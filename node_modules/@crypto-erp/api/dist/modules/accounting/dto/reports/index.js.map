@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/modules/accounting/dto/reports/index.ts"],"sourcesContent":["export { QueryReportsDto } from './query-reports.dto.js';\n"],"names":["QueryReportsDto"],"mappings":";;;;+BAASA;;;eAAAA,gCAAe;;;iCAAQ"}

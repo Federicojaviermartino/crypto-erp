@@ -1,0 +1,39 @@
+FROM postgres:15-alpine
+
+# Install required packages
+RUN apk add --no-cache \
+    aws-cli \
+    bash \
+    curl \
+    dcron \
+    gzip \
+    postgresql-client \
+    tzdata
+
+# Set timezone
+ENV TZ=Europe/Madrid
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Create backup directories
+RUN mkdir -p /backups /scripts /var/log/backups
+
+# Copy backup scripts
+COPY scripts/backup-database.sh /scripts/backup-database.sh
+COPY scripts/restore-database.sh /scripts/restore-database.sh
+COPY scripts/backup-entrypoint.sh /scripts/backup-entrypoint.sh
+
+# Make scripts executable
+RUN chmod +x /scripts/*.sh
+
+# Create cron log file
+RUN touch /var/log/backups/cron.log
+
+# Set working directory
+WORKDIR /scripts
+
+# Health check
+HEALTHCHECK --interval=5m --timeout=10s --start-period=30s --retries=3 \
+  CMD [ "test", "-f", "/var/run/crond.pid" ]
+
+# Run entrypoint script
+ENTRYPOINT ["/scripts/backup-entrypoint.sh"]

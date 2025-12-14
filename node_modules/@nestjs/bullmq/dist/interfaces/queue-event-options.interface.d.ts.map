@@ -1,0 +1,1 @@
+{"version":3,"file":"queue-event-options.interface.d.ts","sourceRoot":"","sources":["../../lib/interfaces/queue-event-options.interface.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,QAAQ,CAAC;AAC5C,OAAO,EAAE,oBAAoB,EAAE,MAAM,sCAAsC,CAAC;AAE5E,MAAM,WAAW,qBACf,SAAQ,oBAAoB,CAAC,kBAAkB,EAAE,YAAY,CAAC;IAC9D;;;SAGK;IACL,gBAAgB,CAAC,EAAE,OAAO,CAAC;CAC5B"}

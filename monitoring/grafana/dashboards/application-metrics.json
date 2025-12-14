@@ -1,0 +1,13 @@
+{
+  "title": "Crypto-ERP Application Metrics",
+  "tags": ["crypto-erp", "application"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "graph",
+      "targets": [{"expr": "rate(http_requests_total[5m])"}]
+    }
+  ],
+  "refresh": "10s"
+}

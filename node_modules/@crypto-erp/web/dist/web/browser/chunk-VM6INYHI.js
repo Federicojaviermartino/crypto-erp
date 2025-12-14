@@ -1,0 +1,1 @@
+import"./chunk-35PI25VP.js";var t=[{path:"",loadComponent:()=>import("./chunk-XW4BPMJ2.js").then(o=>o.SettingsComponent)},{path:"company",loadComponent:()=>import("./chunk-V4WHYELP.js").then(o=>o.CompanySettingsComponent)},{path:"profile",loadComponent:()=>import("./chunk-PD4AHZ74.js").then(o=>o.ProfileSettingsComponent)}];export{t as SETTINGS_ROUTES};

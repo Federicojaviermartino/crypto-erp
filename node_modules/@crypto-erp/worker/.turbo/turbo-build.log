@@ -1,0 +1,9 @@
+
+> @crypto-erp/worker@0.1.0 build
+> nest build
+
+-  TSC  Initializing type checker...
+✔  TSC  Initializing type checker...
+>  TSC  Found 0 issues.
+>  SWC  Running...
+Successfully compiled: 9 files with swc (121.21ms)

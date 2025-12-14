@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/modules/invitations/dto/accept-invitation.dto.ts"],"sourcesContent":["import { IsUUID } from 'class-validator';\n\nexport class AcceptInvitationDto {\n  @IsUUID()\n  token: string;\n}\n"],"names":["AcceptInvitationDto"],"mappings":";;;;+BAEaA;;;eAAAA;;;gCAFU;;;;;;;;;;AAEhB,IAAA,AAAMA,sBAAN,MAAMA;AAGb"}

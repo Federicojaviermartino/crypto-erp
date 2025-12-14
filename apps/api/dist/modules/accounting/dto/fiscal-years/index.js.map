@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/modules/accounting/dto/fiscal-years/index.ts"],"sourcesContent":["export { CreateFiscalYearDto } from './create-fiscal-year.dto.js';\n"],"names":["CreateFiscalYearDto"],"mappings":";;;;+BAASA;;;eAAAA,wCAAmB;;;qCAAQ"}

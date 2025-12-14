@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{title}}</title>
+  <style>
+    /* Reset styles */
+    body, table, td, a {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+
+    /* Global styles */
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100% !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8fafc;
+    }
+
+    /* Container */
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+
+    /* Header */
+    .email-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .email-logo {
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+      text-decoration: none;
+    }
+
+    /* Body */
+    .email-body {
+      padding: 40px 30px;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .email-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+      color: #0f172a;
+    }
+
+    .email-text {
+      font-size: 16px;
+      margin: 0 0 20px 0;
+      color: #475569;
+    }
+
+    /* Button */
+    .email-button {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 20px 0;
+      transition: transform 0.2s;
+    }
+
+    .email-button:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Card */
+    .email-card {
+      background-color: #f1f5f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      border-left: 4px solid #667eea;
+    }
+
+    /* Footer */
+    .email-footer {
+      background-color: #f1f5f9;
+      padding: 30px 20px;
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .email-footer-links {
+      margin: 15px 0;
+    }
+
+    .email-footer-link {
+      color: #667eea;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    .email-footer-text {
+      margin: 10px 0;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media only screen and (max-width: 600px) {
+      .email-body {
+        padding: 30px 20px !important;
+      }
+
+      .email-title {
+        font-size: 20px !important;
+      }
+
+      .email-button {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f8fafc;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="100%">
+          <!-- Header -->
+          <tr>
+            <td class="email-header">
+              <h1 class="email-logo">Crypto-ERP</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td class="email-body">
+              {{content}}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="email-footer">
+              <div class="email-footer-links">
+                <a href="{{webUrl}}" class="email-footer-link">Ir a la aplicación</a>
+                <a href="{{webUrl}}/help" class="email-footer-link">Ayuda</a>
+                <a href="{{webUrl}}/contact" class="email-footer-link">Contacto</a>
+              </div>
+              <p class="email-footer-text">
+                &copy; 2025 Crypto-ERP. Todos los derechos reservados.
+              </p>
+              <p class="email-footer-text">
+                Este email fue enviado a {{recipientEmail}}.
+                <br>
+                <a href="{{unsubscribeUrl}}" class="email-footer-link">Cancelar suscripción</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "@crypto-erp/database",
+  "version": "0.1.0",
+  "description": "Database library with Prisma for Crypto ERP",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.20.0",
+    "typescript": "^5.4.5"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0"
+  }
+}

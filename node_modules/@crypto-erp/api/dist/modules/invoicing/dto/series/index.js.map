@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/modules/invoicing/dto/series/index.ts"],"sourcesContent":["export { CreateSeriesDto } from './create-series.dto.js';\n"],"names":["CreateSeriesDto"],"mappings":";;;;+BAASA;;;eAAAA,gCAAe;;;iCAAQ"}

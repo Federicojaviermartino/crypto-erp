@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/modules/accounting/dto/accounts/index.ts"],"sourcesContent":["export { CreateAccountDto } from './create-account.dto.js';\nexport { QueryAccountsDto } from './query-accounts.dto.js';\n"],"names":["CreateAccountDto","QueryAccountsDto"],"mappings":";;;;;;;;;;;QAASA;eAAAA,kCAAgB;;QAChBC;eAAAA,kCAAgB;;;kCADQ;kCACA"}

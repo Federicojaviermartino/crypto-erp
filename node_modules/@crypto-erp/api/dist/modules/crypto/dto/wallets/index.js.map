@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/modules/crypto/dto/wallets/index.ts"],"sourcesContent":["export { CreateWalletDto, UpdateWalletDto } from './create-wallet.dto.js';\n"],"names":["CreateWalletDto","UpdateWalletDto"],"mappings":";;;;;;;;;;;QAASA;eAAAA,gCAAe;;QAAEC;eAAAA,gCAAe;;;iCAAQ"}

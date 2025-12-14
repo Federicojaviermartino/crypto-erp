@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Automated backup service
+  backup-scheduler:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.backup
+    container_name: crypto-erp-backup-scheduler
+    restart: unless-stopped
+    environment:
+      # Database connection
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-crypto_erp}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+
+      # Backup configuration
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}  # 2 AM daily
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_RETENTION_WEEKS: ${BACKUP_RETENTION_WEEKS:-4}
+      BACKUP_RETENTION_MONTHS: ${BACKUP_RETENTION_MONTHS:-12}
+
+      # S3 configuration (optional)
+      S3_ENABLED: ${S3_ENABLED:-false}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_PREFIX: ${S3_PREFIX:-backups/database}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+
+      # Notifications
+      WEBHOOK_URL: ${BACKUP_WEBHOOK_URL:-}
+
+      # Monitoring
+      PROMETHEUS_PUSHGATEWAY: ${PROMETHEUS_PUSHGATEWAY:-http://pushgateway:9091}
+
+    volumes:
+      - ./backups:/backups
+      - ./scripts:/scripts:ro
+
+    networks:
+      - crypto-erp-network
+
+    depends_on:
+      - postgres
+
+  # Prometheus Pushgateway for backup metrics
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: crypto-erp-pushgateway
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+
+    networks:
+      - crypto-erp-network
+
+networks:
+  crypto-erp-network:
+    external: true
+
+volumes:
+  backups:
+    driver: local

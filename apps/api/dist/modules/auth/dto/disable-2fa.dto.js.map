@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/modules/auth/dto/disable-2fa.dto.ts"],"sourcesContent":["import { IsString, IsNotEmpty } from 'class-validator';\n\nexport class Disable2FADto {\n  @IsString()\n  @IsNotEmpty()\n  password: string;\n}\n"],"names":["Disable2FADto"],"mappings":";;;;+BAEaA;;;eAAAA;;;gCAFwB;;;;;;;;;;AAE9B,IAAA,AAAMA,gBAAN,MAAMA;AAIb"}

@@ -1,0 +1,467 @@
+
+> @crypto-erp/api@0.1.0 test:cov
+> jest --coverage
+
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in C:/Users/feder/OneDrive/Escritorio/Federico-2025/Freelance_projects/crypto-erp/crypto-erp/apps/api/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+PASS test/unit/crypto/blockchain-sync.service.spec.ts
+PASS test/unit/invoicing/verifactu.service.spec.ts
+FAIL test/unit/invoicing/invoices.service.spec.ts
+  ● InvoicesService › findAll › should filter by date range
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: ObjectContaining {"where": ObjectContaining {"issueDate": {"gte": 2024-01-01T00:00:00.000Z, "lte": 2024-12-31T00:00:00.000Z}}}
+    Received: {"include": {"contact": {"select": {"email": true, "id": true, "name": true, "taxId": true}}, "lines": true, "series": {"select": {"id": true, "name": true, "prefix": true}}}, "orderBy": [{"issueDate": "desc"}, {"number": "desc"}], "skip": 0, "take": 50, "where": {"companyId": "company-1", "issueDate": {"lte": 2024-12-31T00:00:00.000Z}}}
+
+    Number of calls: 1
+
+    [0m [90m 194 |[39m
+     [90m 195 |[39m       [90m// Assert[39m
+    [31m[1m>[22m[39m[90m 196 |[39m       expect(prismaService[33m.[39minvoice[33m.[39mfindMany)[33m.[39mtoHaveBeenCalledWith(
+     [90m     |[39m                                              [31m[1m^[22m[39m
+     [90m 197 |[39m         expect[33m.[39mobjectContaining({
+     [90m 198 |[39m           where[33m:[39m expect[33m.[39mobjectContaining({
+     [90m 199 |[39m             issueDate[33m:[39m {[0m
+
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:196:46)
+
+  ● InvoicesService › create › should create invoice with calculated totals
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:314:22)
+
+  ● InvoicesService › create › should generate sequential invoice number
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:342:22)
+
+  ● InvoicesService › create › should use default series if none specified
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:365:7)
+
+  ● InvoicesService › create › should apply discount correctly
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:435:22)
+
+  ● InvoicesService › create › should create invoice without contact (counterparty fields)
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:468:22)
+
+  ● InvoicesService › create › should default to 21% VAT if not specified
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:497:7)
+
+  ● InvoicesService › update › should update draft invoice
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Updated notes"
+    Received: null
+
+    [0m [90m 531 |[39m
+     [90m 532 |[39m       [90m// Assert[39m
+    [31m[1m>[22m[39m[90m 533 |[39m       expect(result[33m.[39mnotes)[33m.[39mtoBe([32m'Updated notes'[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 534 |[39m     })[33m;[39m
+     [90m 535 |[39m
+     [90m 536 |[39m     it([32m'should throw error when updating non-draft invoice'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:533:28)
+
+  ● InvoicesService › Total Calculations › should calculate totals for multiple lines correctly
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:603:22)
+
+  ● InvoicesService › Total Calculations › should handle zero VAT correctly
+
+    TypeError: this.prisma.invoiceSeries.findUnique is not a function
+
+    [0m [90m 350 |[39m     seriesId[33m:[39m string[33m,[39m
+     [90m 351 |[39m   )[33m:[39m [33mPromise[39m[33m<[39m{ number[33m:[39m number[33m;[39m fullNumber[33m:[39m string }[33m>[39m {
+    [31m[1m>[22m[39m[90m 352 |[39m     [36mconst[39m series [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mprisma[33m.[39minvoiceSeries[33m.[39mfindUnique({
+     [90m     |[39m                                                    [31m[1m^[22m[39m
+     [90m 353 |[39m       where[33m:[39m { id[33m:[39m seriesId }[33m,[39m
+     [90m 354 |[39m     })[33m;[39m
+     [90m 355 |[39m[0m
+
+      at InvoicesService.findUnique [as generateInvoiceNumber] (src/modules/invoicing/services/invoices.service.ts:352:52)
+      at InvoicesService.generateInvoiceNumber [as create] (src/modules/invoicing/services/invoices.service.ts:129:47)
+      at Object.<anonymous> (test/unit/invoicing/invoices.service.spec.ts:635:22)
+
+FAIL test/unit/fiscal/modelo721.service.spec.ts
+  ● Modelo721Service › generateModelo721 › should calculate balances at end of year (31/12)
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:113:22)
+
+  ● Modelo721Service › generateModelo721 › should mark as obligado declarar if > 50,000 EUR
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:138:22)
+
+  ● Modelo721Service › generateModelo721 › should mark as NOT obligado declarar if < 50,000 EUR
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:161:22)
+
+  ● Modelo721Service › generateModelo721 › should map exchange to correct country code
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:177:22)
+
+  ● Modelo721Service › generateModelo721 › should handle multiple crypto assets
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:218:22)
+
+  ● Modelo721Service › generateModelo721 › should group by exchange/wallet correctly
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:262:22)
+
+  ● Modelo721Service › generateModelo721 › should exclude sold/consumed lots
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:286:22)
+
+  ● Modelo721Service › generateModelo721 › should include fecha adquisicion of first lot
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:308:22)
+
+  ● Modelo721Service › generateModelo721 › should handle zero balances correctly
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:321:22)
+
+  ● Modelo721Service › generateModelo721 › should calculate porcentaje titularidad as 100%
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:338:22)
+
+  ● Modelo721Service › exportToAEATFormat › should generate XML in AEAT format
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Modelo721Service.exportToAEATFormat (src/modules/fiscal/modelo721.service.ts:309:20)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:362:19)
+
+  ● Modelo721Service › exportToAEATFormat › should include all positions in XML
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Modelo721Service.exportToAEATFormat (src/modules/fiscal/modelo721.service.ts:309:20)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:409:19)
+
+  ● Modelo721Service › exportToAEATFormat › should format dates correctly (ISO 8601)
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Modelo721Service.exportToAEATFormat (src/modules/fiscal/modelo721.service.ts:309:20)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:433:19)
+
+  ● Modelo721Service › exportToCSV › should generate CSV export
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Modelo721Service.exportToCSV (src/modules/fiscal/modelo721.service.ts:446:20)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:457:19)
+
+  ● Modelo721Service › Exchange Country Mapping › should map known exchanges to correct countries
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:500:24)
+
+  ● Modelo721Service › Exchange Country Mapping › should default to unknown country for unmapped exchange
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:521:22)
+
+  ● Modelo721Service › Validation › should validate that summary has correct metadata
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:539:22)
+
+  ● Modelo721Service › Validation › should fail validation if data is incomplete
+
+    TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+
+    [0m [90m 279 |[39m       bitcoin[33m:[39m [32m'US'[39m[33m,[39m
+     [90m 280 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 281 |[39m     [36mreturn[39m chainCountries[chain[33m.[39mtoLowerCase()] [33m||[39m [32m'US'[39m[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 282 |[39m   }
+     [90m 283 |[39m
+     [90m 284 |[39m   [90m/**[39m[0m
+
+      at Modelo721Service.toLowerCase [as getWalletCountry] (src/modules/fiscal/modelo721.service.ts:281:33)
+      at Modelo721Service.getWalletCountry [as generateModelo721] (src/modules/fiscal/modelo721.service.ts:112:28)
+      at Object.<anonymous> (test/unit/fiscal/modelo721.service.spec.ts:566:22)
+

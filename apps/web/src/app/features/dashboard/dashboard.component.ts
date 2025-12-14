@@ -1,0 +1,274 @@
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '@core/services/auth.service';
+import { ApiService } from '@core/services/api.service';
+import { PortfolioChartComponent } from './widgets/portfolio-chart.component';
+import { MonthlyTrendsComponent } from './widgets/monthly-trends.component';
+import { AiInsightsComponent } from './widgets/ai-insights.component';
+import { OnboardingWizardComponent } from '@shared/components/onboarding-wizard/onboarding-wizard.component';
+
+interface DashboardStats {
+  totalAccounts: number;
+  totalInvoices: number;
+  pendingInvoices: number;
+  cryptoAssets: number;
+  totalBalance: number;
+}
+
+interface QuickAction {
+  label: string;
+  path: string;
+  icon: string;
+  color: string;
+}
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterLink,
+    PortfolioChartComponent,
+    MonthlyTrendsComponent,
+    AiInsightsComponent,
+    OnboardingWizardComponent,
+  ],
+  template: `
+    <div class="dashboard">
+      <header class="page-header">
+        <h1>Dashboard</h1>
+        <p class="welcome">Bienvenido, {{ authService.currentUser()?.firstName }}</p>
+      </header>
+
+      <!-- Onboarding Wizard -->
+      <app-onboarding-wizard />
+
+      <!-- Quick Actions -->
+      <section class="quick-actions">
+        @for (action of quickActions; track action.path) {
+          <a [routerLink]="action.path" class="action-card" [style.border-color]="action.color">
+            <span class="action-icon">{{ action.icon }}</span>
+            <span class="action-label">{{ action.label }}</span>
+          </a>
+        }
+      </section>
+
+      <!-- Stats Cards -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dbeafe;">📒</div>
+          <div class="stat-info">
+            <h3>{{ stats().totalAccounts }}</h3>
+            <p>Cuentas Contables</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dcfce7;">🧾</div>
+          <div class="stat-info">
+            <h3>{{ stats().totalInvoices }}</h3>
+            <p>Facturas Totales</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fef3c7;">⏳</div>
+          <div class="stat-info">
+            <h3>{{ stats().pendingInvoices }}</h3>
+            <p>Facturas Pendientes</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #f3e8ff;">₿</div>
+          <div class="stat-info">
+            <h3>{{ stats().cryptoAssets }}</h3>
+            <p>Activos Crypto</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts & Analytics -->
+      <section class="charts-section">
+        <app-monthly-trends />
+      </section>
+
+      <!-- Main Content Grid -->
+      <div class="content-grid">
+        <!-- Portfolio Chart -->
+        <app-portfolio-chart />
+
+        <!-- AI Insights -->
+        <app-ai-insights />
+      </div>
+    </div>
+  `,
+  styles: [`
+    .dashboard {
+      padding: var(--spacing-xl);
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-xl);
+
+      h1 {
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .welcome {
+        color: var(--gray-500);
+        margin: 0;
+      }
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .action-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-lg);
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--gray-200);
+      text-decoration: none;
+      color: var(--gray-700);
+      transition: all var(--transition-fast);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .action-icon {
+        font-size: 2rem;
+      }
+
+      .action-label {
+        font-weight: 500;
+        text-align: center;
+      }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .charts-section {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-info {
+      h3 {
+        font-size: 1.5rem;
+        margin: 0;
+      }
+
+      p {
+        margin: 0;
+        color: var(--gray-500);
+        font-size: 0.875rem;
+      }
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: var(--spacing-md);
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  `],
+})
+export class DashboardComponent implements OnInit {
+  loading = signal(true);
+  stats = signal<DashboardStats>({
+    totalAccounts: 0,
+    totalInvoices: 0,
+    pendingInvoices: 0,
+    cryptoAssets: 0,
+    totalBalance: 0,
+  });
+
+  quickActions: QuickAction[] = [
+    { label: 'Nueva Factura', path: '/invoicing/invoices/new', icon: '➕', color: '#22c55e' },
+    { label: 'Nuevo Asiento', path: '/accounting/journal-entries/new', icon: '📝', color: '#3b82f6' },
+    { label: 'Nueva Transacción', path: '/crypto/transactions/new', icon: '₿', color: '#f59e0b' },
+    { label: 'Ver Reportes', path: '/accounting/reports', icon: '📊', color: '#8b5cf6' },
+  ];
+
+  constructor(
+    public authService: AuthService,
+    private api: ApiService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadStats();
+  }
+
+  private loadStats(): void {
+    this.api.get<{
+      totalCostBasis: number;
+      monthlyActivity: number;
+      pendingInvoices: number;
+      portfolioDistribution: Array<{ name: string; value: number }>;
+    }>('/analytics/dashboard').subscribe({
+      next: (data) => {
+        this.stats.set({
+          totalAccounts: 0,
+          totalInvoices: 0,
+          pendingInvoices: data.pendingInvoices,
+          cryptoAssets: data.portfolioDistribution?.length || 0,
+          totalBalance: data.totalCostBasis,
+        });
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+}

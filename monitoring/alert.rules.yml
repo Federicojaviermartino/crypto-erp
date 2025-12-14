@@ -1,0 +1,162 @@
+# Prometheus Alert Rules for Crypto-ERP
+groups:
+  - name: crypto_erp_alerts
+    interval: 30s
+    rules:
+      # API Health Alerts
+      - alert: ApiDown
+        expr: up{job="crypto-erp-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Crypto-ERP API is down"
+          description: "The API has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(crypto_erp_http_requests_total{status_code=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      - alert: SlowApiResponse
+        expr: histogram_quantile(0.95, rate(crypto_erp_http_request_duration_seconds_bucket[5m])) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API response time is slow"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # Database Alerts
+      - alert: SlowDatabaseQueries
+        expr: histogram_quantile(0.95, rate(crypto_erp_db_query_duration_seconds_bucket[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile query time is {{ $value }}s"
+
+      - alert: HighDatabaseConnections
+        expr: crypto_erp_db_connections_active > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of database connections"
+          description: "{{ $value }} active connections"
+
+      # Queue Alerts
+      - alert: HighQueueFailureRate
+        expr: rate(crypto_erp_queue_jobs_failed_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High queue job failure rate"
+          description: "Queue {{ $labels.queue }} has {{ $value }} failures per second"
+
+      - alert: QueueBacklog
+        expr: crypto_erp_queue_jobs_active > 1000
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Large queue backlog"
+          description: "Queue {{ $labels.queue }} has {{ $value }} pending jobs"
+
+      # Business Metrics Alerts
+      - alert: NoInvoicesCreated
+        expr: increase(crypto_erp_invoices_created_total[1h]) == 0
+        for: 2h
+        labels:
+          severity: info
+        annotations:
+          summary: "No invoices created recently"
+          description: "No invoices have been created in the last 2 hours"
+
+      # Subscription Alerts
+      - alert: HighChurnRate
+        expr: rate(crypto_erp_subscriptions_churned_total[24h]) > 0.05
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "High subscription churn rate"
+          description: "Churn rate is {{ $value | humanizePercentage }} over the last 24 hours"
+
+      # System Resources
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighCpuUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+      # Backup Alerts
+      - alert: BackupFailed
+        expr: crypto_erp_backup_total{status="failure"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database backup failed"
+          description: "The last database backup failed. Check logs immediately."
+
+      - alert: BackupNotRunRecently
+        expr: time() - crypto_erp_backup_last_success_timestamp{status="success"} > 86400 * 2
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "No successful backup in 48 hours"
+          description: "Last successful backup was {{ $value | humanizeDuration }} ago"
+
+      - alert: BackupTakingTooLong
+        expr: crypto_erp_backup_duration_seconds > 1800
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backup taking too long"
+          description: "Backup took {{ $value }}s (>30 minutes)"
+
+      - alert: BackupSizeAnomalous
+        expr: |
+          (
+            crypto_erp_backup_size_bytes
+            / avg_over_time(crypto_erp_backup_size_bytes[7d])
+          ) < 0.5 or (
+            crypto_erp_backup_size_bytes
+            / avg_over_time(crypto_erp_backup_size_bytes[7d])
+          ) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backup size anomaly detected"
+          description: "Current backup size ({{ $value | humanizeBytes }}) differs significantly from 7-day average"

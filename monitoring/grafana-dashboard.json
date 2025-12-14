@@ -1,0 +1,216 @@
+{
+  "dashboard": {
+    "title": "Crypto-ERP - Production Dashboard",
+    "tags": ["crypto-erp", "production"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "API Request Rate",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "rate(crypto_erp_http_requests_total[5m])",
+            "legendFormat": "{{method}} {{route}} - {{status_code}}"
+          }
+        ]
+      },
+      {
+        "title": "API Response Time (p95)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(crypto_erp_http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{method}} {{route}}"
+          }
+        ]
+      },
+      {
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(crypto_erp_http_requests_total{status_code=~\"5..\"}[5m])",
+            "legendFormat": "5xx errors"
+          },
+          {
+            "expr": "rate(crypto_erp_http_requests_total{status_code=~\"4..\"}[5m])",
+            "legendFormat": "4xx errors"
+          }
+        ]
+      },
+      {
+        "title": "Database Query Duration (p95)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(crypto_erp_db_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{operation}}"
+          }
+        ]
+      },
+      {
+        "title": "Invoices Created (per hour)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "increase(crypto_erp_invoices_created_total[1h])"
+          }
+        ]
+      },
+      {
+        "title": "AI Messages (per hour)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 16 },
+        "targets": [
+          {
+            "expr": "increase(crypto_erp_ai_messages_total[1h])"
+          }
+        ]
+      },
+      {
+        "title": "Active Subscriptions",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "crypto_erp_subscriptions_active"
+          }
+        ]
+      },
+      {
+        "title": "MRR (EUR)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 16 },
+        "targets": [
+          {
+            "expr": "crypto_erp_revenue_mrr"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyEUR"
+          }
+        }
+      },
+      {
+        "title": "Queue Jobs - Active",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+        "targets": [
+          {
+            "expr": "crypto_erp_queue_jobs_active",
+            "legendFormat": "{{queue}}"
+          }
+        ]
+      },
+      {
+        "title": "Queue Jobs - Failure Rate",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+        "targets": [
+          {
+            "expr": "rate(crypto_erp_queue_jobs_failed_total[5m])",
+            "legendFormat": "{{queue}}"
+          }
+        ]
+      },
+      {
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+        "targets": [
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "Memory %"
+          }
+        ]
+      },
+      {
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU %"
+          }
+        ]
+      },
+      {
+        "title": "Backup Status",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 36 },
+        "targets": [
+          {
+            "expr": "time() - crypto_erp_backup_last_success_timestamp{status=\"success\"}",
+            "legendFormat": "Last Backup"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 86400, "color": "yellow" },
+                { "value": 172800, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "Backup Duration",
+        "type": "graph",
+        "gridPos": { "h": 6, "w": 6, "x": 6, "y": 36 },
+        "targets": [
+          {
+            "expr": "crypto_erp_backup_duration_seconds",
+            "legendFormat": "Duration (s)"
+          }
+        ]
+      },
+      {
+        "title": "Backup Size",
+        "type": "graph",
+        "gridPos": { "h": 6, "w": 6, "x": 12, "y": 36 },
+        "targets": [
+          {
+            "expr": "crypto_erp_backup_size_bytes / 1024 / 1024",
+            "legendFormat": "Size (MB)"
+          }
+        ]
+      },
+      {
+        "title": "Backup Success Rate",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 6, "x": 18, "y": 36 },
+        "targets": [
+          {
+            "expr": "sum(crypto_erp_backup_total{status=\"success\"}) / sum(crypto_erp_backup_total) * 100",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 95, "color": "yellow" },
+                { "value": 99, "color": "green" }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

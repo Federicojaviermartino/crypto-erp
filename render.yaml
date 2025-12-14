@@ -1,0 +1,59 @@
+# Render Blueprint for Crypto ERP
+# https://render.com/docs/blueprint-spec
+
+services:
+  # NestJS API Backend
+  - type: web
+    name: crypto-erp-api
+    env: node
+    region: frankfurt
+    plan: starter
+    buildCommand: npm ci && npm run build:api
+    startCommand: npm run start:api:prod
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: crypto-erp-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+  # Angular Frontend (Static Site)
+  - type: web
+    name: crypto-erp-web
+    env: static
+    region: frankfurt
+    buildCommand: npm ci && npm run build:web
+    staticPublishPath: ./apps/web/dist/web/browser
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://crypto-erp-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+
+databases:
+  - name: crypto-erp-db
+    region: frankfurt
+    plan: starter
+    databaseName: crypto_erp
+    user: crypto_erp_user

@@ -1,0 +1,70 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build applications
+        run: |
+          npm run build:api
+          npm run build:worker
+          npm run build:web
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: npx prisma migrate deploy
+        working-directory: libs/database
+
+      # Option 1: Deploy to cloud provider (uncomment and configure as needed)
+      # - name: Deploy to Render/Railway/etc
+      #   run: |
+      #     # Your deployment commands here
+      #     echo "Deploying to staging environment"
+
+      # Option 2: Deploy via SSH
+      # - name: Deploy via SSH
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.STAGING_HOST }}
+      #     username: ${{ secrets.STAGING_USER }}
+      #     key: ${{ secrets.STAGING_SSH_KEY }}
+      #     source: "dist/"
+      #     target: "/opt/crypto-erp"
+
+      # - name: Restart services
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.STAGING_HOST }}
+      #     username: ${{ secrets.STAGING_USER }}
+      #     key: ${{ secrets.STAGING_SSH_KEY }}
+      #     script: |
+      #       cd /opt/crypto-erp
+      #       pm2 restart crypto-erp-api
+      #       pm2 restart crypto-erp-worker
+
+      - name: Deployment summary
+        run: |
+          echo "Staging deployment completed"
+          echo "Environment: staging"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"

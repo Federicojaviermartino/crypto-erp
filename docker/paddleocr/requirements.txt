@@ -1,0 +1,14 @@
+# PaddleOCR dependencies
+paddlepaddle==2.6.0
+paddleocr==2.7.3
+
+# Web server
+flask==3.0.0
+flask-cors==4.0.0
+
+# Image processing
+pillow==10.1.0
+opencv-python-headless==4.8.1.78
+
+# Utilities
+numpy==1.26.2

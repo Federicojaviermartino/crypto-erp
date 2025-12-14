@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: cryptoerp_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint --if-present
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: libs/database
+
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/cryptoerp_test
+        run: npx prisma migrate deploy
+        working-directory: libs/database
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/cryptoerp_test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: test-jwt-secret-key-for-ci
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret-for-ci
+          NODE_ENV: test
+        run: npm run test:cov --if-present
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: success()
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+      - name: Build API
+        run: npm run build:api --if-present
+
+      - name: Build Worker
+        run: npm run build:worker --if-present
+
+      - name: Build Web
+        run: npm run build:web --if-present
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --production --audit-level=high
+        continue-on-error: true
+
+      - name: Check for known vulnerabilities
+        run: npx audit-ci --high
+        continue-on-error: true

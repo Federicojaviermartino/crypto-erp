@@ -1,0 +1,188 @@
+# Docker Compose for Crypto ERP
+# Development: docker-compose up -d postgres redis
+# Production:  docker-compose --profile production up -d
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # APPLICATION SERVICES
+  # ==========================================================================
+
+  # API Server
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: crypto-erp-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/crypto_erp?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      COVALENT_API_KEY: ${COVALENT_API_KEY}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - production
+
+  # Background Worker
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: crypto-erp-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/crypto_erp?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      COVALENT_API_KEY: ${COVALENT_API_KEY}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY}
+      AEAT_CERTIFICATE_PATH: ${AEAT_CERTIFICATE_PATH}
+      AEAT_CERTIFICATE_PASSWORD: ${AEAT_CERTIFICATE_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - production
+
+  # ==========================================================================
+  # INFRASTRUCTURE SERVICES
+  # ==========================================================================
+
+  # PostgreSQL Database with pgvector
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: crypto-erp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: crypto_erp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and queues
+  redis:
+    image: redis:7-alpine
+    container_name: crypto-erp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ollama for local AI (optional, requires GPU)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: crypto-erp-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # Uncomment for GPU support (NVIDIA)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # PaddleOCR for self-hosted OCR (optional)
+  paddleocr:
+    build:
+      context: ./docker/paddleocr
+      dockerfile: Dockerfile
+    container_name: crypto-erp-paddleocr
+    restart: unless-stopped
+    ports:
+      - "8866:8866"
+    volumes:
+      - paddleocr_models:/root/.paddleocr
+    environment:
+      PORT: 8866
+      LANG: es
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8866/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    profiles:
+      - ocr  # Only start with: docker-compose --profile ocr up
+
+  # BullMQ Dashboard (optional)
+  bull-board:
+    image: deadly0/bull-board:latest
+    container_name: crypto-erp-bull-board
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    profiles:
+      - tools
+
+  # Adminer for database management (optional)
+  adminer:
+    image: adminer:latest
+    container_name: crypto-erp-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+  paddleocr_models:
+    driver: local
+
+networks:
+  default:
+    name: crypto-erp-network

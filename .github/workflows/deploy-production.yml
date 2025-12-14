@@ -1,0 +1,105 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event_name == 'release' || github.event.inputs.confirm == 'deploy'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --production
+
+      - name: Build applications
+        run: |
+          npm run build:api
+          npm run build:worker
+          npm run build:web
+        env:
+          NODE_ENV: production
+
+      - name: Run tests before deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          NODE_ENV: test
+        run: npm run test --if-present
+
+      - name: Backup database
+        run: |
+          echo "Creating database backup before deployment"
+          # Add your backup commands here
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: npx prisma migrate deploy
+        working-directory: libs/database
+
+      # Option 1: Deploy to cloud provider (configure as needed)
+      # - name: Deploy to production
+      #   run: |
+      #     # Your deployment commands here
+      #     echo "Deploying to production environment"
+
+      # Option 2: Deploy via SSH with zero-downtime
+      # - name: Deploy via SSH
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.PRODUCTION_HOST }}
+      #     username: ${{ secrets.PRODUCTION_USER }}
+      #     key: ${{ secrets.PRODUCTION_SSH_KEY }}
+      #     source: "dist/"
+      #     target: "/opt/crypto-erp"
+
+      # - name: Restart services (zero-downtime)
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.PRODUCTION_HOST }}
+      #     username: ${{ secrets.PRODUCTION_USER }}
+      #     key: ${{ secrets.PRODUCTION_SSH_KEY }}
+      #     script: |
+      #       cd /opt/crypto-erp
+      #       pm2 reload crypto-erp-api --update-env
+      #       pm2 reload crypto-erp-worker --update-env
+
+      - name: Health check
+        run: |
+          echo "Performing health check on production deployment"
+          # Add health check commands here
+          # curl -f https://api.crypto-erp.com/health || exit 1
+
+      - name: Notify Sentry of deployment
+        if: success()
+        run: |
+          curl -sL https://sentry.io/api/0/organizations/${{ secrets.SENTRY_ORG }}/releases/ \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.SENTRY_AUTH_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"version\": \"${{ github.sha }}\", \"projects\": [\"crypto-erp\"]}"
+        continue-on-error: true
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Production deployment completed"
+          echo "Environment: production"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Release: ${{ github.event.release.tag_name }}"

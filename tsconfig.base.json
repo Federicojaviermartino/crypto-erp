@@ -1,0 +1,77 @@
+{
+  "compilerOptions": {
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // Strict Type Checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+
+    // Additional Checks
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "importHelpers": true,
+    "downlevelIteration": true,
+
+    // Interop Constraints
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+
+    // Decorators (for NestJS)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Path Mapping
+    "baseUrl": ".",
+    "paths": {
+      "@crypto-erp/shared": ["libs/shared/src/index.ts"],
+      "@crypto-erp/shared/*": ["libs/shared/src/*"],
+      "@crypto-erp/database": ["libs/database/src/index.ts"],
+      "@crypto-erp/database/*": ["libs/database/src/*"],
+      "@crypto-erp/crypto": ["libs/crypto/src/index.ts"],
+      "@crypto-erp/crypto/*": ["libs/crypto/src/*"],
+      "@crypto-erp/ai": ["libs/ai/src/index.ts"],
+      "@crypto-erp/ai/*": ["libs/ai/src/*"]
+    },
+
+    // Skip type checking of declaration files
+    "skipLibCheck": true,
+
+    // Incremental compilation
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsbuildinfo"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.e2e-spec.ts"
+  ]
+}
