@@ -51,6 +51,29 @@ let HealthController = class HealthController {
     async readiness() {
         return this.check();
     }
+    async regionalHealth() {
+        const primaryRegion = process.env['DATABASE_PRIMARY_REGION'] || 'eu';
+        const [primaryOk, replicaStatuses, redisOk] = await Promise.all([
+            this.checkDatabase(),
+            this.checkReadReplicas(),
+            this.checkRedis()
+        ]);
+        const replicaCount = this.prisma.getReplicaCount();
+        const allHealthy = primaryOk && redisOk && replicaStatuses.every((r)=>r.status === 'healthy');
+        const anyUnhealthy = !primaryOk || !redisOk || replicaStatuses.some((r)=>r.status === 'unhealthy');
+        return {
+            status: allHealthy ? 'ok' : anyUnhealthy ? 'error' : 'degraded',
+            timestamp: new Date(),
+            region: primaryRegion,
+            services: {
+                primaryDatabase: primaryOk ? 'healthy' : 'unhealthy',
+                readReplicas: replicaStatuses,
+                redis: redisOk ? 'healthy' : 'unhealthy'
+            },
+            replicaCount,
+            uptime: process.uptime()
+        };
+    }
     async checkDatabase() {
         try {
             await this.prisma.$queryRaw`SELECT 1`;
@@ -68,6 +91,30 @@ let HealthController = class HealthController {
             console.error('Redis health check failed:', error);
             return false;
         }
+    }
+    async checkReadReplicas() {
+        const regions = this.prisma.getAvailableRegions();
+        const results = await Promise.all(regions.map(async (region)=>{
+            const startTime = Date.now();
+            try {
+                const replica = this.prisma.getReadReplica(region);
+                await replica.$queryRaw`SELECT 1`;
+                const latency = Date.now() - startTime;
+                return {
+                    region,
+                    status: 'healthy',
+                    latency
+                };
+            } catch (error) {
+                console.error(`Read replica health check failed for ${region}:`, error);
+                return {
+                    region,
+                    status: 'unhealthy',
+                    latency: -1
+                };
+            }
+        }));
+        return results;
     }
     constructor(prisma, emailQueue){
         this.prisma = prisma;
@@ -92,6 +139,12 @@ _ts_decorate([
     _ts_metadata("design:paramtypes", []),
     _ts_metadata("design:returntype", Promise)
 ], HealthController.prototype, "readiness", null);
+_ts_decorate([
+    (0, _common.Get)('regional'),
+    _ts_metadata("design:type", Function),
+    _ts_metadata("design:paramtypes", []),
+    _ts_metadata("design:returntype", Promise)
+], HealthController.prototype, "regionalHealth", null);
 HealthController = _ts_decorate([
     (0, _common.Controller)('health'),
     _ts_param(1, (0, _bullmq.InjectQueue)('email-send')),

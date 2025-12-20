@@ -21,6 +21,7 @@ import { MetricsInterceptor } from './modules/monitoring/metrics.interceptor.js'
 import { CommonModule } from './common/common.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { CacheModule } from './common/cache/cache.module.js';
+import { OAuthModule } from './modules/oauth/oauth.module.js';
 
 @Module({
   imports: [
@@ -101,6 +102,7 @@ import { CacheModule } from './common/cache/cache.module.js';
     PaymentsModule,
     MonitoringModule,
     OnboardingModule,
+    OAuthModule,
   ],
   providers: [
     // Global exception filter

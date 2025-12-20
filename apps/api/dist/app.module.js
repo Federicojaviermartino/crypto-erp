@@ -31,6 +31,7 @@ const _metricsinterceptor = require("./modules/monitoring/metrics.interceptor.js
 const _commonmodule = require("./common/common.module.js");
 const _onboardingmodule = require("./modules/onboarding/onboarding.module.js");
 const _cachemodule = require("./common/cache/cache.module.js");
+const _oauthmodule = require("./modules/oauth/oauth.module.js");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -129,7 +130,8 @@ AppModule = _ts_decorate([
             _analyticsmodule.AnalyticsModule,
             _paymentsmodule.PaymentsModule,
             _monitoringmodule.MonitoringModule,
-            _onboardingmodule.OnboardingModule
+            _onboardingmodule.OnboardingModule,
+            _oauthmodule.OAuthModule
         ],
         providers: [
             // Global exception filter
