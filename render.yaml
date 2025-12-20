@@ -1,8 +1,11 @@
 # Render Blueprint for Crypto ERP
 # https://render.com/docs/blueprint-spec
+# Updated: Phase 4B - Includes OAuth, Integrations, Analytics, TimescaleDB, Redis, Worker
 
 services:
-  # NestJS API Backend
+  # ============================================================================
+  # NestJS API Backend (Main Application)
+  # ============================================================================
   - type: web
     name: crypto-erp-api
     env: node
@@ -10,50 +13,193 @@ services:
     plan: starter
     buildCommand: npm ci && npm run build:api
     startCommand: npm run start:api:prod
-    healthCheckPath: /api/v1/health
+    healthCheckPath: /api/v1/health/liveness
     envVars:
+      # Environment
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
+      - key: API_PREFIX
+        value: api/v1
+
+      # Database (PostgreSQL with TimescaleDB)
       - key: DATABASE_URL
         fromDatabase:
           name: crypto-erp-db
           property: connectionString
+      - key: DATABASE_PRIMARY_REGION
+        value: eu
+
+      # Redis (for caching and BullMQ)
+      - key: REDIS_HOST
+        fromService:
+          name: crypto-erp-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: crypto-erp-redis
+          type: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          name: crypto-erp-redis
+          type: redis
+          property: password
+      - key: REDIS_DB
+        value: 0
+
+      # JWT Authentication
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
         generateValue: true
+      - key: JWT_EXPIRATION
+        value: 1h
+      - key: JWT_REFRESH_EXPIRATION
+        value: 7d
+
+      # Encryption (for OAuth tokens, etc.)
+      - key: ENCRYPTION_KEY
+        generateValue: true
+
+      # CORS
       - key: CORS_ORIGINS
+        sync: false
+
+      # AI (OpenAI for chat and OCR)
+      - key: OPENAI_API_KEY
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
 
+      # Blockchain APIs
+      - key: COVALENT_API_KEY
+        sync: false
+
+      # QuickBooks Integration
+      - key: QUICKBOOKS_CLIENT_ID
+        sync: false
+      - key: QUICKBOOKS_CLIENT_SECRET
+        sync: false
+
+      # Xero Integration
+      - key: XERO_CLIENT_ID
+        sync: false
+      - key: XERO_CLIENT_SECRET
+        sync: false
+
+      # Email (optional)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+
+  # ============================================================================
+  # Worker Service (Background Jobs with BullMQ)
+  # ============================================================================
+  - type: worker
+    name: crypto-erp-worker
+    env: node
+    region: frankfurt
+    plan: starter
+    buildCommand: npm ci && npm run build:worker
+    startCommand: npm run start:worker:prod
+    envVars:
+      # Environment
+      - key: NODE_ENV
+        value: production
+
+      # Database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: crypto-erp-db
+          property: connectionString
+
+      # Redis (for BullMQ)
+      - key: REDIS_HOST
+        fromService:
+          name: crypto-erp-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: crypto-erp-redis
+          type: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          name: crypto-erp-redis
+          type: redis
+          property: password
+      - key: REDIS_DB
+        value: 0
+
+      # Blockchain APIs (for crypto sync jobs)
+      - key: COVALENT_API_KEY
+        sync: false
+
+  # ============================================================================
   # Angular Frontend (Static Site)
+  # ============================================================================
   - type: web
     name: crypto-erp-web
     env: static
     region: frankfurt
+    plan: starter
     buildCommand: npm ci && npm run build:web
     staticPublishPath: ./apps/web/dist/web/browser
     routes:
+      # Proxy API requests to backend
       - type: rewrite
         source: /api/*
         destination: https://crypto-erp-api.onrender.com/api/*
+      # SPA fallback
       - type: rewrite
         source: /*
         destination: /index.html
     headers:
+      # Security headers
       - path: /*
         name: X-Frame-Options
         value: DENY
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
 
+# ============================================================================
+# Databases
+# ============================================================================
 databases:
+  # PostgreSQL 15 with TimescaleDB extension
+  # Note: Render's managed PostgreSQL doesn't support TimescaleDB extension
+  # You'll need to use a custom Docker service or external TimescaleDB provider
   - name: crypto-erp-db
     region: frankfurt
     plan: starter
     databaseName: crypto_erp
     user: crypto_erp_user
+    # After creation, connect and run:
+    # CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+    # Then run migrations:
+    # psql -U crypto_erp_user -d crypto_erp -f libs/database/prisma/migrations/20251220_analytics_timescaledb.sql
+    # psql -U crypto_erp_user -d crypto_erp -f libs/database/prisma/migrations/20251220_oauth_marketplace.sql
+    # psql -U crypto_erp_user -d crypto_erp -f libs/database/prisma/migrations/20251220_integrations.sql
+
+# ============================================================================
+# Redis (for caching and BullMQ job queues)
+# ============================================================================
+# Note: Render doesn't have a native Redis service in the blueprint
+# You need to add it manually through the Render dashboard or use an external Redis provider
+# Alternatively, use Upstash Redis (https://upstash.com) and set env vars manually
