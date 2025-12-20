@@ -66,6 +66,7 @@ model Company {
   province                   String?              @db.VarChar(100)
   postalCode                 String?              @map("postal_code") @db.VarChar(10)
   country                    String               @default("ES") @db.VarChar(2)
+  region                     String               @default("eu") @db.VarChar(10) // Database region (eu, us, asia)
   phone                      String?              @db.VarChar(20)
   email                      String?              @db.VarChar(255)
   website                    String?              @db.VarChar(255)

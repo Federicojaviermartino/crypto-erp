@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${DATABASE_NAME:-crypto_erp}
       POSTGRES_USER: ${DATABASE_USER:-crypto_erp_user}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+      # Enable replication
+      POSTGRES_INITDB_ARGS: "-c wal_level=replica -c max_wal_senders=10 -c max_replication_slots=10"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -21,6 +23,115 @@ services:
       retries: 5
     networks:
       - crypto-erp-network
+    command: >
+      postgres
+      -c wal_level=replica
+      -c hot_standby=on
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby_feedback=on
+
+  # Read Replica - EU Region
+  postgres-replica-eu:
+    image: postgres:15-alpine
+    container_name: crypto-erp-postgres-replica-eu
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-crypto_erp}
+      POSTGRES_USER: ${DATABASE_USER:-crypto_erp_user}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+      PGUSER: ${DATABASE_USER:-crypto_erp_user}
+      PGPASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+    volumes:
+      - postgres_replica_eu_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-crypto_erp_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crypto-erp-network
+    command: >
+      bash -c "
+      until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot_eu --host=postgres --port=5432; do
+        echo 'Waiting for primary to be ready...';
+        sleep 5;
+      done;
+      exec postgres -c hot_standby=on
+      "
+
+  # Read Replica - US Region (Optional - comment out if not needed)
+  # postgres-replica-us:
+  #   image: postgres:15-alpine
+  #   container_name: crypto-erp-postgres-replica-us
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: ${DATABASE_NAME:-crypto_erp}
+  #     POSTGRES_USER: ${DATABASE_USER:-crypto_erp_user}
+  #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+  #     PGUSER: ${DATABASE_USER:-crypto_erp_user}
+  #     PGPASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+  #   volumes:
+  #     - postgres_replica_us_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5434:5432"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-crypto_erp_user}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - crypto-erp-network
+  #   command: >
+  #     bash -c "
+  #     until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot_us --host=postgres --port=5432; do
+  #       echo 'Waiting for primary to be ready...';
+  #       sleep 5;
+  #     done;
+  #     exec postgres -c hot_standby=on
+  #     "
+
+  # Read Replica - Asia Region (Optional - comment out if not needed)
+  # postgres-replica-asia:
+  #   image: postgres:15-alpine
+  #   container_name: crypto-erp-postgres-replica-asia
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: ${DATABASE_NAME:-crypto_erp}
+  #     POSTGRES_USER: ${DATABASE_USER:-crypto_erp_user}
+  #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+  #     PGUSER: ${DATABASE_USER:-crypto_erp_user}
+  #     PGPASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
+  #   volumes:
+  #     - postgres_replica_asia_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5435:5432"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-crypto_erp_user}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - crypto-erp-network
+  #   command: >
+  #     bash -c "
+  #     until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot_asia --host=postgres --port=5432; do
+  #       echo 'Waiting for primary to be ready...';
+  #       sleep 5;
+  #     done;
+  #     exec postgres -c hot_standby=on
+  #     "
 
   redis:
     image: redis:7-alpine
@@ -100,4 +211,7 @@ networks:
 
 volumes:
   postgres_data:
+  postgres_replica_eu_data:
+  # postgres_replica_us_data:  # Uncomment if using US replica
+  # postgres_replica_asia_data:  # Uncomment if using Asia replica
   redis_data:
