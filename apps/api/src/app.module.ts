@@ -22,6 +22,7 @@ import { CommonModule } from './common/common.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { CacheModule } from './common/cache/cache.module.js';
 import { OAuthModule } from './modules/oauth/oauth.module.js';
+import { IntegrationsModule } from './modules/integrations/integrations.module.js';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { OAuthModule } from './modules/oauth/oauth.module.js';
     MonitoringModule,
     OnboardingModule,
     OAuthModule,
+    IntegrationsModule,
   ],
   providers: [
     // Global exception filter

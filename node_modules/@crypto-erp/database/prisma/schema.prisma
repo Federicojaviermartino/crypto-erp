@@ -114,6 +114,7 @@ model Company {
   oauthApps        OAuthApp[]
   oauthTokens      OAuthToken[]
   apiUsage         ApiUsage[]
+  integrations     Integration[]
 
   @@index([taxId])
   @@map("companies")
@@ -975,6 +976,54 @@ model ApiUsage {
   @@index([endpoint, timestamp])
   @@index([timestamp])
   @@map("api_usage")
+}
+
+// ============================================================================
+// INTEGRATIONS (Phase 4B - Feature 4)
+// ============================================================================
+
+/// Third-party integrations (QuickBooks, Xero, HubSpot, Salesforce, etc.)
+model Integration {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+
+  // Integration details
+  provider  String   @db.VarChar(50) // "quickbooks", "xero", "hubspot", "salesforce", "paypal", "square"
+  name      String   @db.VarChar(255) // User-friendly name
+
+  // OAuth credentials (encrypted)
+  accessToken  String?  @map("access_token") @db.Text // Encrypted OAuth access token
+  refreshToken String?  @map("refresh_token") @db.Text // Encrypted OAuth refresh token
+  expiresAt    DateTime? @map("expires_at") // Token expiration
+
+  // Provider-specific metadata
+  realmId      String?  @map("realm_id") @db.VarChar(100) // QuickBooks company ID
+  tenantId     String?  @map("tenant_id") @db.VarChar(100) // Xero tenant ID
+  instanceUrl  String?  @map("instance_url") @db.VarChar(500) // Salesforce instance URL
+  metadata     Json?    @default("{}") // Additional provider-specific data
+
+  // Sync configuration
+  syncEnabled  Boolean  @default(true) @map("sync_enabled")
+  syncFrequency String  @default("hourly") @map("sync_frequency") @db.VarChar(20) // "realtime", "hourly", "daily", "manual"
+  lastSyncAt   DateTime? @map("last_sync_at")
+  lastSyncStatus String? @map("last_sync_status") @db.VarChar(20) // "success", "error", "partial"
+  lastSyncError String?  @map("last_sync_error") @db.Text
+
+  // Status
+  isActive     Boolean  @default(true) @map("is_active")
+
+  // Metadata
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, provider])
+  @@index([companyId])
+  @@index([provider])
+  @@index([syncEnabled, isActive])
+  @@map("integrations")
 }
 
 // ============================================================================
