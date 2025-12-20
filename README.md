@@ -1,89 +1,89 @@
 # Crypto-ERP
 
-Sistema ERP completo para gestión contable, facturación electrónica con Verifactu, y contabilidad de criptomonedas con cumplimiento fiscal español.
+Complete ERP system for accounting management, electronic invoicing with Verifactu, and cryptocurrency accounting with Spanish tax compliance.
 
-## 🚀 Estado del Proyecto
+## Project Status
 
-**Versión**: 3.0 (Fase 3B completada - Enero 2025)
-**Estado**: ✅ **Commercial Launch Ready** 🎉
+**Version**: 3.0 (January 2025)
+**Status**: Commercial Launch Ready
 **Coverage**: 90%+ (421 tests)
-**Capacidad**: 100-500 usuarios concurrentes
+**Capacity**: 100-500 concurrent users
 
 ---
 
-## ✨ Características Principales
+## Main Features
 
-### 💼 Contabilidad
-- Plan General Contable (PGC) español completo
-- Asientos contables automáticos
-- Ejercicios fiscales y cierres
-- Balance de situación y Cuenta de PyG
-- Libro mayor y libro diario
+### Accounting
+- Complete Spanish General Accounting Plan (PGC)
+- Automatic journal entries
+- Fiscal years and closings
+- Balance sheet and P&L statement
+- General ledger and journal book
 
-### 🧾 Facturación Electrónica & Compliance
-- Sistema **Verifactu COMPLETO** (AEAT)
-- **SII** - Suministro Inmediato de Información (envío 4 días)
-- **Modelo 347** - Declaración operaciones >3,005€
-- Hash chain SHA-256 + QR codes
-- Envío SOAP a AEAT con reintentos
-- Generación de XML firmado AEAT
-- Series de facturación configurables
-- Gestión de contactos (clientes/proveedores)
-- Exportación a PDF
+### Electronic Invoicing & Compliance
+- Complete **Verifactu** system (AEAT)
+- **SII** - Immediate Information Supply (4-day submission)
+- **Model 347** - Declaration of operations >3,005 EUR
+- SHA-256 hash chain + QR codes
+- SOAP submission to AEAT with retries
+- AEAT signed XML generation
+- Configurable invoice series
+- Contact management (customers/suppliers)
+- PDF export
 
-### ₿ Crypto & Blockchain
-- **9 blockchains soportadas**:
+### Crypto & Blockchain
+- **9 blockchains supported**:
   - EVM: Ethereum, Polygon, BSC, Arbitrum, Optimism, Base, Avalanche
   - Non-EVM: Solana, Bitcoin
-- Cálculo FIFO automático (cost basis)
-- 20+ tipos de transacciones auto-detectadas
-- Integración con exchanges (Coinbase, Kraken, Binance)
-- Portfolio tracking en tiempo real
-- Modelo 721/720 (declaración criptomonedas)
+- Automatic FIFO calculation (cost basis)
+- 20+ auto-detected transaction types
+- Exchange integration (Coinbase, Kraken, Binance)
+- Real-time portfolio tracking
+- Model 721/720 (cryptocurrency declaration)
 
-### 🤖 Inteligencia Artificial
-- **Chat asistente contable** con RAG (Retrieval-Augmented Generation)
-- **Predicción fiscal** en tiempo real
-- **OCR inteligente** para facturas (Google Vision + PaddleOCR + AI)
-- **Categorización batch** de transacciones crypto
-- Knowledge base AEAT (IVA, IRPF, Impuesto Sociedades, BOICAC)
-- Soporte **multi-idioma** (Español + Inglés)
-- Insights y recomendaciones automáticas
+### Artificial Intelligence
+- **Accounting assistant chat** with RAG (Retrieval-Augmented Generation)
+- **Real-time tax prediction**
+- **Intelligent OCR** for invoices (Google Vision + PaddleOCR + AI)
+- **Batch categorization** of crypto transactions
+- AEAT knowledge base (VAT, IRPF, Corporate Tax, BOICAC)
+- **Multi-language** support (Spanish + English)
+- Automatic insights and recommendations
 
-### 📊 Analytics & Reporting
-- Dashboard interactivo con Chart.js
-- Gráficos de portfolio (doughnut chart)
-- Tendencias mensuales (line charts)
-- Reportes fiscales (CSV export)
-- Tax calculator con tramos IRPF
+### Analytics & Reporting
+- Interactive dashboard with Chart.js
+- Portfolio charts (doughnut chart)
+- Monthly trends (line charts)
+- Tax reports (CSV export)
+- Tax calculator with IRPF brackets
 
-### 💳 Payments & SaaS
-- **Stripe integration** completa (Checkout + Webhooks)
-- **3 Subscription tiers**: Free, Pro (€29/mes), Enterprise (€99/mes)
-- Trial de 14 días en planes de pago
-- Usage limits por plan (facturas/mes, AI messages/mes)
-- Customer Portal para gestión de subscripción
-- Upgrade/downgrade automático
+### Payments & SaaS
+- Complete **Stripe integration** (Checkout + Webhooks)
+- **3 Subscription tiers**: Free, Pro (29 EUR/month), Enterprise (99 EUR/month)
+- 14-day trial on paid plans
+- Usage limits per plan (invoices/month, AI messages/month)
+- Customer Portal for subscription management
+- Automatic upgrade/downgrade
 
-### 📈 Monitoring & Observability
-- **Prometheus** para métricas (15+ métricas personalizadas)
-- **Grafana** dashboards (16 paneles pre-configurados)
-- **Sentry** para error tracking
-- Alertas automáticas (18 reglas configuradas)
-- Business metrics (MRR, churn, subscriptions activas)
+### Monitoring & Observability
+- **Prometheus** for metrics (15+ custom metrics)
+- **Grafana** dashboards (16 pre-configured panels)
+- **Sentry** for error tracking
+- Automatic alerts (18 configured rules)
+- Business metrics (MRR, churn, active subscriptions)
 
-### 💾 Backups & DR
-- **Backups automáticos** diarios (cron scheduler)
-- Upload automático a **AWS S3**
-- Política de retención (7d/4w/12m)
-- Restauración segura con safety backup
-- Métricas de backup integradas en Grafana
+### Backups & DR
+- **Automatic daily backups** (cron scheduler)
+- Automatic upload to **AWS S3**
+- Retention policy (7d/4w/12m)
+- Safe restoration with safety backup
+- Backup metrics integrated in Grafana
 
 ---
 
-## 🏗️ Arquitectura
+## Architecture
 
-### Stack Tecnológico
+### Technology Stack
 
 - **Backend**: NestJS 10 + TypeScript
 - **Frontend**: Angular 17 (standalone components + signals)
@@ -95,36 +95,36 @@ Sistema ERP completo para gestión contable, facturación electrónica con Verif
 - **Charts**: Chart.js + ng2-charts
 - **Payments**: Stripe
 - **Monitoring**: Prometheus + Grafana + Sentry
-- **Backups**: Automated PostgreSQL backups → S3
+- **Backups**: Automated PostgreSQL backups to S3
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### Requisitos Previos
+### Prerequisites
 - Node.js 18+
 - Docker & Docker Compose
-- PostgreSQL 15+ (o usar Docker)
-- Redis 7+ (o usar Docker)
+- PostgreSQL 15+ (or use Docker)
+- Redis 7+ (or use Docker)
 
-### 1. Instalar Dependencias
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configure Environment Variables
 
 ```bash
 cp .env.example .env
 ```
 
-Editar `.env` con tus API keys:
+Edit `.env` with your API keys:
 ```bash
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/cryptoerp"
 
-# AI (elegir uno o varios)
+# AI (choose one or more)
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
 OLLAMA_BASE_URL=http://localhost:11434
@@ -133,46 +133,47 @@ OLLAMA_BASE_URL=http://localhost:11434
 COVALENT_API_KEY=cqt_...
 COINGECKO_API_KEY=CG-...
 
-# OCR (opcional)
+# OCR (optional)
 GOOGLE_CLOUD_API_KEY=...
 PADDLE_OCR_URL=http://localhost:8866
 ```
 
-### 3. Arrancar Base de Datos
+### 3. Start Database
 
 ```bash
 docker-compose up -d postgres redis
 ```
 
-### 4. Migrar Base de Datos
+### 4. Run Database Migrations
 
 ```bash
 npm run db:migrate
-npm run db:seed  # Datos de ejemplo (opcional)
+npm run db:seed  # Sample data (optional)
 ```
 
-### 5. Arrancar Aplicación
+### 5. Start Application
 
 ```bash
 npm run dev
 ```
 
-Esto arranca:
+This starts:
 - API: http://localhost:3000
 - Web: http://localhost:4200
 - Worker: background
 
 ---
 
-## 📖 Documentación
+## Documentation
 
-- [Fase 2 Completada](docs/FASE-2-COMPLETED.md) - Documentación detallada de todas las features
-- [Plan Fase 2](docs/FASE-2-PLAN.md) - Plan original de implementación
 - [API Docs](http://localhost:3000/api-docs) - Swagger UI
+- [Architecture](docs/ARCHITECTURE.md) - System architecture
+- [Deployment](docs/DEPLOYMENT.md) - Production deployment guide
+- [Scaling](docs/SCALING.md) - Scaling guide
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 npm run test        # Unit tests
@@ -180,11 +181,11 @@ npm run test:e2e    # E2E tests
 npm run test:cov    # Coverage report
 ```
 
-**Cobertura actual**: 90%+ (421 tests)
+**Current coverage**: 90%+ (421 tests)
 
 ---
 
-## 📦 Build
+## Build
 
 ```bash
 npm run build
@@ -192,90 +193,55 @@ npm run build
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
-### ✅ Fase 1 - MVP (Completada)
-- Autenticación JWT
-- Contabilidad PGC
-- Facturación básica
+### Phase 1 - MVP (Completed)
+- JWT Authentication
+- PGC Accounting
+- Basic Invoicing
 - Verifactu AEAT
-- 7 Blockchains EVM
-- AI Chat básico
+- 7 EVM Blockchains
+- Basic AI Chat
 
-### ✅ Fase 2 - AI Avanzado + Multi-Blockchain (Completada)
-- Predicción fiscal en tiempo real
-- Categorización batch AI
-- Knowledge base expandida (AEAT)
-- Multi-idioma (ES/EN)
-- PaddleOCR auto-hospedado
+### Phase 2 - Advanced AI + Multi-Blockchain (Completed)
+- Real-time tax prediction
+- AI batch categorization
+- Expanded knowledge base (AEAT)
+- Multi-language (ES/EN)
+- Self-hosted PaddleOCR
 - Solana + Bitcoin
-- Dashboard con charts interactivos
-- OCR en formularios
-- AI Chat mejorado (context, history, files)
+- Dashboard with interactive charts
+- OCR in forms
+- Improved AI Chat (context, history, files)
 
-### ✅ Fase 3A - MVP Production (Completada)
+### Phase 3A - MVP Production (Completed)
 - Email notifications (Resend)
 - User invitations system
 - Two-Factor Authentication (2FA)
-- Audit logging completo
+- Complete audit logging
 - GDPR compliance (data export/deletion)
 - Error tracking (Sentry)
 - CI/CD pipeline (GitHub Actions)
 
-### ✅ Fase 3B - Commercial Launch (Completada)
-- **Modelo 347** - Declaración operaciones >3,005€
-- **SII** - Suministro Inmediato de Información
-- **Stripe integration** - Pagos + Subscripciones
-- **Subscription tiers** - Free/Pro/Enterprise
-- **Prometheus + Grafana** - Monitoring production
-- **Automated backups** - PostgreSQL → S3
-- Documentación completa (Deployment + Scaling)
+### Phase 3B - Commercial Launch (Completed)
+- Model 347 - Declaration of operations >3,005 EUR
+- SII - Immediate Information Supply
+- Stripe integration - Payments + Subscriptions
+- Subscription tiers - Free/Pro/Enterprise
+- Prometheus + Grafana - Production monitoring
+- Automated backups - PostgreSQL to S3
+- Complete documentation (Deployment + Scaling)
 
-### 🔄 Fase 3C - Enterprise Ready (Futura)
-- Multi-región deployment
+### Phase 3C - Enterprise Ready (Current)
 - SSO/SAML integration
-- Advanced analytics (BigQuery)
+- Webhooks system
+- Multi-region deployment
+- Advanced analytics
 - White-label branding
-- Webhooks salientes
 - Mobile app (React Native)
-- NFT support
-- Staking rewards
 
 ---
 
-## 📚 Documentación
+## License
 
-- **[Quick Start Guide](QUICKSTART.md)** - Arranca en 15 minutos
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy completo a producción
-- **[Scaling Guide](docs/SCALING.md)** - Escala de 10 a 10,000+ usuarios
-- **[Beta Launch Guide](docs/BETA-LAUNCH.md)** - Lanzar beta privada (10-20 usuarios)
-- **[Fase 3B Summary](docs/FASE-3B-RESUMEN.md)** - Resumen features comerciales
-- **[API Documentation](http://localhost:3000/api-docs)** - Swagger UI (cuando API está corriendo)
-
----
-
-## 🎯 Roadmap Lanzamiento
-
-### Q1 2025 - Beta Privada ✅
-- [x] Compliance fiscal completo (Verifactu + SII + Modelo 347)
-- [x] Payment system (Stripe)
-- [x] Monitoring & backups
-- [x] Security hardening (2FA + GDPR)
-- [ ] Beta con 10-20 usuarios
-
-### Q2 2025 - Public Launch
-- [ ] Libro Registro de Facturas oficial (Feature 10)
-- [ ] Onboarding flow mejorado
-- [ ] Marketing website
-- [ ] Documentación usuario final
-- [ ] Lanzamiento público
-
-### Q3 2025 - Growth
-- [ ] Mobile app beta
-- [ ] Multi-región (EU + US)
-- [ ] SSO/SAML para enterprise
-- [ ] Advanced analytics dashboard
-
----
-
-**Desarrollado con ❤️ para profesionales del crypto en España**
+Proprietary - All rights reserved
