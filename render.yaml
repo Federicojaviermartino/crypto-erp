@@ -1,6 +1,6 @@
 # Render Blueprint for Crypto ERP
 # https://render.com/docs/blueprint-spec
-# Updated: Phase 4B - Includes OAuth, Integrations, Analytics, TimescaleDB, Redis, Worker
+# Updated: Phase 4B - Simplified for Render compatibility
 
 services:
   # ============================================================================
@@ -23,7 +23,7 @@ services:
       - key: API_PREFIX
         value: api/v1
 
-      # Database (PostgreSQL with TimescaleDB)
+      # Database (PostgreSQL)
       - key: DATABASE_URL
         fromDatabase:
           name: crypto-erp-db
@@ -31,22 +31,15 @@ services:
       - key: DATABASE_PRIMARY_REGION
         value: eu
 
-      # Redis (for caching and BullMQ)
+      # Redis (must be configured manually via Upstash)
+      # After deployment, add these variables manually:
+      # REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB
       - key: REDIS_HOST
-        fromService:
-          name: crypto-erp-redis
-          type: redis
-          property: host
+        sync: false
       - key: REDIS_PORT
-        fromService:
-          name: crypto-erp-redis
-          type: redis
-          property: port
+        sync: false
       - key: REDIS_PASSWORD
-        fromService:
-          name: crypto-erp-redis
-          type: redis
-          property: password
+        sync: false
       - key: REDIS_DB
         value: 0
 
@@ -121,22 +114,13 @@ services:
           name: crypto-erp-db
           property: connectionString
 
-      # Redis (for BullMQ)
+      # Redis (same as API)
       - key: REDIS_HOST
-        fromService:
-          name: crypto-erp-redis
-          type: redis
-          property: host
+        sync: false
       - key: REDIS_PORT
-        fromService:
-          name: crypto-erp-redis
-          type: redis
-          property: port
+        sync: false
       - key: REDIS_PASSWORD
-        fromService:
-          name: crypto-erp-redis
-          type: redis
-          property: password
+        sync: false
       - key: REDIS_DB
         value: 0
 
@@ -150,8 +134,6 @@ services:
   - type: web
     name: crypto-erp-web
     env: static
-    region: frankfurt
-    plan: starter
     buildCommand: npm ci && npm run build:web
     staticPublishPath: ./apps/web/dist/web/browser
     routes:
@@ -182,24 +164,11 @@ services:
 # Databases
 # ============================================================================
 databases:
-  # PostgreSQL 15 with TimescaleDB extension
-  # Note: Render's managed PostgreSQL doesn't support TimescaleDB extension
-  # You'll need to use a custom Docker service or external TimescaleDB provider
+  # PostgreSQL 15
+  # Note: TimescaleDB extension not available on Render's managed PostgreSQL
+  # For analytics features, consider external TimescaleDB or use PostgreSQL partitioning
   - name: crypto-erp-db
     region: frankfurt
     plan: starter
     databaseName: crypto_erp
     user: crypto_erp_user
-    # After creation, connect and run:
-    # CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
-    # Then run migrations:
-    # psql -U crypto_erp_user -d crypto_erp -f libs/database/prisma/migrations/20251220_analytics_timescaledb.sql
-    # psql -U crypto_erp_user -d crypto_erp -f libs/database/prisma/migrations/20251220_oauth_marketplace.sql
-    # psql -U crypto_erp_user -d crypto_erp -f libs/database/prisma/migrations/20251220_integrations.sql
-
-# ============================================================================
-# Redis (for caching and BullMQ job queues)
-# ============================================================================
-# Note: Render doesn't have a native Redis service in the blueprint
-# You need to add it manually through the Render dashboard or use an external Redis provider
-# Alternatively, use Upstash Redis (https://upstash.com) and set env vars manually
