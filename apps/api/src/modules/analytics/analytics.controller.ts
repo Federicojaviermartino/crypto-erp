@@ -58,4 +58,55 @@ export class AnalyticsController {
 
     return this.analyticsService.getMonthlyData(companyId, months);
   }
+
+  // ============================================================================
+  // PHASE 4 - ADVANCED ANALYTICS ENDPOINTS
+  // ============================================================================
+
+  /**
+   * Get revenue analytics (MRR, ARR, total revenue, growth)
+   * GET /analytics/revenue?startDate=2025-01-01&endDate=2025-12-31
+   */
+  @Get('revenue')
+  async getRevenueMetrics(
+    @Headers() headers: Record<string, string>,
+    @Query('startDate') startDateStr?: string,
+    @Query('endDate') endDateStr?: string,
+  ) {
+    const companyId = this.getCompanyId(headers);
+
+    // Default to current month if not provided
+    const now = new Date();
+    const startDate = startDateStr
+      ? new Date(startDateStr)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = endDateStr
+      ? new Date(endDateStr)
+      : now;
+
+    return this.analyticsService.getRevenueMetrics(companyId, startDate, endDate);
+  }
+
+  /**
+   * Get user behavior analytics (active users, churn rate)
+   * GET /analytics/users?startDate=2025-01-01&endDate=2025-12-31
+   */
+  @Get('users')
+  async getUserMetrics(
+    @Headers() headers: Record<string, string>,
+    @Query('startDate') startDateStr?: string,
+    @Query('endDate') endDateStr?: string,
+  ) {
+    const companyId = this.getCompanyId(headers);
+
+    const now = new Date();
+    const startDate = startDateStr
+      ? new Date(startDateStr)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = endDateStr
+      ? new Date(endDateStr)
+      : now;
+
+    return this.analyticsService.getUserMetrics(companyId, startDate, endDate);
+  }
 }

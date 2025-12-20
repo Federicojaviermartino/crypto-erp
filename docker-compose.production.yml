@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: timescale/timescaledb:latest-pg15  # TimescaleDB with PostgreSQL 15
     container_name: crypto-erp-postgres
     restart: unless-stopped
     environment:
@@ -11,6 +11,8 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD required}
       # Enable replication
       POSTGRES_INITDB_ARGS: "-c wal_level=replica -c max_wal_senders=10 -c max_replication_slots=10"
+      # TimescaleDB settings
+      TIMESCALEDB_TELEMETRY: "off"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -33,7 +35,7 @@ services:
 
   # Read Replica - EU Region
   postgres-replica-eu:
-    image: postgres:15-alpine
+    image: timescale/timescaledb:latest-pg15  # TimescaleDB with PostgreSQL 15
     container_name: crypto-erp-postgres-replica-eu
     restart: unless-stopped
     environment:

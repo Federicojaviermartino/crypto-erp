@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@crypto-erp/database';
+import { Decimal } from '@prisma/client/runtime/library';
 
 interface PortfolioOverview {
   totalCostBasis: number;
@@ -523,5 +524,208 @@ export class AnalyticsService {
       status: inv.status,
       date: inv.issueDate,
     }));
+  }
+
+  // ============================================================================
+  // PHASE 4 - ADVANCED ANALYTICS
+  // ============================================================================
+
+  /**
+   * Get revenue metrics (MRR, ARR, growth)
+   * Phase 4 Feature: Business intelligence
+   */
+  async getRevenueMetrics(
+    companyId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{
+    mrr: number;
+    arr: number;
+    totalRevenue: number;
+    averageRevenuePerUser: number;
+    revenueGrowth: number;
+    currency: string;
+  }> {
+    // Get MRR from active subscriptions
+    const subscriptions = await this.prisma.subscription.aggregate({
+      where: {
+        companyId,
+        status: 'ACTIVE',
+      },
+      _sum: {
+        amount: true,
+      },
+      _count: true,
+    });
+
+    const mrr = subscriptions._sum.amount?.toNumber() || 0;
+    const arr = mrr * 12;
+
+    // Get total revenue from paid invoices
+    const invoiceRevenue = await this.prisma.invoice.aggregate({
+      where: {
+        companyId,
+        issueDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+        status: 'PAID',
+      },
+      _sum: {
+        totalAmount: true,
+      },
+    });
+
+    const totalRevenue = invoiceRevenue._sum.totalAmount?.toNumber() || 0;
+
+    // Calculate previous period revenue for growth
+    const periodLength = endDate.getTime() - startDate.getTime();
+    const previousStartDate = new Date(startDate.getTime() - periodLength);
+    const previousRevenue = await this.prisma.invoice.aggregate({
+      where: {
+        companyId,
+        issueDate: {
+          gte: previousStartDate,
+          lt: startDate,
+        },
+        status: 'PAID',
+      },
+      _sum: {
+        totalAmount: true,
+      },
+    });
+
+    const previousTotal = previousRevenue._sum.totalAmount?.toNumber() || 0;
+    const revenueGrowth = previousTotal > 0 ? ((totalRevenue - previousTotal) / previousTotal) * 100 : 0;
+
+    // Calculate ARPU (Average Revenue Per User)
+    const activeUsers = await this.prisma.companyUser.count({
+      where: {
+        companyId,
+        user: {
+          isActive: true,
+        },
+      },
+    });
+
+    const averageRevenuePerUser = activeUsers > 0 ? totalRevenue / activeUsers : 0;
+
+    return {
+      mrr,
+      arr,
+      totalRevenue,
+      averageRevenuePerUser,
+      revenueGrowth,
+      currency: 'EUR',
+    };
+  }
+
+  /**
+   * Get user behavior analytics
+   * Phase 4 Feature: User activity tracking
+   */
+  async getUserMetrics(
+    companyId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    newUsers: number;
+    churnedUsers: number;
+    churnRate: number;
+    activeUserRate: number;
+  }> {
+    const totalUsers = await this.prisma.companyUser.count({
+      where: {
+        companyId,
+        createdAt: {
+          lte: endDate,
+        },
+      },
+    });
+
+    // Active users (logged in last 30 days)
+    const thirtyDaysAgo = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const activeUsers = await this.prisma.user.count({
+      where: {
+        companyUsers: {
+          some: {
+            companyId,
+          },
+        },
+        lastLoginAt: {
+          gte: thirtyDaysAgo,
+          lte: endDate,
+        },
+      },
+    });
+
+    // New users in period
+    const newUsers = await this.prisma.companyUser.count({
+      where: {
+        companyId,
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    // Churned users (cancelled subscriptions)
+    const churnedUsers = await this.prisma.subscription.count({
+      where: {
+        companyId,
+        status: 'CANCELLED',
+        cancelledAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    const churnRate = totalUsers > 0 ? (churnedUsers / totalUsers) * 100 : 0;
+    const activeUserRate = totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;
+
+    return {
+      totalUsers,
+      activeUsers,
+      newUsers,
+      churnedUsers,
+      churnRate,
+      activeUserRate,
+    };
+  }
+
+  /**
+   * Record an analytics event to TimescaleDB
+   * Phase 4 Feature: Event tracking
+   */
+  async recordEvent(
+    companyId: string | null,
+    userId: string | null,
+    eventType: string,
+    category: string,
+    value?: Decimal | number,
+    currency?: string,
+    metadata?: any,
+  ): Promise<void> {
+    try {
+      await this.prisma.analyticsEvent.create({
+        data: {
+          companyId,
+          userId,
+          eventType,
+          category,
+          value: value instanceof Decimal ? value : value ? new Decimal(value) : null,
+          currency,
+          metadata: metadata || {},
+          timestamp: new Date(),
+        },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to record analytics event:`, error);
+      // Don't throw - analytics should not break the application
+    }
   }
 }

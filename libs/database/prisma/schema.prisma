@@ -47,6 +47,7 @@ model User {
   invitationsAccepted CompanyInvitation[] @relation("InvitationsAccepted")
   auditLogs       AuditLog[]
   onboarding      UserOnboarding?
+  analyticsEvents AnalyticsEvent[]
 
   @@index([email])
   @@index([ssoProvider, ssoId])
@@ -106,6 +107,7 @@ model Company {
   invitations      CompanyInvitation[]
   auditLogs        AuditLog[]
   webhookSubscriptions WebhookSubscription[]
+  analyticsEvents  AnalyticsEvent[]
 
   @@index([taxId])
   @@map("companies")
@@ -806,6 +808,42 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// ANALYTICS & METRICS (Phase 4 - TimescaleDB)
+// ============================================================================
+
+/// Analytics event for time-series metrics
+/// Stored in TimescaleDB hypertable for efficient time-series queries
+model AnalyticsEvent {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId String?  @map("company_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+
+  // Event details
+  eventType String   @map("event_type") @db.VarChar(100) // "invoice.created", "user.login", "payment.received"
+  category  String   @db.VarChar(50) // "revenue", "user_activity", "system", "crypto"
+
+  // Metrics
+  value     Decimal? @db.Decimal(20, 8) // Numeric value (amount, count, etc.)
+  currency  String?  @db.VarChar(3) // For revenue events
+
+  // Metadata
+  metadata  Json?    @default("{}") // Event-specific data
+
+  // Timestamp (primary dimension for TimescaleDB)
+  timestamp DateTime @default(now())
+
+  // Optional relations (nullable for system events)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, timestamp])
+  @@index([eventType, timestamp])
+  @@index([category, timestamp])
+  @@index([timestamp]) // Primary index for time-series queries
+  @@map("analytics_events")
 }
 
 // ============================================================================
