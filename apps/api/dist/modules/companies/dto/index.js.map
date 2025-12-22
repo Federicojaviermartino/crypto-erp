@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/modules/companies/dto/index.ts"],"sourcesContent":["export { CreateCompanyDto } from './create-company.dto.js';\nexport { UpdateCompanyDto } from './update-company.dto.js';\n"],"names":["CreateCompanyDto","UpdateCompanyDto"],"mappings":";;;;;;;;;;;QAASA;eAAAA,kCAAgB;;QAChBC;eAAAA,kCAAgB;;;kCADQ;kCACA"}
