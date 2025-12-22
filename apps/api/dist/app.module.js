@@ -33,6 +33,8 @@ const _onboardingmodule = require("./modules/onboarding/onboarding.module.js");
 const _cachemodule = require("./common/cache/cache.module.js");
 const _oauthmodule = require("./modules/oauth/oauth.module.js");
 const _integrationsmodule = require("./modules/integrations/integrations.module.js");
+const _whitelabelmodule = require("./modules/white-label/white-label.module.js");
+const _partnersmodule = require("./modules/partners/partners.module.js");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -133,7 +135,9 @@ AppModule = _ts_decorate([
             _monitoringmodule.MonitoringModule,
             _onboardingmodule.OnboardingModule,
             _oauthmodule.OAuthModule,
-            _integrationsmodule.IntegrationsModule
+            _integrationsmodule.IntegrationsModule,
+            _whitelabelmodule.WhiteLabelModule,
+            _partnersmodule.PartnersModule
         ],
         providers: [
             // Global exception filter

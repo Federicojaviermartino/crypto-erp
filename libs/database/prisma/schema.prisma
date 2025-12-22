@@ -115,6 +115,8 @@ model Company {
   oauthTokens      OAuthToken[]
   apiUsage         ApiUsage[]
   integrations     Integration[]
+  whiteLabelConfig WhiteLabelConfig?
+  partnerCustomer  PartnerCustomer?
 
   @@index([taxId])
   @@map("companies")
@@ -1441,4 +1443,248 @@ enum WebhookDeliveryStatus {
   DELIVERED
   FAILED
   CANCELLED
+}
+
+// ============================================================================
+// WHITE-LABEL & PARTNER MANAGEMENT
+// ============================================================================
+
+/// White-Label Configuration for Company
+/// Allows customization of branding per company (for B2B2C model)
+model WhiteLabelConfig {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId         String    @unique @map("company_id") @db.Uuid
+
+  // Branding
+  brandName         String?   @map("brand_name") @db.VarChar(255)
+  logoUrl           String?   @map("logo_url") @db.VarChar(500) // S3/CDN URL
+  faviconUrl        String?   @map("favicon_url") @db.VarChar(500)
+
+  // Theme Colors (CSS variables)
+  primaryColor      String?   @map("primary_color") @db.VarChar(7) // #RRGGBB
+  secondaryColor    String?   @map("secondary_color") @db.VarChar(7)
+  accentColor       String?   @map("accent_color") @db.VarChar(7)
+  backgroundColor   String?   @map("background_color") @db.VarChar(7)
+  textColor         String?   @map("text_color") @db.VarChar(7)
+
+  // Custom CSS (optional)
+  customCss         String?   @map("custom_css") @db.Text
+
+  // Custom Domain
+  customDomain      String?   @unique @map("custom_domain") @db.VarChar(255)
+  domainVerified    Boolean   @default(false) @map("domain_verified")
+
+  // Email Branding
+  emailFromName     String?   @map("email_from_name") @db.VarChar(255)
+  emailReplyTo      String?   @map("email_reply_to") @db.VarChar(255)
+  emailFooterText   String?   @map("email_footer_text") @db.Text
+
+  // Feature Flags (what features to show)
+  enabledFeatures   String[]  @default([]) @map("enabled_features") // ["invoicing", "crypto", "analytics"]
+
+  // Metadata
+  metadata          Json?     @default("{}")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  company           Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([customDomain])
+  @@map("white_label_configs")
+}
+
+/// Partner (Reseller) for White-Label Program
+/// Partners can resell the platform with their own branding
+model Partner {
+  id                      String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+
+  // Partner Info
+  name                    String            @db.VarChar(255)
+  legalName               String            @map("legal_name") @db.VarChar(255)
+  email                   String            @unique @db.VarChar(255)
+  phone                   String?           @db.VarChar(20)
+  website                 String?           @db.VarChar(255)
+
+  // Tax Info
+  taxId                   String?           @map("tax_id") @db.VarChar(50)
+  address                 String?           @db.VarChar(500)
+  city                    String?           @db.VarChar(100)
+  country                 String            @default("ES") @db.VarChar(2)
+
+  // Partnership Terms
+  commissionRate          Float             @default(20.0) @map("commission_rate") // Percentage (0-100)
+  revenueShareModel       RevenueShareModel @default(PERCENTAGE) @map("revenue_share_model")
+  paymentTerms            String?           @map("payment_terms") @db.VarChar(100) // "NET30", "NET60"
+
+  // Status
+  status                  PartnerStatus     @default(PENDING)
+  isActive                Boolean           @default(true) @map("is_active")
+
+  // API Access
+  apiKey                  String?           @unique @map("api_key") @db.VarChar(64) // For partner API
+  apiKeyHash              String?           @map("api_key_hash") @db.VarChar(128) // Hashed version
+  webhookUrl              String?           @map("webhook_url") @db.VarChar(500) // Partner webhook endpoint
+
+  // Metadata
+  metadata                Json?             @default("{}")
+  notes                   String?           @db.Text // Internal notes
+
+  // Dates
+  contractStartDate       DateTime?         @map("contract_start_date")
+  contractEndDate         DateTime?         @map("contract_end_date")
+  createdAt               DateTime          @default(now()) @map("created_at")
+  updatedAt               DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  customers               PartnerCustomer[]
+  commissions             PartnerCommission[]
+  payouts                 PartnerPayout[]
+
+  @@index([email])
+  @@index([status])
+  @@index([isActive])
+  @@map("partners")
+}
+
+/// Companies managed by a Partner
+model PartnerCustomer {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  partnerId         String    @map("partner_id") @db.Uuid
+  companyId         String    @unique @map("company_id") @db.Uuid // One company = one partner
+
+  // Custom pricing for this customer
+  customCommissionRate Float? @map("custom_commission_rate") // Override partner's default
+
+  // Status
+  status            PartnerCustomerStatus @default(ACTIVE)
+
+  // Dates
+  activatedAt       DateTime? @map("activated_at")
+  deactivatedAt     DateTime? @map("deactivated_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  partner           Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  company           Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
+  @@index([companyId])
+  @@index([status])
+  @@map("partner_customers")
+}
+
+/// Commission tracking for partners
+model PartnerCommission {
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  partnerId         String              @map("partner_id") @db.Uuid
+  companyId         String              @map("company_id") @db.Uuid
+
+  // Transaction Details
+  transactionType   String              @map("transaction_type") @db.VarChar(50) // "subscription", "invoice", "addon"
+  transactionId     String?             @map("transaction_id") @db.Uuid // Reference to subscription/invoice
+
+  // Amounts
+  baseAmount        Float               @map("base_amount") // Original transaction amount
+  commissionRate    Float               @map("commission_rate") // Rate applied
+  commissionAmount  Float               @map("commission_amount") // Calculated commission
+  currency          String              @default("EUR") @db.VarChar(3)
+
+  // Status
+  status            CommissionStatus    @default(PENDING)
+
+  // Payout tracking
+  payoutId          String?             @map("payout_id") @db.Uuid
+  paidAt            DateTime?           @map("paid_at")
+
+  // Period
+  periodStart       DateTime            @map("period_start")
+  periodEnd         DateTime            @map("period_end")
+
+  // Dates
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  partner           Partner             @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  payout            PartnerPayout?      @relation(fields: [payoutId], references: [id])
+
+  @@index([partnerId])
+  @@index([companyId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("partner_commissions")
+}
+
+/// Payout to partners
+model PartnerPayout {
+  id                String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  partnerId         String            @map("partner_id") @db.Uuid
+
+  // Payout Details
+  amount            Float             // Total payout amount
+  currency          String            @default("EUR") @db.VarChar(3)
+
+  // Period covered
+  periodStart       DateTime          @map("period_start")
+  periodEnd         DateTime          @map("period_end")
+
+  // Payment Details
+  paymentMethod     String?           @map("payment_method") @db.VarChar(50) // "bank_transfer", "paypal"
+  paymentReference  String?           @map("payment_reference") @db.VarChar(100) // Transaction ID
+
+  // Status
+  status            PayoutStatus      @default(PENDING)
+
+  // Dates
+  scheduledAt       DateTime?         @map("scheduled_at")
+  paidAt            DateTime?         @map("paid_at")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  partner           Partner           @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  commissions       PartnerCommission[]
+
+  @@index([partnerId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("partner_payouts")
+}
+
+// ============================================================================
+// WHITE-LABEL ENUMS
+// ============================================================================
+
+enum RevenueShareModel {
+  PERCENTAGE   // Fixed percentage of revenue
+  TIERED       // Different rates based on volume
+  FLAT_FEE     // Fixed fee per customer
+  HYBRID       // Combination
+}
+
+enum PartnerStatus {
+  PENDING      // Application pending review
+  ACTIVE       // Active partner
+  SUSPENDED    // Temporarily suspended
+  TERMINATED   // Contract terminated
+}
+
+enum PartnerCustomerStatus {
+  ACTIVE       // Active customer
+  CHURNED      // Customer cancelled
+  SUSPENDED    // Temporarily suspended
+}
+
+enum CommissionStatus {
+  PENDING      // Not yet approved
+  APPROVED     // Approved for payout
+  PAID         // Already paid
+  CANCELLED    // Cancelled (refund, chargeback)
+}
+
+enum PayoutStatus {
+  PENDING      // Scheduled but not paid
+  PROCESSING   // Payment in progress
+  PAID         // Successfully paid
+  FAILED       // Payment failed
+  CANCELLED    // Cancelled
 }

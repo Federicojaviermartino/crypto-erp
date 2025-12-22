@@ -23,6 +23,8 @@ import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { CacheModule } from './common/cache/cache.module.js';
 import { OAuthModule } from './modules/oauth/oauth.module.js';
 import { IntegrationsModule } from './modules/integrations/integrations.module.js';
+import { WhiteLabelModule } from './modules/white-label/white-label.module.js';
+import { PartnersModule } from './modules/partners/partners.module.js';
 
 @Module({
   imports: [
@@ -105,6 +107,8 @@ import { IntegrationsModule } from './modules/integrations/integrations.module.j
     OnboardingModule,
     OAuthModule,
     IntegrationsModule,
+    WhiteLabelModule,
+    PartnersModule,
   ],
   providers: [
     // Global exception filter
