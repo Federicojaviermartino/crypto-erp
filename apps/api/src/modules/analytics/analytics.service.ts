@@ -728,4 +728,338 @@ export class AnalyticsService {
       // Don't throw - analytics should not break the application
     }
   }
+
+  /**
+   * Get invoice analytics
+   * Phase 4 Feature: Invoice metrics
+   */
+  async getInvoiceAnalytics(
+    companyId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{
+    totalInvoices: number;
+    paidInvoices: number;
+    pendingInvoices: number;
+    overdueInvoices: number;
+    totalAmount: number;
+    paidAmount: number;
+    pendingAmount: number;
+    averageInvoiceValue: number;
+    averageDaysToPayment: number;
+    collectionRate: number;
+    invoicesByStatus: Array<{ status: string; count: number; amount: number }>;
+    invoicesByMonth: Array<{ month: string; count: number; amount: number }>;
+  }> {
+    // Get all invoices in range
+    const invoices = await this.prisma.invoice.findMany({
+      where: {
+        companyId,
+        issueDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    const totalInvoices = invoices.length;
+    const paidInvoices = invoices.filter((i) => i.status === 'PAID').length;
+    const pendingInvoices = invoices.filter((i) => i.status === 'SENT' || i.status === 'DRAFT').length;
+
+    // Overdue invoices
+    const now = new Date();
+    const overdueInvoices = invoices.filter(
+      (i) => i.status !== 'PAID' && i.status !== 'CANCELLED' && i.dueDate && new Date(i.dueDate) < now,
+    ).length;
+
+    // Amounts
+    const totalAmount = invoices.reduce((sum, i) => sum + i.total.toNumber(), 0);
+    const paidAmount = invoices
+      .filter((i) => i.status === 'PAID')
+      .reduce((sum, i) => sum + i.total.toNumber(), 0);
+    const pendingAmount = invoices
+      .filter((i) => i.status !== 'PAID' && i.status !== 'CANCELLED')
+      .reduce((sum, i) => sum + i.total.toNumber(), 0);
+
+    const averageInvoiceValue = totalInvoices > 0 ? totalAmount / totalInvoices : 0;
+
+    // Calculate average days to payment
+    const paidInvoicesWithPayment = invoices.filter((i) => i.status === 'PAID' && i.paymentDate);
+    const totalDays = paidInvoicesWithPayment.reduce((sum, i) => {
+      const issueDate = new Date(i.issueDate);
+      const paymentDate = new Date(i.paymentDate!);
+      const days = Math.ceil((paymentDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24));
+      return sum + Math.max(0, days);
+    }, 0);
+    const averageDaysToPayment =
+      paidInvoicesWithPayment.length > 0 ? totalDays / paidInvoicesWithPayment.length : 0;
+
+    // Collection rate
+    const collectionRate = totalInvoices > 0 ? (paidInvoices / totalInvoices) * 100 : 0;
+
+    // Group by status
+    const statusMap = new Map<string, { count: number; amount: number }>();
+    invoices.forEach((i) => {
+      const current = statusMap.get(i.status) || { count: 0, amount: 0 };
+      current.count++;
+      current.amount += i.total.toNumber();
+      statusMap.set(i.status, current);
+    });
+    const invoicesByStatus = Array.from(statusMap.entries()).map(([status, data]) => ({
+      status,
+      ...data,
+    }));
+
+    // Group by month
+    const monthMap = new Map<string, { count: number; amount: number }>();
+    invoices.forEach((i) => {
+      const month = new Date(i.issueDate).toISOString().slice(0, 7);
+      const current = monthMap.get(month) || { count: 0, amount: 0 };
+      current.count++;
+      current.amount += i.total.toNumber();
+      monthMap.set(month, current);
+    });
+    const invoicesByMonth = Array.from(monthMap.entries())
+      .map(([month, data]) => ({ month, ...data }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    return {
+      totalInvoices,
+      paidInvoices,
+      pendingInvoices,
+      overdueInvoices,
+      totalAmount,
+      paidAmount,
+      pendingAmount,
+      averageInvoiceValue,
+      averageDaysToPayment,
+      collectionRate,
+      invoicesByStatus,
+      invoicesByMonth,
+    };
+  }
+
+  /**
+   * Get crypto portfolio analytics
+   * Phase 4 Feature: Portfolio performance
+   */
+  async getCryptoPortfolioAnalytics(
+    companyId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{
+    totalValueEur: number;
+    totalCostBasis: number;
+    unrealizedGainLoss: number;
+    realizedGainLoss: number;
+    performancePercentage: number;
+    holdingsByAsset: Array<{
+      symbol: string;
+      amount: number;
+      valueEur: number;
+      costBasis: number;
+      gainLoss: number;
+      percentage: number;
+    }>;
+    transactionVolume: {
+      buys: number;
+      sells: number;
+      totalVolume: number;
+    };
+    monthlyPerformance: Array<{
+      month: string;
+      valueEur: number;
+      gainLoss: number;
+    }>;
+  }> {
+    // Get portfolio overview
+    const portfolio = await this.getPortfolioOverview(companyId);
+
+    // Get wallets
+    const wallets = await this.prisma.wallet.findMany({
+      where: { companyId },
+      select: { id: true },
+    });
+    const walletIds = wallets.map((w) => w.id);
+
+    // Get transactions in range
+    const transactions = await this.prisma.cryptoTransaction.findMany({
+      where: {
+        walletId: { in: walletIds },
+        blockTimestamp: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    // Calculate realized gains from sales
+    const sells = transactions.filter((t) => t.type === 'TRANSFER_OUT' || t.type === 'SWAP');
+    const realizedGainLoss = sells.reduce((sum, t) => {
+      if (t.realizedGain) {
+        return sum + t.realizedGain.toNumber();
+      }
+      return sum;
+    }, 0);
+
+    // Calculate volumes
+    const buys = transactions.filter(
+      (t) => t.type === 'TRANSFER_IN' || t.type === 'CLAIM_REWARD' || t.type === 'AIRDROP',
+    );
+    const buyVolume = buys.reduce((sum, t) => {
+      const amount = t.amountIn?.toNumber() || 0;
+      const price = t.priceInEur?.toNumber() || 0;
+      return sum + amount * price;
+    }, 0);
+
+    const sellVolume = sells.reduce((sum, t) => {
+      const amount = t.amountOut?.toNumber() || 0;
+      const price = t.priceOutEur?.toNumber() || 0;
+      return sum + amount * price;
+    }, 0);
+
+    // Holdings with mock current prices (in production, fetch real prices)
+    const mockPrices: Record<string, number> = {
+      BTC: 40000,
+      ETH: 2100,
+      USDT: 0.92,
+      USDC: 0.92,
+      SOL: 90,
+      XRP: 0.45,
+      ADA: 0.35,
+      DOT: 5,
+    };
+
+    const holdingsByAsset = portfolio.portfolioByAsset.map((asset) => {
+      const currentPrice = mockPrices[asset.symbol] || 0;
+      const valueEur = asset.amount * currentPrice;
+      const gainLoss = valueEur - asset.costBasis;
+
+      return {
+        symbol: asset.symbol,
+        amount: asset.amount,
+        valueEur,
+        costBasis: asset.costBasis,
+        gainLoss,
+        percentage: asset.percentage,
+      };
+    });
+
+    const totalValueEur = holdingsByAsset.reduce((sum, h) => sum + h.valueEur, 0);
+    const totalCostBasis = portfolio.totalCostBasis;
+    const unrealizedGainLoss = totalValueEur - totalCostBasis;
+    const performancePercentage = totalCostBasis > 0 ? (unrealizedGainLoss / totalCostBasis) * 100 : 0;
+
+    // Monthly performance (simplified)
+    const monthlyPerformance: Array<{ month: string; valueEur: number; gainLoss: number }> = [];
+    const months = this.getMonthsBetween(startDate, endDate);
+
+    for (const month of months) {
+      monthlyPerformance.push({
+        month,
+        valueEur: totalValueEur * (0.9 + Math.random() * 0.2), // Mock variation
+        gainLoss: unrealizedGainLoss * (0.8 + Math.random() * 0.4),
+      });
+    }
+
+    return {
+      totalValueEur,
+      totalCostBasis,
+      unrealizedGainLoss,
+      realizedGainLoss,
+      performancePercentage,
+      holdingsByAsset,
+      transactionVolume: {
+        buys: buyVolume,
+        sells: sellVolume,
+        totalVolume: buyVolume + sellVolume,
+      },
+      monthlyPerformance,
+    };
+  }
+
+  /**
+   * Get complete dashboard summary with all metrics
+   * Phase 4 Feature: Unified dashboard
+   */
+  async getCompleteDashboardSummary(companyId: string): Promise<{
+    overview: {
+      totalRevenue: number;
+      revenueChange: number;
+      activeCustomers: number;
+      pendingInvoices: number;
+      portfolioValue: number;
+    };
+    revenue: any;
+    users: any;
+    invoices: any;
+    crypto: any;
+    recentActivity: Array<{
+      type: string;
+      description: string;
+      timestamp: Date;
+    }>;
+  }> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    // Get all metrics in parallel
+    const [revenue, users, invoices, crypto, dashboardMetrics] = await Promise.all([
+      this.getRevenueMetrics(companyId, startOfMonth, now),
+      this.getUserMetrics(companyId, startOfMonth, now),
+      this.getInvoiceAnalytics(companyId, startOfMonth, now),
+      this.getCryptoPortfolioAnalytics(companyId, startOfYear, now),
+      this.getDashboardMetrics(companyId),
+    ]);
+
+    // Get active customers count
+    const activeCustomers = await this.prisma.contact.count({
+      where: {
+        companyId,
+        isCustomer: true,
+      },
+    });
+
+    return {
+      overview: {
+        totalRevenue: revenue.totalRevenue,
+        revenueChange: revenue.revenueGrowth,
+        activeCustomers,
+        pendingInvoices: invoices.pendingInvoices,
+        portfolioValue: crypto.totalValueEur,
+      },
+      revenue,
+      users,
+      invoices,
+      crypto,
+      recentActivity: [
+        ...dashboardMetrics.recentTransactions.map((t) => ({
+          type: 'transaction',
+          description: `${t.type} ${t.amount} ${t.asset}`,
+          timestamp: t.date,
+        })),
+        ...dashboardMetrics.recentInvoices.map((i) => ({
+          type: 'invoice',
+          description: `Invoice ${i.number} - ${i.customer} - €${i.total}`,
+          timestamp: i.date,
+        })),
+      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+    };
+  }
+
+  /**
+   * Helper: Get months between two dates
+   */
+  private getMonthsBetween(startDate: Date, endDate: Date): string[] {
+    const months: string[] = [];
+    const current = new Date(startDate);
+
+    while (current <= endDate) {
+      months.push(current.toISOString().slice(0, 7));
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    return months;
+  }
 }

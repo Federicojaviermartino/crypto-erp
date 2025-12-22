@@ -1688,3 +1688,72 @@ enum PayoutStatus {
   FAILED       // Payment failed
   CANCELLED    // Cancelled
 }
+
+// ============================================================================
+// CUSTOM REPORTS (Phase 4 - Advanced Analytics)
+// ============================================================================
+
+/// Custom report configuration
+model CustomReport {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+
+  // Report definition
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+
+  // Metrics configuration
+  metrics     String[] // Array of metric types: "revenue", "users", "invoices", "crypto"
+  timeRange   String   @map("time_range") @db.VarChar(20) // "day", "week", "month", "quarter", "year", "custom"
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+
+  // Scheduling (optional)
+  schedule    String?  @db.VarChar(20) // "daily", "weekly", "monthly"
+  recipients  String[] // Email addresses for scheduled reports
+
+  // Report metadata
+  lastGeneratedAt DateTime? @map("last_generated_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@index([companyId, schedule])
+  @@map("custom_reports")
+}
+
+// ============================================================================
+// MULTI-REGION CONFIGURATION (Phase 4)
+// ============================================================================
+
+/// Regional database configuration
+model RegionalConfig {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+
+  // Region identification
+  region       String   @unique @db.VarChar(20) // "eu", "us", "asia"
+  displayName  String   @map("display_name") @db.VarChar(100) // "Europe", "United States", "Asia Pacific"
+
+  // Database configuration
+  primaryHost      String   @map("primary_host") @db.VarChar(255)
+  readReplicaHosts String[] @map("read_replica_hosts")
+
+  // CDN configuration
+  cdnEndpoint  String?  @map("cdn_endpoint") @db.VarChar(255)
+  cdnCacheTtl  Int      @default(3600) @map("cdn_cache_ttl") // Cache TTL in seconds
+
+  // Health status
+  isHealthy    Boolean  @default(true) @map("is_healthy")
+  lastHealthCheck DateTime? @map("last_health_check")
+  avgLatencyMs Int?     @map("avg_latency_ms")
+
+  // Configuration
+  isActive     Boolean  @default(true) @map("is_active")
+  isPrimary    Boolean  @default(false) @map("is_primary")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([region, isActive])
+  @@map("regional_configs")
+}
