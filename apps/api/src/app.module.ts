@@ -58,13 +58,19 @@ import { PartnersModule } from './modules/partners/partners.module.js';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-          password: config.get<string>('REDIS_PASSWORD', undefined),
-          db: config.get<number>('REDIS_DB', 0),
-        },
+      useFactory: (config: ConfigService) => {
+        const redisHost = config.get<string>('REDIS_HOST', 'localhost');
+        const useTls = config.get<string>('REDIS_TLS', 'false') === 'true' ||
+                       redisHost.includes('upstash.io');
+
+        return {
+          connection: {
+            host: redisHost,
+            port: config.get<number>('REDIS_PORT', 6379),
+            password: config.get<string>('REDIS_PASSWORD', undefined),
+            db: config.get<number>('REDIS_DB', 0),
+            ...(useTls && { tls: {} }),
+          },
         defaultJobOptions: {
           removeOnComplete: 100,
           removeOnFail: 500,
@@ -74,7 +80,8 @@ import { PartnersModule } from './modules/partners/partners.module.js';
             delay: 2000,
           },
         },
-      }),
+        };
+      },
     }),
     BullModule.registerQueue(
       { name: 'blockchain-sync' },
