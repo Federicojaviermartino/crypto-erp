@@ -3,6 +3,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import compression from 'compression';
 import * as Sentry from '@sentry/node';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import { AppModule } from './app.module.js';
@@ -47,9 +48,14 @@ async function bootstrap(): Promise<void> {
   // Security headers
   app.use(helmet());
 
+  // Response compression (gzip/deflate)
+  app.use(compression({
+    threshold: 1024, // Only compress responses larger than 1KB
+    level: 6, // Compression level (1-9, 6 is a good balance)
+  }));
+
   // CORS configuration
   const frontendUrl = configService.get<string>('frontendUrl');
-  const nodeEnv = configService.get<string>('nodeEnv');
 
   const allowedOrigins = [
     'http://localhost:4200',
