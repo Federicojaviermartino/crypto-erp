@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/modules/auth/dto/verify-2fa.dto.ts"],"sourcesContent":["import { IsString, IsNotEmpty } from 'class-validator';\n\nexport class Verify2FADto {\n  @IsString()\n  @IsNotEmpty()\n  token: string;\n}\n"],"names":["Verify2FADto"],"mappings":";;;;+BAEaA;;;eAAAA;;;gCAFwB;;;;;;;;;;AAE9B,IAAA,AAAMA,eAAN,MAAMA;AAIb"}

@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/common/dto/index.ts"],"sourcesContent":["export { PaginationDto, paginate } from './pagination.dto.js';\nexport type { PaginatedResponse } from './pagination.dto.js';\n"],"names":["PaginationDto","paginate"],"mappings":";;;;;;;;;;;QAASA;eAAAA,4BAAa;;QAAEC;eAAAA,uBAAQ;;;+BAAQ"}
