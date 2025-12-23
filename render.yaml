@@ -168,11 +168,11 @@ services:
 # Databases
 # ============================================================================
 databases:
-  # PostgreSQL 15
+  # PostgreSQL 16
   # Note: TimescaleDB extension not available on Render's managed PostgreSQL
   # For analytics features, consider external TimescaleDB or use PostgreSQL partitioning
   - name: crypto-erp-db
     region: frankfurt
-    plan: starter
+    plan: basic
     databaseName: crypto_erp
     user: crypto_erp_user
