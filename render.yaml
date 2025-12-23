@@ -1,6 +1,6 @@
 # Render Blueprint for Crypto ERP
 # https://render.com/docs/blueprint-spec
-# Updated: Phase 4B - Simplified for Render compatibility
+# Cost-optimized: API only ($7/month) + External DB (Supabase/Neon free)
 
 services:
   # ============================================================================
@@ -23,17 +23,12 @@ services:
       - key: API_PREFIX
         value: api/v1
 
-      # Database (PostgreSQL)
+      # Database (External - Supabase/Neon free tier)
+      # Add manually after creating DB in Supabase or Neon
       - key: DATABASE_URL
-        fromDatabase:
-          name: crypto-erp-db
-          property: connectionString
-      - key: DATABASE_PRIMARY_REGION
-        value: eu
+        sync: false
 
-      # Redis (must be configured manually via Upstash)
-      # After deployment, add these variables manually:
-      # REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB
+      # Redis (Upstash free tier)
       - key: REDIS_HOST
         sync: false
       - key: REDIS_PORT
@@ -71,34 +66,12 @@ services:
       - key: COVALENT_API_KEY
         sync: false
 
-      # QuickBooks Integration
-      - key: QUICKBOOKS_CLIENT_ID
-        sync: false
-      - key: QUICKBOOKS_CLIENT_SECRET
-        sync: false
-
-      # Xero Integration
-      - key: XERO_CLIENT_ID
-        sync: false
-      - key: XERO_CLIENT_SECRET
-        sync: false
-
       # Error Tracking (Sentry)
       - key: SENTRY_DSN
         sync: false
 
-      # Email (optional)
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        sync: false
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-
   # ============================================================================
-  # Angular Frontend (Static Site)
+  # Angular Frontend (Static Site) - FREE
   # ============================================================================
   - type: web
     name: crypto-erp-web
@@ -129,16 +102,4 @@ services:
         name: Referrer-Policy
         value: strict-origin-when-cross-origin
 
-# ============================================================================
-# Databases
-# ============================================================================
-databases:
-  # PostgreSQL 16
-  # Note: TimescaleDB extension not available on Render's managed PostgreSQL
-  # For analytics features, consider external TimescaleDB or use PostgreSQL partitioning
-  - name: crypto-erp-db
-    region: frankfurt
-    plan: basic-256mb
-    diskSizeGB: 15
-    databaseName: crypto_erp
-    user: crypto_erp_user
+# No managed database - using external free tier (Supabase/Neon)
