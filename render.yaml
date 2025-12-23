@@ -1,17 +1,14 @@
 # Render Blueprint for Crypto ERP
-# https://render.com/docs/blueprint-spec
-# Cost-optimized: API only ($7/month) + External DB (Supabase/Neon free)
+# Single service: NestJS API + Angular Frontend
+# Cost: $7/month (Starter plan)
 
 services:
-  # ============================================================================
-  # NestJS API Backend (Main Application)
-  # ============================================================================
   - type: web
-    name: crypto-erp-api
+    name: crypto-erp
     env: node
     region: frankfurt
     plan: starter
-    buildCommand: npm ci && npm run build:api && npm run db:migrate:prod
+    buildCommand: npm ci && npm run build:prod && npm run db:migrate:prod
     startCommand: npm run start:api:prod
     healthCheckPath: /api/v1/health/liveness
     envVars:
@@ -26,8 +23,7 @@ services:
       - key: API_PREFIX
         value: api/v1
 
-      # Database (External - Supabase/Neon free tier)
-      # Add manually after creating DB in Supabase or Neon
+      # Database (External - Supabase free tier)
       - key: DATABASE_URL
         sync: false
 
@@ -55,10 +51,6 @@ services:
       - key: ENCRYPTION_KEY
         generateValue: true
 
-      # CORS
-      - key: CORS_ORIGINS
-        sync: false
-
       # AI (OpenAI for chat and OCR)
       - key: OPENAI_API_KEY
         sync: false
@@ -73,39 +65,5 @@ services:
       - key: SENTRY_DSN
         sync: false
 
-  # ============================================================================
-  # Angular Frontend (Static Site) - FREE
-  # ============================================================================
-  - type: web
-    name: crypto-erp-web
-    env: static
-    buildCommand: npm ci && npm run build:web
-    staticPublishPath: ./apps/web/dist/web/browser
-    envVars:
-      - key: NODE_VERSION
-        value: 20.18.0
-    routes:
-      # Proxy API requests to backend
-      - type: rewrite
-        source: /api/*
-        destination: https://crypto-erp-api.onrender.com/api/*
-      # SPA fallback
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      # Security headers
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: X-XSS-Protection
-        value: 1; mode=block
-      - path: /*
-        name: Referrer-Policy
-        value: strict-origin-when-cross-origin
-
-# No managed database - using external free tier (Supabase/Neon)
+# No managed database - using Supabase free tier
+# No separate frontend - served by NestJS

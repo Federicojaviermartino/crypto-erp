@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { join } from 'path';
 import { PrismaModule } from '@crypto-erp/database';
 import configuration from './config/configuration.js';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter.js';
@@ -33,6 +35,16 @@ import { PartnersModule } from './modules/partners/partners.module.js';
       isGlobal: true,
       load: [configuration],
       envFilePath: ['.env.local', '.env'],
+    }),
+
+    // Serve Angular frontend (static files)
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'client'),
+      exclude: ['/api/(.*)'],
+      serveStaticOptions: {
+        fallthrough: true,
+        index: 'index.html',
+      },
     }),
 
     // Rate limiting
