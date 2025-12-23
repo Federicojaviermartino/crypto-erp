@@ -11,7 +11,7 @@ services:
     env: node
     region: frankfurt
     plan: starter
-    buildCommand: npm ci && npm run build:api
+    buildCommand: npm ci && npm run build:api && npm run db:migrate:prod
     startCommand: npm run start:api:prod
     healthCheckPath: /api/v1/health/liveness
     envVars:
@@ -81,6 +81,10 @@ services:
       - key: XERO_CLIENT_ID
         sync: false
       - key: XERO_CLIENT_SECRET
+        sync: false
+
+      # Error Tracking (Sentry)
+      - key: SENTRY_DSN
         sync: false
 
       # Email (optional)
