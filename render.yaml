@@ -15,6 +15,9 @@ services:
     startCommand: npm run start:api:prod
     healthCheckPath: /api/v1/health/liveness
     envVars:
+      # Node version
+      - key: NODE_VERSION
+        value: 20.18.0
       # Environment
       - key: NODE_ENV
         value: production
@@ -78,6 +81,9 @@ services:
     env: static
     buildCommand: npm ci && npm run build:web
     staticPublishPath: ./apps/web/dist/web/browser
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
     routes:
       # Proxy API requests to backend
       - type: rewrite
