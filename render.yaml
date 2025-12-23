@@ -173,6 +173,7 @@ databases:
   # For analytics features, consider external TimescaleDB or use PostgreSQL partitioning
   - name: crypto-erp-db
     region: frankfurt
-    plan: basic
+    plan: basic-256mb
+    diskSizeGB: 15
     databaseName: crypto_erp
     user: crypto_erp_user
