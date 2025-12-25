@@ -8,7 +8,7 @@ services:
     env: node
     region: frankfurt
     plan: starter
-    buildCommand: npm ci && npm run build:prod
+    buildCommand: npm ci --include=dev && npm run build:prod
     startCommand: npm run start:api:prod
     healthCheckPath: /api/v1/health/liveness
     envVars:
