@@ -39,8 +39,7 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "ollama:pull": "docker exec crypto-erp-ollama ollama pull llama3.1:8b",
-    "prepare": "husky install"
-  },
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {}\""  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@bull-board/api": "^5.21.0",
