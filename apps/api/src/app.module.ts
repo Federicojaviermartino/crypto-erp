@@ -39,7 +39,7 @@ import { PartnersModule } from './modules/partners/partners.module.js';
 
     // Serve Angular frontend (static files)
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'client'),
+      rootPath: join(__dirname, 'client'),
       exclude: ['/api/(.*)'],
       serveStaticOptions: {
         fallthrough: true,
