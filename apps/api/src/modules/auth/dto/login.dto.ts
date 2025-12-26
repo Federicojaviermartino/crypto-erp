@@ -14,4 +14,9 @@ export class LoginDto {
   @IsOptional()
   @IsString()
   twoFactorToken?: string;
+
+    @ApiProperty({ example: 'client', required: false, description: 'User role type' })
+    @IsOptional()
+    @IsString()
+    role?: string;
 }
