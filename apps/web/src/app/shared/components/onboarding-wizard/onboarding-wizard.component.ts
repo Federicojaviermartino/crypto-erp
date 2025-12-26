@@ -13,10 +13,10 @@ import { OnboardingService, OnboardingStep } from '@core/services/onboarding.ser
         <!-- Header -->
         <div class="wizard-header">
           <div class="wizard-title">
-            <h3>Guía de Inicio</h3>
-            <span class="wizard-progress">{{ onboarding.completionPercentage() }}% completado</span>
+            <h3>Getting Started Guide</h3>
+            <span class="wizard-progress">{{ onboarding.completionPercentage() }}% complete</span>
           </div>
-          <button class="btn-dismiss" (click)="dismissOnboarding()" title="Cerrar guía">
+          <button class="btn-dismiss" (click)="dismissOnboarding()" title="Close guide">
             ✕
           </button>
         </div>
@@ -55,22 +55,22 @@ import { OnboardingService, OnboardingStep } from '@core/services/onboarding.ser
                     [routerLink]="step.path"
                     (click)="navigateToStep(step)"
                   >
-                    {{ step.action || 'Ir' }}
+                    {{ step.action || 'Go' }}
                   </button>
                   <button
                     class="btn btn-sm btn-ghost"
                     (click)="skipStep(step.id)"
                   >
-                    Omitir
+                    Skip
                   </button>
                 } @else if (step.isCompleted) {
-                  <span class="badge badge-success">Completado</span>
+                  <span class="badge badge-success">Completed</span>
                 } @else if (step.isSkipped) {
                   <button
                     class="btn btn-sm btn-ghost"
                     (click)="undoSkip(step.id)"
                   >
-                    Deshacer
+                    Undo
                   </button>
                 }
               </div>
@@ -83,14 +83,14 @@ import { OnboardingService, OnboardingStep } from '@core/services/onboarding.ser
           @if (onboarding.completionPercentage() === 100) {
             <div class="completion-message">
               <span class="celebration-icon">🎉</span>
-              <p>¡Felicitaciones! Has completado la configuración inicial.</p>
+              <p>Congratulations! You've completed the initial setup.</p>
               <button class="btn btn-primary" (click)="completeOnboarding()">
-                Finalizar guía
+                Finish guide
               </button>
             </div>
           } @else {
             <button class="btn btn-link" (click)="dismissOnboarding()">
-              Cerrar guía (puedes retomarla después)
+              Close guide (you can resume it later)
             </button>
           }
         </div>
@@ -360,7 +360,7 @@ export class OnboardingWizardComponent implements OnInit {
   }
 
   dismissOnboarding(): void {
-    if (confirm('¿Estás seguro de que quieres cerrar la guía? Podrás retomarla desde Configuración.')) {
+    if (confirm('Are you sure you want to close the guide? You can resume it from Settings.')) {
       this.onboarding.dismissOnboarding().subscribe({
         next: () => {
           // Optionally reload or navigate
@@ -372,7 +372,7 @@ export class OnboardingWizardComponent implements OnInit {
   completeOnboarding(): void {
     this.onboarding.dismissOnboarding().subscribe({
       next: () => {
-        alert('¡Guía completada! Ya puedes usar todas las funcionalidades.');
+        alert('Guide completed! You can now use all features.');
       },
     });
   }

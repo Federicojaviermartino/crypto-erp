@@ -9,40 +9,40 @@ import { RouterLink } from '@angular/router';
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Configuración</h1>
-        <p class="text-muted">Gestiona tu cuenta y empresa</p>
+        <h1>Settings</h1>
+        <p class="text-muted">Manage your account and company</p>
       </header>
 
       <div class="settings-grid">
         <a routerLink="/settings/company" class="settings-card">
           <span class="icon">🏢</span>
           <div class="info">
-            <h3>Empresa</h3>
-            <p>Datos fiscales, logo y configuración general</p>
+            <h3>Company</h3>
+            <p>Tax details, logo and general settings</p>
           </div>
         </a>
 
         <a routerLink="/settings/profile" class="settings-card">
           <span class="icon">👤</span>
           <div class="info">
-            <h3>Perfil</h3>
-            <p>Tu información personal y contraseña</p>
+            <h3>Profile</h3>
+            <p>Your personal information and password</p>
           </div>
         </a>
 
         <a routerLink="/invoicing/series" class="settings-card">
           <span class="icon">🔢</span>
           <div class="info">
-            <h3>Series de Facturación</h3>
-            <p>Configurar numeración de facturas</p>
+            <h3>Invoice Series</h3>
+            <p>Configure invoice numbering</p>
           </div>
         </a>
 
         <a routerLink="/accounting/fiscal-years" class="settings-card">
           <span class="icon">📅</span>
           <div class="info">
-            <h3>Años Fiscales</h3>
-            <p>Gestionar ejercicios contables</p>
+            <h3>Fiscal Years</h3>
+            <p>Manage accounting periods</p>
           </div>
         </a>
       </div>

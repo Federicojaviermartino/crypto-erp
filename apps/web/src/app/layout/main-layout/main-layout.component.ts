@@ -53,7 +53,7 @@ interface NavItem {
               <span class="user-email">{{ authService.currentUser()?.email }}</span>
             </div>
           }
-          <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+          <button class="logout-btn" (click)="logout()" title="Sign Out">
             🚪
           </button>
         </div>
@@ -237,11 +237,11 @@ export class MainLayoutComponent {
 
   navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'Contabilidad', path: '/accounting', icon: '📒' },
-    { label: 'Facturación', path: '/invoicing', icon: '🧾' },
+    { label: 'Accounting', path: '/accounting', icon: '📒' },
+    { label: 'Invoicing', path: '/invoicing', icon: '🧾' },
     { label: 'Crypto', path: '/crypto', icon: '₿' },
-    { label: 'Asistente IA', path: '/ai', icon: '🤖' },
-    { label: 'Configuración', path: '/settings', icon: '⚙️' },
+    { label: 'AI Assistant', path: '/ai', icon: '🤖' },
+    { label: 'Settings', path: '/settings', icon: '⚙️' },
   ];
 
   constructor(public authService: AuthService) {}

@@ -22,8 +22,8 @@ interface ChatMessage {
         <div class="header-info">
           <span class="ai-avatar">🤖</span>
           <div>
-            <h2>Asistente Contable IA</h2>
-            <p class="text-muted">Experto en PGC, Verifactu y Crypto</p>
+            <h2>AI Accounting Assistant</h2>
+            <p class="text-muted">Expert in accounting, tax compliance and Crypto</p>
           </div>
         </div>
         <div class="header-actions">
@@ -35,7 +35,7 @@ interface ChatMessage {
             {{ language() === 'es' ? '🇪🇸 ES' : '🇬🇧 EN' }}
           </button>
           <button class="btn btn-sm btn-secondary" (click)="clearChat()">
-            Limpiar Chat
+            Clear Chat
           </button>
         </div>
       </header>
@@ -44,20 +44,20 @@ interface ChatMessage {
         @if (messages().length === 0) {
           <div class="welcome-message">
             <span class="welcome-icon">💬</span>
-            <h3>¡Hola! Soy tu asistente contable</h3>
-            <p>Puedo ayudarte con:</p>
+            <h3>Hello! I'm your accounting assistant</h3>
+            <p>I can help you with:</p>
             <div class="suggestions">
-              <button class="suggestion" (click)="sendSuggestion('¿Cómo registro una factura de compra?')">
-                📄 Registrar facturas
+              <button class="suggestion" (click)="sendSuggestion('How do I record a purchase invoice?')">
+                📄 Record invoices
               </button>
-              <button class="suggestion" (click)="sendSuggestion('¿Cómo funciona el cálculo FIFO en crypto?')">
-                💰 Fiscalidad crypto
+              <button class="suggestion" (click)="sendSuggestion('How does FIFO calculation work for crypto?')">
+                💰 Crypto taxation
               </button>
-              <button class="suggestion" (click)="sendSuggestion('¿Qué es Verifactu y cómo afecta a mi empresa?')">
+              <button class="suggestion" (click)="sendSuggestion('What is Verifactu and how does it affect my company?')">
                 📋 Verifactu
               </button>
-              <button class="suggestion" (click)="sendSuggestion('¿Cómo cierro el ejercicio fiscal?')">
-                📊 Cierre fiscal
+              <button class="suggestion" (click)="sendSuggestion('How do I close the fiscal year?')">
+                📊 Year-end closing
               </button>
             </div>
           </div>
@@ -92,7 +92,7 @@ interface ChatMessage {
       <!-- Suggested Follow-ups -->
       @if (suggestedFollowUps().length > 0 && !loading()) {
         <div class="suggested-questions">
-          <p class="suggested-label">Preguntas sugeridas:</p>
+          <p class="suggested-label">Suggested questions:</p>
           <div class="suggestions-grid">
             @for (suggestion of suggestedFollowUps(); track suggestion) {
               <button class="suggestion-btn" (click)="useSuggestion(suggestion)">
@@ -125,7 +125,7 @@ interface ChatMessage {
             class="attach-btn"
             (click)="fileInput.click()"
             [disabled]="loading()"
-            title="Adjuntar archivo">
+            title="Attach file">
             📎
           </button>
 
@@ -133,7 +133,7 @@ interface ChatMessage {
             #inputField
             [(ngModel)]="userInput"
             (keydown.enter)="onEnterPress($any($event))"
-            placeholder="Escribe tu pregunta..."
+            placeholder="Type your question..."
             rows="1"
             [disabled]="loading()"
           ></textarea>
@@ -150,7 +150,7 @@ interface ChatMessage {
             }
           </button>
         </div>
-        <p class="input-hint">Enter para enviar, Shift+Enter para nueva línea • Adjunta imágenes o PDFs</p>
+        <p class="input-hint">Enter to send, Shift+Enter for new line • Attach images or PDFs</p>
       </div>
     </div>
   `,

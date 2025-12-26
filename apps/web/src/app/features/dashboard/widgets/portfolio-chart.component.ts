@@ -18,24 +18,24 @@ interface PortfolioAsset {
   template: `
     <div class="portfolio-chart-widget">
       <div class="widget-header">
-        <h3>Distribución de Portfolio</h3>
+        <h3>Portfolio Distribution</h3>
         <span class="total-value">{{ totalValue() | number:'1.2-2' }} EUR</span>
       </div>
 
       @if (loading()) {
         <div class="loading-state">
           <span class="spinner"></span>
-          <p>Cargando portfolio...</p>
+          <p>Loading portfolio...</p>
         </div>
       } @else if (error()) {
         <div class="error-state">
-          <p>❌ Error al cargar datos</p>
-          <button class="btn btn-sm btn-secondary" (click)="loadData()">Reintentar</button>
+          <p>❌ Error loading data</p>
+          <button class="btn btn-sm btn-secondary" (click)="loadData()">Retry</button>
         </div>
       } @else if (portfolioData().length === 0) {
         <div class="empty-state">
-          <p>📊 No hay activos crypto registrados</p>
-          <small>Agrega tu primera wallet para ver la distribución</small>
+          <p>📊 No crypto assets registered</p>
+          <small>Add your first wallet to see the distribution</small>
         </div>
       } @else {
         <div class="chart-container">

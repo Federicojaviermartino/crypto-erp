@@ -20,11 +20,11 @@ interface Account {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Plan de Cuentas</h1>
-          <p class="text-muted">Gestiona el plan general contable</p>
+          <h1>Chart of Accounts</h1>
+          <p class="text-muted">Manage your general ledger accounts</p>
         </div>
         <button class="btn btn-primary" (click)="showCreateModal = true">
-          + Nueva Cuenta
+          + New Account
         </button>
       </header>
 
@@ -34,18 +34,18 @@ interface Account {
           <input
             type="text"
             class="form-input"
-            placeholder="Buscar por código o nombre..."
+            placeholder="Search by code or name..."
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearch()"
             style="max-width: 300px;"
           />
           <select class="form-select" [(ngModel)]="filterType" (ngModelChange)="loadAccounts()" style="max-width: 200px;">
-            <option value="">Todos los tipos</option>
-            <option value="ASSET">Activo</option>
-            <option value="LIABILITY">Pasivo</option>
-            <option value="EQUITY">Patrimonio</option>
-            <option value="INCOME">Ingreso</option>
-            <option value="EXPENSE">Gasto</option>
+            <option value="">All types</option>
+            <option value="ASSET">Asset</option>
+            <option value="LIABILITY">Liability</option>
+            <option value="EQUITY">Equity</option>
+            <option value="INCOME">Income</option>
+            <option value="EXPENSE">Expense</option>
           </select>
         </div>
       </div>
@@ -61,11 +61,11 @@ interface Account {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Tipo</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -80,19 +80,19 @@ interface Account {
                     </td>
                     <td>
                       <span class="badge" [class]="account.isActive ? 'badge-success' : 'badge-secondary'">
-                        {{ account.isActive ? 'Activa' : 'Inactiva' }}
+                        {{ account.isActive ? 'Active' : 'Inactive' }}
                       </span>
                     </td>
                     <td>
                       <button class="btn btn-sm btn-secondary" (click)="editAccount(account)">
-                        Editar
+                        Edit
                       </button>
                     </td>
                   </tr>
                 } @empty {
                   <tr>
                     <td colspan="5" class="text-center text-muted p-lg">
-                      No se encontraron cuentas
+                      No accounts found
                     </td>
                   </tr>
                 }
@@ -176,11 +176,11 @@ export class AccountsListComponent implements OnInit {
 
   getTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      ASSET: 'Activo',
-      LIABILITY: 'Pasivo',
-      EQUITY: 'Patrimonio',
-      INCOME: 'Ingreso',
-      EXPENSE: 'Gasto',
+      ASSET: 'Asset',
+      LIABILITY: 'Liability',
+      EQUITY: 'Equity',
+      INCOME: 'Income',
+      EXPENSE: 'Expense',
     };
     return labels[type] || type;
   }

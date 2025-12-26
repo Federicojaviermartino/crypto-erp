@@ -18,29 +18,29 @@ interface Insight {
   template: `
     <div class="insights-widget">
       <div class="widget-header">
-        <h3>💡 Recomendaciones IA</h3>
+        <h3>💡 AI Recommendations</h3>
         <button
           class="refresh-btn"
           (click)="loadInsights()"
           [disabled]="loading()">
-          🔄 {{ loading() ? 'Generando...' : 'Actualizar' }}
+          🔄 {{ loading() ? 'Generating...' : 'Refresh' }}
         </button>
       </div>
 
       @if (loading()) {
         <div class="loading-state">
           <span class="spinner"></span>
-          <p>Analizando tus finanzas con IA...</p>
+          <p>Analyzing your finances with AI...</p>
         </div>
       } @else if (error()) {
         <div class="error-state">
-          <p>❌ Error al generar insights</p>
-          <button class="btn btn-sm btn-secondary" (click)="loadInsights()">Reintentar</button>
+          <p>❌ Error generating insights</p>
+          <button class="btn btn-sm btn-secondary" (click)="loadInsights()">Retry</button>
         </div>
       } @else if (insights().length === 0) {
         <div class="empty-state">
-          <p>✅ Todo está en orden</p>
-          <small>No hay recomendaciones en este momento</small>
+          <p>✅ All good</p>
+          <small>No recommendations at this time</small>
         </div>
       } @else {
         <div class="insights-list">
@@ -56,7 +56,7 @@ interface Insight {
                   {{ getCategoryLabel(insight.category) }}
                 </span>
                 @if (insight.priority === 'high') {
-                  <span class="priority-badge">⚠️ Alta</span>
+                  <span class="priority-badge">⚠️ High</span>
                 }
               </div>
               <p class="insight-message">{{ insight.message }}</p>
@@ -280,10 +280,10 @@ export class AiInsightsComponent implements OnInit {
 
   getCategoryLabel(category: string): string {
     const labels: Record<string, string> = {
-      tax: 'Fiscal',
+      tax: 'Tax',
       crypto: 'Crypto',
-      accounting: 'Contabilidad',
-      optimization: 'Optimización',
+      accounting: 'Accounting',
+      optimization: 'Optimization',
     };
     return labels[category] || category;
   }

@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsOptional } from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -15,8 +15,9 @@ export class LoginDto {
   @IsString()
   twoFactorToken?: string;
 
-    @ApiProperty({ example: 'client', required: false, description: 'User role type' })
-    @IsOptional()
-    @IsString()
-    role?: string;
+  @ApiProperty({ example: 'client', required: false, description: 'User role for login' })
+  @IsOptional()
+  @IsString()
+  @IsIn(['client', 'admin'])
+  role?: string;
 }

@@ -33,7 +33,7 @@ const CHAIN_NAMES: Record<string, string> = {
 };
 
 const WALLET_TYPES: Record<string, string> = {
-  EXTERNAL: 'Externa',
+  EXTERNAL: 'External',
   EXCHANGE: 'Exchange',
   DEFI: 'DeFi',
   COLD: 'Cold Storage',
@@ -47,18 +47,18 @@ const WALLET_TYPES: Record<string, string> = {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Wallets Blockchain</h1>
-          <p class="text-muted">Gestiona tus wallets y sincroniza transacciones</p>
+          <h1>Blockchain Wallets</h1>
+          <p class="text-muted">Manage your wallets and sync transactions</p>
         </div>
         <div class="header-actions">
           <button class="btn btn-secondary" (click)="syncAllWallets()" [disabled]="syncingAll()">
             @if (syncingAll()) {
               <span class="spinner-sm"></span>
             }
-            Sincronizar Todas
+            Sync All
           </button>
           <button class="btn btn-primary" (click)="showModal = true">
-            + Agregar Wallet
+            + Add Wallet
           </button>
         </div>
       </header>
@@ -81,28 +81,28 @@ const WALLET_TYPES: Record<string, string> = {
                 <div class="wallet-status">
                   @if (wallet.syncStatus === 'SYNCING') {
                     <span class="status-badge syncing">
-                      <span class="spinner-xs"></span> Sincronizando
+                      <span class="spinner-xs"></span> Syncing
                     </span>
                   } @else if (wallet.syncStatus === 'SYNCED') {
-                    <span class="status-badge synced">Sincronizado</span>
+                    <span class="status-badge synced">Synced</span>
                   } @else if (wallet.syncStatus === 'ERROR') {
                     <span class="status-badge error" [title]="wallet.syncError || ''">Error</span>
                   } @else {
-                    <span class="status-badge pending">Pendiente</span>
+                    <span class="status-badge pending">Pending</span>
                   }
                 </div>
               </div>
 
               <div class="wallet-body">
-                <h3 class="wallet-label">{{ wallet.label || 'Sin nombre' }}</h3>
+                <h3 class="wallet-label">{{ wallet.label || 'Unnamed' }}</h3>
                 <p class="wallet-address" [title]="wallet.address">
                   {{ truncateAddress(wallet.address) }}
-                  <button class="copy-btn" (click)="copyAddress(wallet.address)">Copiar</button>
+                  <button class="copy-btn" (click)="copyAddress(wallet.address)">Copy</button>
                 </p>
 
                 @if (wallet.lastSyncAt) {
                   <p class="wallet-sync-time">
-                    Ultima sync: {{ wallet.lastSyncAt | date:'dd/MM/yyyy HH:mm' }}
+                    Last sync: {{ wallet.lastSyncAt | date:'dd/MM/yyyy HH:mm' }}
                   </p>
                 }
               </div>
@@ -113,26 +113,26 @@ const WALLET_TYPES: Record<string, string> = {
                   (click)="syncWallet(wallet)"
                   [disabled]="wallet.syncStatus === 'SYNCING'"
                 >
-                  Sincronizar
+                  Sync
                 </button>
                 <button
                   class="btn btn-sm btn-secondary"
                   (click)="viewBalances(wallet)"
                 >
-                  Ver Balances
+                  View Balances
                 </button>
                 <button class="btn btn-sm btn-secondary" (click)="editWallet(wallet)">
-                  Editar
+                  Edit
                 </button>
               </div>
             </div>
           } @empty {
             <div class="empty-state">
               <span class="empty-icon">+</span>
-              <h3>No hay wallets configuradas</h3>
-              <p>Agrega tu primera wallet para comenzar a sincronizar transacciones</p>
+              <h3>No wallets configured</h3>
+              <p>Add your first wallet to start syncing transactions</p>
               <button class="btn btn-primary" (click)="showModal = true">
-                Agregar Wallet
+                Add Wallet
               </button>
             </div>
           }
@@ -144,12 +144,12 @@ const WALLET_TYPES: Record<string, string> = {
         <div class="modal-backdrop" (click)="closeModal()">
           <div class="modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3>{{ editingWallet ? 'Editar' : 'Agregar' }} Wallet</h3>
+              <h3>{{ editingWallet ? 'Edit' : 'Add' }} Wallet</h3>
               <button class="close-btn" (click)="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Direccion *</label>
+                <label class="form-label">Address *</label>
                 <input
                   type="text"
                   class="form-input"
@@ -162,7 +162,7 @@ const WALLET_TYPES: Record<string, string> = {
                 <div class="form-group">
                   <label class="form-label">Blockchain *</label>
                   <select class="form-select" [(ngModel)]="walletForm.chain" [disabled]="!!editingWallet">
-                    <option value="">Seleccionar</option>
+                    <option value="">Select</option>
                     <option value="ethereum">Ethereum</option>
                     <option value="polygon">Polygon</option>
                     <option value="bsc">BNB Chain</option>
@@ -173,9 +173,9 @@ const WALLET_TYPES: Record<string, string> = {
                   </select>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Tipo</label>
+                  <label class="form-label">Type</label>
                   <select class="form-select" [(ngModel)]="walletForm.type">
-                    <option value="EXTERNAL">Externa</option>
+                    <option value="EXTERNAL">External</option>
                     <option value="EXCHANGE">Exchange</option>
                     <option value="DEFI">DeFi</option>
                     <option value="COLD">Cold Storage</option>
@@ -183,32 +183,32 @@ const WALLET_TYPES: Record<string, string> = {
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Etiqueta</label>
+                <label class="form-label">Label</label>
                 <input
                   type="text"
                   class="form-input"
                   [(ngModel)]="walletForm.label"
-                  placeholder="Mi Wallet Principal"
+                  placeholder="My Main Wallet"
                 />
               </div>
               <div class="form-group">
-                <label class="form-label">Codigo Contable</label>
+                <label class="form-label">Account Code</label>
                 <input
                   type="text"
                   class="form-input"
                   [(ngModel)]="walletForm.accountCode"
                   placeholder="5700001"
                 />
-                <small class="form-hint">Cuenta contable para asientos automaticos</small>
+                <small class="form-hint">Accounting code for automatic journal entries</small>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
               <button class="btn btn-primary" (click)="saveWallet()" [disabled]="saving()">
                 @if (saving()) {
                   <span class="spinner-sm"></span>
                 }
-                {{ editingWallet ? 'Guardar' : 'Agregar' }}
+                {{ editingWallet ? 'Save' : 'Add' }}
               </button>
             </div>
           </div>
@@ -254,7 +254,7 @@ const WALLET_TYPES: Record<string, string> = {
                     } @empty {
                       <tr>
                         <td colspan="3" class="text-center text-muted p-lg">
-                          No hay balances disponibles
+                          No balances available
                         </td>
                       </tr>
                     }

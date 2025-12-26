@@ -38,7 +38,7 @@ interface QuickAction {
     <div class="dashboard">
       <header class="page-header">
         <h1>Dashboard</h1>
-        <p class="welcome">Bienvenido, {{ authService.currentUser()?.firstName }}</p>
+        <p class="welcome">Welcome back, {{ authService.currentUser()?.firstName }}</p>
       </header>
 
       <!-- Onboarding Wizard -->
@@ -60,7 +60,7 @@ interface QuickAction {
           <div class="stat-icon" style="background: #dbeafe;">📒</div>
           <div class="stat-info">
             <h3>{{ stats().totalAccounts }}</h3>
-            <p>Cuentas Contables</p>
+            <p>Accounts</p>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ interface QuickAction {
           <div class="stat-icon" style="background: #dcfce7;">🧾</div>
           <div class="stat-info">
             <h3>{{ stats().totalInvoices }}</h3>
-            <p>Facturas Totales</p>
+            <p>Total Invoices</p>
           </div>
         </div>
 
@@ -76,7 +76,7 @@ interface QuickAction {
           <div class="stat-icon" style="background: #fef3c7;">⏳</div>
           <div class="stat-info">
             <h3>{{ stats().pendingInvoices }}</h3>
-            <p>Facturas Pendientes</p>
+            <p>Pending Invoices</p>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ interface QuickAction {
           <div class="stat-icon" style="background: #f3e8ff;">₿</div>
           <div class="stat-info">
             <h3>{{ stats().cryptoAssets }}</h3>
-            <p>Activos Crypto</p>
+            <p>Crypto Assets</p>
           </div>
         </div>
       </section>
@@ -236,10 +236,10 @@ export class DashboardComponent implements OnInit {
   });
 
   quickActions: QuickAction[] = [
-    { label: 'Nueva Factura', path: '/invoicing/invoices/new', icon: '➕', color: '#22c55e' },
-    { label: 'Nuevo Asiento', path: '/accounting/journal-entries/new', icon: '📝', color: '#3b82f6' },
-    { label: 'Nueva Transacción', path: '/crypto/transactions/new', icon: '₿', color: '#f59e0b' },
-    { label: 'Ver Reportes', path: '/accounting/reports', icon: '📊', color: '#8b5cf6' },
+    { label: 'New Invoice', path: '/invoicing/invoices/new', icon: '➕', color: '#22c55e' },
+    { label: 'New Entry', path: '/accounting/journal-entries/new', icon: '📝', color: '#3b82f6' },
+    { label: 'New Transaction', path: '/crypto/transactions/new', icon: '₿', color: '#f59e0b' },
+    { label: 'View Reports', path: '/accounting/reports', icon: '📊', color: '#8b5cf6' },
   ];
 
   constructor(

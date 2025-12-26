@@ -18,7 +18,7 @@ interface MonthlyData {
   template: `
     <div class="trends-widget">
       <div class="widget-header">
-        <h3>Tendencias Mensuales</h3>
+        <h3>Monthly Trends</h3>
         <div class="period-selector">
           <button
             *ngFor="let period of periods"
@@ -33,17 +33,17 @@ interface MonthlyData {
       @if (loading()) {
         <div class="loading-state">
           <span class="spinner"></span>
-          <p>Cargando tendencias...</p>
+          <p>Loading trends...</p>
         </div>
       } @else if (error()) {
         <div class="error-state">
-          <p>❌ Error al cargar datos</p>
-          <button class="btn btn-sm btn-secondary" (click)="loadData()">Reintentar</button>
+          <p>❌ Error loading data</p>
+          <button class="btn btn-sm btn-secondary" (click)="loadData()">Retry</button>
         </div>
       } @else if (monthlyData().length === 0) {
         <div class="empty-state">
-          <p>📈 No hay datos para mostrar</p>
-          <small>Registra facturas y transacciones para ver tendencias</small>
+          <p>📈 No data to display</p>
+          <small>Record invoices and transactions to see trends</small>
         </div>
       } @else {
         <div class="chart-container">
@@ -57,15 +57,15 @@ interface MonthlyData {
 
         <div class="summary-stats">
           <div class="summary-item">
-            <span class="summary-label">Ingresos Totales</span>
+            <span class="summary-label">Total Income</span>
             <span class="summary-value income">{{ getTotalIncome() | number:'1.2-2' }} EUR</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Gastos Totales</span>
+            <span class="summary-label">Total Expenses</span>
             <span class="summary-value expense">{{ getTotalExpenses() | number:'1.2-2' }} EUR</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">Ganancias Crypto</span>
+            <span class="summary-label">Crypto Gains</span>
             <span class="summary-value crypto">{{ getTotalCryptoGains() | number:'1.2-2' }} EUR</span>
           </div>
         </div>
@@ -273,7 +273,7 @@ export class MonthlyTrendsComponent implements OnInit {
           labels: data.monthlyTrends.map(d => d.month),
           datasets: [
             {
-              label: 'Ingresos',
+              label: 'Income',
               data: data.monthlyTrends.map(d => d.income),
               borderColor: '#22c55e',
               backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -281,7 +281,7 @@ export class MonthlyTrendsComponent implements OnInit {
               fill: true,
             },
             {
-              label: 'Gastos',
+              label: 'Expenses',
               data: data.monthlyTrends.map(d => d.expenses),
               borderColor: '#ef4444',
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -289,7 +289,7 @@ export class MonthlyTrendsComponent implements OnInit {
               fill: true,
             },
             {
-              label: 'Ganancias Crypto',
+              label: 'Crypto Gains',
               data: data.monthlyTrends.map(d => d.cryptoGains),
               borderColor: '#f59e0b',
               backgroundColor: 'rgba(245, 158, 11, 0.1)',

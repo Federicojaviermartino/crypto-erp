@@ -12,12 +12,28 @@ import { AuthService } from '@core/services/auth.service';
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
+          <div class="logo-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="24" height="24" rx="6" fill="url(#gradient)"/>
+              <path d="M12 6L18 12L12 18L6 12L12 6Z" fill="white" fill-opacity="0.9"/>
+              <path d="M12 9L15 12L12 15L9 12L12 9Z" fill="white"/>
+              <defs>
+                <linearGradient id="gradient" x1="0" y1="0" x2="24" y2="24">
+                  <stop stop-color="#6366f1"/>
+                  <stop offset="1" stop-color="#8b5cf6"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
           <h1>Crypto ERP</h1>
-          <p>Crea tu cuenta</p>
+          <p>Create your account</p>
         </div>
 
         @if (error()) {
           <div class="alert alert-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
             {{ error() }}
           </div>
         }
@@ -25,78 +41,108 @@ import { AuthService } from '@core/services/auth.service';
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="firstName">Nombre</label>
-              <input
-                type="text"
-                id="firstName"
-                class="form-input"
-                formControlName="firstName"
-                placeholder="Juan"
-                [class.is-invalid]="isFieldInvalid('firstName')"
-              />
+              <label class="form-label" for="firstName">First Name</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input
+                  type="text"
+                  id="firstName"
+                  class="form-input"
+                  formControlName="firstName"
+                  placeholder="John"
+                  [class.is-invalid]="isFieldInvalid('firstName')"
+                />
+              </div>
               @if (isFieldInvalid('firstName')) {
-                <div class="form-error">Nombre es requerido</div>
+                <div class="form-error">First name is required</div>
               }
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="lastName">Apellido</label>
-              <input
-                type="text"
-                id="lastName"
-                class="form-input"
-                formControlName="lastName"
-                placeholder="García"
-                [class.is-invalid]="isFieldInvalid('lastName')"
-              />
+              <label class="form-label" for="lastName">Last Name</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input
+                  type="text"
+                  id="lastName"
+                  class="form-input"
+                  formControlName="lastName"
+                  placeholder="Doe"
+                  [class.is-invalid]="isFieldInvalid('lastName')"
+                />
+              </div>
               @if (isFieldInvalid('lastName')) {
-                <div class="form-error">Apellido es requerido</div>
+                <div class="form-error">Last name is required</div>
               }
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              class="form-input"
-              formControlName="email"
-              placeholder="tu@email.com"
-              [class.is-invalid]="isFieldInvalid('email')"
-            />
+            <label class="form-label" for="email">Email Address</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <input
+                type="email"
+                id="email"
+                class="form-input"
+                formControlName="email"
+                placeholder="you@example.com"
+                [class.is-invalid]="isFieldInvalid('email')"
+              />
+            </div>
             @if (isFieldInvalid('email')) {
-              <div class="form-error">Email válido es requerido</div>
+              <div class="form-error">Please enter a valid email address</div>
             }
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="password">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              class="form-input"
-              formControlName="password"
-              placeholder="••••••••"
-              [class.is-invalid]="isFieldInvalid('password')"
-            />
+            <label class="form-label" for="password">Password</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input
+                type="password"
+                id="password"
+                class="form-input"
+                formControlName="password"
+                placeholder="Minimum 8 characters"
+                [class.is-invalid]="isFieldInvalid('password')"
+              />
+            </div>
             @if (isFieldInvalid('password')) {
-              <div class="form-error">Mínimo 8 caracteres</div>
+              <div class="form-error">Minimum 8 characters required</div>
             }
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="confirmPassword">Confirmar Contraseña</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              class="form-input"
-              formControlName="confirmPassword"
-              placeholder="••••••••"
-              [class.is-invalid]="isFieldInvalid('confirmPassword') || passwordMismatch()"
-            />
+            <label class="form-label" for="confirmPassword">Confirm Password</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input
+                type="password"
+                id="confirmPassword"
+                class="form-input"
+                formControlName="confirmPassword"
+                placeholder="Re-enter your password"
+                [class.is-invalid]="isFieldInvalid('confirmPassword') || passwordMismatch()"
+              />
+            </div>
             @if (passwordMismatch()) {
-              <div class="form-error">Las contraseñas no coinciden</div>
+              <div class="form-error">Passwords do not match</div>
             }
           </div>
 
@@ -107,15 +153,15 @@ import { AuthService } from '@core/services/auth.service';
           >
             @if (loading()) {
               <span class="spinner"></span>
-              Creando cuenta...
+              Creating account...
             } @else {
-              Crear cuenta
+              Create Account
             }
           </button>
         </form>
 
         <div class="auth-footer">
-          <p>¿Ya tienes una cuenta? <a routerLink="/auth/login">Inicia sesión</a></p>
+          <p>Already have an account? <a routerLink="/auth/login">Sign in</a></p>
         </div>
       </div>
     </div>
@@ -127,60 +173,207 @@ import { AuthService } from '@core/services/auth.service';
       align-items: center;
       justify-content: center;
       padding: var(--spacing-lg);
-      background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
 
     .auth-card {
       width: 100%;
-      max-width: 450px;
-      background: var(--white);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-lg);
-      padding: var(--spacing-2xl);
+      max-width: 480px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      padding: 40px;
+      position: relative;
+      z-index: 1;
     }
 
     .auth-header {
       text-align: center;
-      margin-bottom: var(--spacing-xl);
+      margin-bottom: 32px;
+    }
 
-      h1 {
-        color: var(--primary);
-        margin-bottom: var(--spacing-sm);
-      }
+    .logo-icon {
+      margin-bottom: 16px;
+    }
 
-      p {
-        color: var(--gray-500);
-      }
+    .auth-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .auth-header p {
+      color: var(--gray-500);
+      font-size: 0.95rem;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--spacing-md);
+      gap: 16px;
     }
 
-    .alert {
-      padding: var(--spacing-md);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--spacing-md);
+    .form-group {
+      margin-bottom: 20px;
+    }
 
-      &-danger {
-        background-color: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-      }
+    .form-label {
+      display: block;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 14px 14px 46px;
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      background: var(--white);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-input.is-invalid {
+      border-color: #ef4444;
+    }
+
+    .form-input::placeholder {
+      color: var(--gray-400);
+    }
+
+    .form-error {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #ef4444;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .w-100 {
+      width: 100%;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .auth-footer {
       text-align: center;
-      margin-top: var(--spacing-lg);
-      padding-top: var(--spacing-lg);
+      margin-top: 24px;
+      padding-top: 24px;
       border-top: 1px solid var(--gray-200);
+    }
 
-      p {
-        color: var(--gray-500);
-        margin: 0;
-      }
+    .auth-footer p {
+      color: var(--gray-500);
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+      color: #6366f1;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
     }
 
     @media (max-width: 480px) {
@@ -240,7 +433,7 @@ export class RegisterComponent {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || 'Error al crear la cuenta');
+        this.error.set(err.error?.message || 'Error creating account. Please try again.');
       },
     });
   }

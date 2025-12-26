@@ -25,12 +25,12 @@ interface Invoice {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Facturas</h1>
-          <p class="text-muted">Gestiona tus facturas de venta y compra</p>
+          <h1>Invoices</h1>
+          <p class="text-muted">Manage your sales and purchase invoices</p>
         </div>
         <div class="d-flex gap-md">
-          <a routerLink="/invoicing/contacts" class="btn btn-secondary">Contactos</a>
-          <a routerLink="/invoicing/invoices/new" class="btn btn-primary">+ Nueva Factura</a>
+          <a routerLink="/invoicing/contacts" class="btn btn-secondary">Contacts</a>
+          <a routerLink="/invoicing/invoices/new" class="btn btn-primary">+ New Invoice</a>
         </div>
       </header>
 
@@ -41,14 +41,14 @@ interface Invoice {
           [class.active]="direction === 'SALES'"
           (click)="direction = 'SALES'; loadInvoices()"
         >
-          Ventas
+          Sales
         </button>
         <button
           class="tab"
           [class.active]="direction === 'PURCHASE'"
           (click)="direction = 'PURCHASE'; loadInvoices()"
         >
-          Compras
+          Purchases
         </button>
       </div>
 
@@ -58,17 +58,17 @@ interface Invoice {
           <input
             type="text"
             class="form-input"
-            placeholder="Buscar..."
+            placeholder="Search..."
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearch()"
             style="max-width: 250px;"
           />
           <select class="form-select" [(ngModel)]="filterStatus" (ngModelChange)="loadInvoices()" style="max-width: 150px;">
-            <option value="">Todos los estados</option>
-            <option value="DRAFT">Borrador</option>
-            <option value="ISSUED">Emitida</option>
-            <option value="PAID">Pagada</option>
-            <option value="CANCELLED">Cancelada</option>
+            <option value="">All statuses</option>
+            <option value="DRAFT">Draft</option>
+            <option value="ISSUED">Issued</option>
+            <option value="PAID">Paid</option>
+            <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
       </div>
@@ -84,13 +84,13 @@ interface Invoice {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Número</th>
-                  <th>Fecha</th>
-                  <th>{{ direction === 'SALES' ? 'Cliente' : 'Proveedor' }}</th>
-                  <th class="text-right">Importe</th>
-                  <th>Estado</th>
+                  <th>Number</th>
+                  <th>Date</th>
+                  <th>{{ direction === 'SALES' ? 'Customer' : 'Supplier' }}</th>
+                  <th class="text-right">Amount</th>
+                  <th>Status</th>
                   <th>Verifactu</th>
-                  <th>Acciones</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,19 +107,19 @@ interface Invoice {
                     </td>
                     <td>
                       @if (invoice.verifactuHash) {
-                        <span class="badge badge-success" title="Registrada en Verifactu">✓</span>
+                        <span class="badge badge-success" title="Registered in Verifactu">✓</span>
                       } @else {
                         <span class="badge badge-secondary">-</span>
                       }
                     </td>
                     <td>
                       <div class="d-flex gap-sm">
-                        <button class="btn btn-sm btn-secondary">Ver</button>
+                        <button class="btn btn-sm btn-secondary">View</button>
                         @if (invoice.status === 'DRAFT') {
-                          <button class="btn btn-sm btn-primary" (click)="issueInvoice(invoice)">Emitir</button>
+                          <button class="btn btn-sm btn-primary" (click)="issueInvoice(invoice)">Issue</button>
                         }
                         @if (invoice.status === 'ISSUED') {
-                          <button class="btn btn-sm btn-success" (click)="markAsPaid(invoice)">Cobrar</button>
+                          <button class="btn btn-sm btn-success" (click)="markAsPaid(invoice)">Mark Paid</button>
                         }
                       </div>
                     </td>
@@ -127,7 +127,7 @@ interface Invoice {
                 } @empty {
                   <tr>
                     <td colspan="7" class="text-center text-muted p-lg">
-                      No se encontraron facturas
+                      No invoices found
                     </td>
                   </tr>
                 }
@@ -241,11 +241,11 @@ export class InvoicesListComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      DRAFT: 'Borrador',
-      ISSUED: 'Emitida',
-      SENT: 'Enviada',
-      PAID: 'Pagada',
-      CANCELLED: 'Cancelada',
+      DRAFT: 'Draft',
+      ISSUED: 'Issued',
+      SENT: 'Sent',
+      PAID: 'Paid',
+      CANCELLED: 'Cancelled',
     };
     return labels[status] || status;
   }

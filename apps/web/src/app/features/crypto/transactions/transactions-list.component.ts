@@ -28,22 +28,22 @@ interface CryptoTransaction {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Transacciones Crypto</h1>
-          <p class="text-muted">Historial de operaciones</p>
+          <h1>Crypto Transactions</h1>
+          <p class="text-muted">Transaction history</p>
         </div>
-        <a routerLink="/crypto/transactions/new" class="btn btn-primary">+ Nueva Transacción</a>
+        <a routerLink="/crypto/transactions/new" class="btn btn-primary">+ New Transaction</a>
       </header>
 
       <!-- Filters -->
       <div class="filters card">
         <div class="card-body d-flex gap-md">
           <select class="form-select" [(ngModel)]="filterType" (ngModelChange)="loadTransactions()" style="max-width: 150px;">
-            <option value="">Todos los tipos</option>
-            <option value="BUY">Compra</option>
-            <option value="SELL">Venta</option>
-            <option value="SWAP">Intercambio</option>
-            <option value="TRANSFER_IN">Entrada</option>
-            <option value="TRANSFER_OUT">Salida</option>
+            <option value="">All types</option>
+            <option value="BUY">Buy</option>
+            <option value="SELL">Sell</option>
+            <option value="SWAP">Swap</option>
+            <option value="TRANSFER_IN">Transfer In</option>
+            <option value="TRANSFER_OUT">Transfer Out</option>
             <option value="STAKING_REWARD">Staking</option>
           </select>
           <input type="date" class="form-input" [(ngModel)]="startDate" (ngModelChange)="loadTransactions()" style="max-width: 150px;" />
@@ -62,13 +62,13 @@ interface CryptoTransaction {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Tipo</th>
-                  <th>Activo</th>
-                  <th class="text-right">Cantidad</th>
-                  <th class="text-right">Precio</th>
-                  <th class="text-right">Valor</th>
-                  <th class="text-right">Ganancia/Pérdida</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Asset</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-right">Price</th>
+                  <th class="text-right">Value</th>
+                  <th class="text-right">Gain/Loss</th>
                   <th>Exchange</th>
                 </tr>
               </thead>
@@ -109,7 +109,7 @@ interface CryptoTransaction {
                 } @empty {
                   <tr>
                     <td colspan="8" class="text-center text-muted p-lg">
-                      No se encontraron transacciones
+                      No transactions found
                     </td>
                   </tr>
                 }
@@ -183,15 +183,15 @@ export class TransactionsListComponent implements OnInit {
 
   getTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      BUY: 'Compra',
-      SELL: 'Venta',
-      SWAP: 'Intercambio',
-      TRANSFER_IN: 'Entrada',
-      TRANSFER_OUT: 'Salida',
+      BUY: 'Buy',
+      SELL: 'Sell',
+      SWAP: 'Swap',
+      TRANSFER_IN: 'Transfer In',
+      TRANSFER_OUT: 'Transfer Out',
       STAKING_REWARD: 'Staking',
       AIRDROP: 'Airdrop',
-      MINING: 'Minería',
-      FEE: 'Comisión',
+      MINING: 'Mining',
+      FEE: 'Fee',
     };
     return labels[type] || type;
   }
