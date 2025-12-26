@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@database/prisma/prisma.service.js';
+import { PrismaService } from '@crypto-erp/database';
 import { UserOnboardingStatus } from '@prisma/client';
 
 export interface OnboardingProgress {

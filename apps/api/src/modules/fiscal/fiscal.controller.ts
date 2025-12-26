@@ -19,10 +19,10 @@ import { SIIService } from './sii.service.js';
 import { LibroRegistroService } from './libro-registro.service.js';
 import { GenerateModelo347Dto } from './dto/generate-modelo347.dto.js';
 import { GenerateLibroRegistroDto, ExportFormat } from './dto/generate-libro-registro.dto.js';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../auth/guards/roles.guard.js';
-import { Roles } from '../auth/decorators/roles.decorator.js';
-import { GetCompany } from '../auth/decorators/get-company.decorator.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { Roles } from '../../common/decorators/roles.decorator.js';
+import { GetCompany } from '../../common/decorators/get-company.decorator.js';
 import { UserRole } from '@prisma/client';
 import { Auditable } from '../audit/decorators/auditable.decorator.js';
 

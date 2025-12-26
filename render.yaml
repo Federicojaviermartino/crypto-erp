@@ -10,7 +10,7 @@ services:
     plan: starter
     buildCommand: npm ci --include=dev && npm run build:prod
     startCommand: npm run start:api:prod
-    healthCheckPath: /api/v1/health/liveness
+    healthCheckPath: /api/v1/health/live
     envVars:
       # Node version
       - key: NODE_VERSION

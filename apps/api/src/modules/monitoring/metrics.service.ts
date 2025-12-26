@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
-import { Counter, Histogram, Gauge, Registry } from 'prom-client';
+import { Counter, Histogram, Gauge, register } from 'prom-client';
 
 /**
  * Metrics Service for Prometheus
@@ -32,8 +32,6 @@ export class MetricsService {
     @InjectMetric('subscriptions_active') public subscriptionsActive: Gauge<string>,
     @InjectMetric('subscriptions_churned_total') public subscriptionsChurned: Counter<string>,
     @InjectMetric('revenue_mrr') public revenueMRR: Gauge<string>,
-
-    private readonly registry: Registry,
   ) {}
 
   /**
@@ -115,6 +113,6 @@ export class MetricsService {
    * Get all metrics as Prometheus text format
    */
   async getMetrics(): Promise<string> {
-    return this.registry.metrics();
+    return register.metrics();
   }
 }

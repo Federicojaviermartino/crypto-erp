@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { SsoController } from './controllers/sso.controller.js';
+import { CryptoService } from './services/crypto.service.js';
 import {
   JwtStrategy,
   JwtRefreshStrategy,
@@ -30,6 +31,7 @@ import { SamlStrategy } from './strategies/saml.strategy.js';
   controllers: [AuthController, SsoController],
   providers: [
     AuthService,
+    CryptoService,
     JwtStrategy,
     JwtRefreshStrategy,
     LocalStrategy,
@@ -37,6 +39,6 @@ import { SamlStrategy } from './strategies/saml.strategy.js';
     AzureADStrategy,
     SamlStrategy,
   ],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, CryptoService, JwtModule],
 })
 export class AuthModule {}
