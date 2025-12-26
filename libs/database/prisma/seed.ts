@@ -11,6 +11,7 @@
  */
 
 import { PrismaClient, AccountType, InvoiceType, CryptoClassification, DocumentType } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -346,12 +347,56 @@ Reference: Real Decreto 1007/2023, Orden HFP/1177/2024
 // SEED FUNCTION
 // ============================================================================
 
+// ============================================================================
+// DEMO USERS
+// ============================================================================
+
+const DEMO_USERS = [
+  {
+        email: 'admin@crypto-erp.com',
+        password: 'Admin123!',
+        firstName: 'Admin',
+        lastName: 'Demo',
+  },
+  {
+        email: 'client@crypto-erp.com',
+        password: 'Client123!',
+        firstName: 'Client',
+        lastName: 'Demo',
+  },
+  ];
+
 async function seed() {
   console.log('🌱 Starting database seed...\n');
 
   // Note: This seed creates template data that will be copied for each company
   // The actual seeding happens when a company is created
 
+
+    // Create demo users
+    console.log('👤 Creating demo users...');
+    for (const demoUser of DEMO_USERS) {
+          const existingUser = await prisma.user.findUnique({
+                  where: { email: demoUser.email },
+          });
+
+          if (!existingUser) {
+                  const passwordHash = await bcrypt.hash(demoUser.password, 12);
+                  await prisma.user.create({
+                            data: {
+                                        email: demoUser.email,
+                                        passwordHash,
+                                        firstName: demoUser.firstName,
+                                        lastName: demoUser.lastName,
+                                        isActive: true,
+                            },
+                  });
+                  console.log(`  ✅ Created user: ${demoUser.email}`);
+          } else {
+                  console.log(`  ⏭️ User already exists: ${demoUser.email}`);
+          }
+    }
+  
   console.log('📚 Seed data prepared:');
   console.log(`   - ${SPANISH_CHART_OF_ACCOUNTS.length} chart of accounts entries`);
   console.log(`   - ${CRYPTO_ASSETS.length} crypto assets`);
