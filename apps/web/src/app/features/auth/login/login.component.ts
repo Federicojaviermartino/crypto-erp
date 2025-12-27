@@ -467,13 +467,13 @@ export class LoginComponent {
     if (role === 'admin') {
       this.form.patchValue({
         email: 'admin@crypto-erp.com',
-        password: 'admin123',
+        password: 'Admin123!',
       });
       this.selectedRole.set('admin');
     } else {
       this.form.patchValue({
-        email: 'maria.gonzalez@empresa-demo.com',
-        password: 'demo123456',
+        email: 'client@crypto-erp.com',
+        password: 'Client123!',
       });
       this.selectedRole.set('client');
     }

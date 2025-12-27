@@ -20,11 +20,11 @@ interface CryptoAsset {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Activos Crypto</h1>
-          <p class="text-muted">Gestiona tus criptoactivos</p>
+          <h1>Crypto Assets</h1>
+          <p class="text-muted">Manage your cryptocurrency assets</p>
         </div>
         <button class="btn btn-primary" (click)="showModal = true">
-          + Nuevo Activo
+          + New Asset
         </button>
       </header>
 
@@ -38,12 +38,12 @@ interface CryptoAsset {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Símbolo</th>
-                  <th>Nombre</th>
-                  <th>Decimales</th>
+                  <th>Symbol</th>
+                  <th>Name</th>
+                  <th>Decimals</th>
                   <th>CoinGecko ID</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -55,17 +55,17 @@ interface CryptoAsset {
                     <td>{{ asset.coingeckoId || '-' }}</td>
                     <td>
                       <span class="badge" [class]="asset.isActive ? 'badge-success' : 'badge-secondary'">
-                        {{ asset.isActive ? 'Activo' : 'Inactivo' }}
+                        {{ asset.isActive ? 'Active' : 'Inactive' }}
                       </span>
                     </td>
                     <td>
-                      <button class="btn btn-sm btn-secondary">Editar</button>
+                      <button class="btn btn-sm btn-secondary" (click)="editAsset(asset)">Edit</button>
                     </td>
                   </tr>
                 } @empty {
                   <tr>
                     <td colspan="6" class="text-center text-muted p-lg">
-                      No hay activos configurados
+                      No assets configured
                     </td>
                   </tr>
                 }
@@ -75,37 +75,42 @@ interface CryptoAsset {
         </div>
       </div>
 
-      <!-- Create Modal -->
+      <!-- Create/Edit Modal -->
       @if (showModal) {
-        <div class="modal-backdrop" (click)="showModal = false">
+        <div class="modal-backdrop" (click)="closeModal()">
           <div class="modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3>Nuevo Activo Crypto</h3>
-              <button class="close-btn" (click)="showModal = false">×</button>
+              <h3>{{ editingAsset ? 'Edit Crypto Asset' : 'New Crypto Asset' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
             </div>
             <div class="modal-body">
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Símbolo *</label>
+                  <label class="form-label">Symbol *</label>
                   <input type="text" class="form-input" [(ngModel)]="newAsset.symbol" placeholder="BTC" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Decimales</label>
+                  <label class="form-label">Decimals</label>
                   <input type="number" class="form-input" [(ngModel)]="newAsset.decimals" min="0" max="18" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Nombre *</label>
+                <label class="form-label">Name *</label>
                 <input type="text" class="form-input" [(ngModel)]="newAsset.name" placeholder="Bitcoin" />
               </div>
               <div class="form-group">
-                <label class="form-label">CoinGecko ID</label>
+                <label class="form-label">CoinGecko ID (for price data)</label>
                 <input type="text" class="form-input" [(ngModel)]="newAsset.coingeckoId" placeholder="bitcoin" />
               </div>
+              @if (saveError) {
+                <div class="alert alert-danger">{{ saveError }}</div>
+              }
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="showModal = false">Cancelar</button>
-              <button class="btn btn-primary" (click)="createAsset()">Crear</button>
+              <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+              <button class="btn btn-primary" (click)="saveAsset()" [disabled]="!newAsset.symbol || !newAsset.name || saving()">
+                {{ saving() ? 'Saving...' : (editingAsset ? 'Update' : 'Create') }}
+              </button>
             </div>
           </div>
         </div>
@@ -169,12 +174,23 @@ interface CryptoAsset {
       padding: var(--spacing-lg);
       border-top: 1px solid var(--gray-200);
     }
+
+    .alert-danger {
+      padding: var(--spacing-md);
+      background: var(--danger-light);
+      color: var(--danger);
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-md);
+    }
   `],
 })
 export class AssetsListComponent implements OnInit {
   assets = signal<CryptoAsset[]>([]);
   loading = signal(true);
+  saving = signal(false);
   showModal = false;
+  editingAsset: CryptoAsset | null = null;
+  saveError = '';
 
   newAsset = {
     symbol: '',
@@ -200,12 +216,52 @@ export class AssetsListComponent implements OnInit {
     });
   }
 
-  createAsset(): void {
-    this.api.post('/crypto/assets', this.newAsset).subscribe({
+  editAsset(asset: CryptoAsset): void {
+    this.editingAsset = asset;
+    this.newAsset = {
+      symbol: asset.symbol,
+      name: asset.name,
+      decimals: asset.decimals,
+      coingeckoId: asset.coingeckoId || '',
+    };
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.editingAsset = null;
+    this.saveError = '';
+    this.newAsset = { symbol: '', name: '', decimals: 8, coingeckoId: '' };
+  }
+
+  saveAsset(): void {
+    if (!this.newAsset.symbol || !this.newAsset.name) {
+      return;
+    }
+
+    this.saving.set(true);
+    this.saveError = '';
+
+    const payload = {
+      symbol: this.newAsset.symbol,
+      name: this.newAsset.name,
+      decimals: this.newAsset.decimals,
+      coingeckoId: this.newAsset.coingeckoId || null,
+    };
+
+    const request = this.editingAsset
+      ? this.api.put(`/crypto/assets/${this.editingAsset.id}`, payload)
+      : this.api.post('/crypto/assets', payload);
+
+    request.subscribe({
       next: () => {
-        this.showModal = false;
-        this.newAsset = { symbol: '', name: '', decimals: 8, coingeckoId: '' };
+        this.saving.set(false);
+        this.closeModal();
         this.loadAssets();
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.saveError = err.error?.message || 'Error saving asset';
       },
     });
   }

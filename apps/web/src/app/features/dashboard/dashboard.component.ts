@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -44,64 +44,74 @@ interface QuickAction {
       <!-- Onboarding Wizard -->
       <app-onboarding-wizard />
 
-      <!-- Quick Actions -->
-      <section class="quick-actions">
-        @for (action of quickActions; track action.path) {
-          <a [routerLink]="action.path" class="action-card" [style.border-color]="action.color">
-            <span class="action-icon">{{ action.icon }}</span>
-            <span class="action-label">{{ action.label }}</span>
-          </a>
-        }
-      </section>
-
-      <!-- Stats Cards -->
-      <section class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon" style="background: #dbeafe;">📒</div>
-          <div class="stat-info">
-            <h3>{{ stats().totalAccounts }}</h3>
-            <p>Accounts</p>
-          </div>
+      @if (!hasCompany()) {
+        <!-- No Company Message -->
+        <div class="no-company-card">
+          <div class="no-company-icon">🏢</div>
+          <h2>Welcome to Crypto ERP!</h2>
+          <p>To get started, you need to create or join a company. Go to Settings to set up your company profile.</p>
+          <a routerLink="/settings/company" class="btn btn-primary">Set Up Company</a>
         </div>
+      } @else {
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+          @for (action of quickActions; track action.path) {
+            <a [routerLink]="action.path" class="action-card" [style.border-color]="action.color">
+              <span class="action-icon">{{ action.icon }}</span>
+              <span class="action-label">{{ action.label }}</span>
+            </a>
+          }
+        </section>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background: #dcfce7;">🧾</div>
-          <div class="stat-info">
-            <h3>{{ stats().totalInvoices }}</h3>
-            <p>Total Invoices</p>
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #dbeafe;">📒</div>
+            <div class="stat-info">
+              <h3>{{ stats().totalAccounts }}</h3>
+              <p>Accounts</p>
+            </div>
           </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background: #fef3c7;">⏳</div>
-          <div class="stat-info">
-            <h3>{{ stats().pendingInvoices }}</h3>
-            <p>Pending Invoices</p>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #dcfce7;">🧾</div>
+            <div class="stat-info">
+              <h3>{{ stats().totalInvoices }}</h3>
+              <p>Total Invoices</p>
+            </div>
           </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background: #f3e8ff;">₿</div>
-          <div class="stat-info">
-            <h3>{{ stats().cryptoAssets }}</h3>
-            <p>Crypto Assets</p>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #fef3c7;">⏳</div>
+            <div class="stat-info">
+              <h3>{{ stats().pendingInvoices }}</h3>
+              <p>Pending Invoices</p>
+            </div>
           </div>
+
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #f3e8ff;">₿</div>
+            <div class="stat-info">
+              <h3>{{ stats().cryptoAssets }}</h3>
+              <p>Crypto Assets</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Charts & Analytics -->
+        <section class="charts-section">
+          <app-monthly-trends />
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+          <!-- Portfolio Chart -->
+          <app-portfolio-chart />
+
+          <!-- AI Insights -->
+          <app-ai-insights />
         </div>
-      </section>
-
-      <!-- Charts & Analytics -->
-      <section class="charts-section">
-        <app-monthly-trends />
-      </section>
-
-      <!-- Main Content Grid -->
-      <div class="content-grid">
-        <!-- Portfolio Chart -->
-        <app-portfolio-chart />
-
-        <!-- AI Insights -->
-        <app-ai-insights />
-      </div>
+      }
     </div>
   `,
   styles: [`
@@ -119,6 +129,48 @@ interface QuickAction {
       .welcome {
         color: var(--gray-500);
         margin: 0;
+      }
+    }
+
+    .no-company-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xxl);
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      max-width: 500px;
+      margin: var(--spacing-xxl) auto;
+
+      .no-company-icon {
+        font-size: 4rem;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      h2 {
+        margin: 0 0 var(--spacing-md);
+        color: var(--gray-800);
+      }
+
+      p {
+        color: var(--gray-600);
+        margin: 0 0 var(--spacing-lg);
+        line-height: 1.6;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: var(--spacing-md) var(--spacing-xl);
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        transition: all var(--transition-fast);
+
+        &:hover {
+          background: var(--primary-dark);
+          transform: translateY(-1px);
+        }
       }
     }
 
@@ -227,6 +279,7 @@ interface QuickAction {
 })
 export class DashboardComponent implements OnInit {
   loading = signal(true);
+  hasCompany = computed(() => !!this.authService.getCompanyId());
   stats = signal<DashboardStats>({
     totalAccounts: 0,
     totalInvoices: 0,
@@ -252,6 +305,12 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadStats(): void {
+    // Only load stats if user has a company
+    if (!this.authService.getCompanyId()) {
+      this.loading.set(false);
+      return;
+    }
+
     this.api.get<{
       totalCostBasis: number;
       monthlyActivity: number;
@@ -262,9 +321,9 @@ export class DashboardComponent implements OnInit {
         this.stats.set({
           totalAccounts: 0,
           totalInvoices: 0,
-          pendingInvoices: data.pendingInvoices,
+          pendingInvoices: data.pendingInvoices || 0,
           cryptoAssets: data.portfolioDistribution?.length || 0,
-          totalBalance: data.totalCostBasis,
+          totalBalance: data.totalCostBasis || 0,
         });
         this.loading.set(false);
       },

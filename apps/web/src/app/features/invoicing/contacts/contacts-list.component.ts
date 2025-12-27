@@ -21,11 +21,11 @@ interface Contact {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Contactos</h1>
-          <p class="text-muted">Gestiona clientes y proveedores</p>
+          <h1>Contacts</h1>
+          <p class="text-muted">Manage customers and suppliers</p>
         </div>
         <button class="btn btn-primary" (click)="showModal = true">
-          + Nuevo Contacto
+          + New Contact
         </button>
       </header>
 
@@ -35,15 +35,15 @@ interface Contact {
           <input
             type="text"
             class="form-input"
-            placeholder="Buscar..."
+            placeholder="Search..."
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearch()"
             style="max-width: 250px;"
           />
           <select class="form-select" [(ngModel)]="filterType" (ngModelChange)="loadContacts()" style="max-width: 150px;">
-            <option value="">Todos</option>
-            <option value="CUSTOMER">Clientes</option>
-            <option value="SUPPLIER">Proveedores</option>
+            <option value="">All</option>
+            <option value="CUSTOMER">Customers</option>
+            <option value="SUPPLIER">Suppliers</option>
           </select>
         </div>
       </div>
@@ -59,12 +59,12 @@ interface Contact {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>NIF/CIF</th>
+                  <th>Name</th>
+                  <th>Tax ID</th>
                   <th>Email</th>
-                  <th>Teléfono</th>
-                  <th>Tipo</th>
-                  <th>Acciones</th>
+                  <th>Phone</th>
+                  <th>Type</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,17 +76,17 @@ interface Contact {
                     <td>{{ contact.phone || '-' }}</td>
                     <td>
                       <span class="badge" [class]="contact.type === 'CUSTOMER' ? 'badge-info' : 'badge-warning'">
-                        {{ contact.type === 'CUSTOMER' ? 'Cliente' : 'Proveedor' }}
+                        {{ contact.type === 'CUSTOMER' ? 'Customer' : 'Supplier' }}
                       </span>
                     </td>
                     <td>
-                      <button class="btn btn-sm btn-secondary" (click)="editContact(contact)">Editar</button>
+                      <button class="btn btn-sm btn-secondary" (click)="editContact(contact)">Edit</button>
                     </td>
                   </tr>
                 } @empty {
                   <tr>
                     <td colspan="6" class="text-center text-muted p-lg">
-                      No se encontraron contactos
+                      No contacts found
                     </td>
                   </tr>
                 }
@@ -101,24 +101,24 @@ interface Contact {
         <div class="modal-backdrop" (click)="showModal = false">
           <div class="modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3>Nuevo Contacto</h3>
-              <button class="close-btn" (click)="showModal = false">×</button>
+              <h3>{{ editingContact ? 'Edit Contact' : 'New Contact' }}</h3>
+              <button class="close-btn" (click)="closeModal()">×</button>
             </div>
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Nombre *</label>
+                <label class="form-label">Name *</label>
                 <input type="text" class="form-input" [(ngModel)]="newContact.name" />
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">NIF/CIF</label>
+                  <label class="form-label">Tax ID</label>
                   <input type="text" class="form-input" [(ngModel)]="newContact.taxId" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Tipo</label>
+                  <label class="form-label">Type</label>
                   <select class="form-select" [(ngModel)]="newContact.type">
-                    <option value="CUSTOMER">Cliente</option>
-                    <option value="SUPPLIER">Proveedor</option>
+                    <option value="CUSTOMER">Customer</option>
+                    <option value="SUPPLIER">Supplier</option>
                   </select>
                 </div>
               </div>
@@ -128,14 +128,19 @@ interface Contact {
                   <input type="email" class="form-input" [(ngModel)]="newContact.email" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Teléfono</label>
+                  <label class="form-label">Phone</label>
                   <input type="text" class="form-input" [(ngModel)]="newContact.phone" />
                 </div>
               </div>
+              @if (saveError) {
+                <div class="alert alert-danger">{{ saveError }}</div>
+              }
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="showModal = false">Cancelar</button>
-              <button class="btn btn-primary" (click)="createContact()">Crear</button>
+              <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+              <button class="btn btn-primary" (click)="saveContact()" [disabled]="!newContact.name || saving()">
+                {{ saving() ? 'Saving...' : (editingContact ? 'Update' : 'Create') }}
+              </button>
             </div>
           </div>
         </div>
@@ -217,14 +222,25 @@ interface Contact {
       padding: var(--spacing-lg);
       border-top: 1px solid var(--gray-200);
     }
+
+    .alert-danger {
+      padding: var(--spacing-md);
+      background: var(--danger-light);
+      color: var(--danger);
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-md);
+    }
   `],
 })
 export class ContactsListComponent implements OnInit {
   contacts = signal<Contact[]>([]);
   loading = signal(true);
+  saving = signal(false);
   searchTerm = '';
   filterType = '';
   showModal = false;
+  editingContact: Contact | null = null;
+  saveError = '';
 
   newContact = {
     name: '',
@@ -261,15 +277,53 @@ export class ContactsListComponent implements OnInit {
   }
 
   editContact(contact: Contact): void {
-    console.log('Edit:', contact);
+    this.editingContact = contact;
+    this.newContact = {
+      name: contact.name,
+      taxId: contact.taxId || '',
+      email: contact.email || '',
+      phone: contact.phone || '',
+      type: contact.type,
+    };
+    this.showModal = true;
   }
 
-  createContact(): void {
-    this.api.post('/contacts', this.newContact).subscribe({
+  closeModal(): void {
+    this.showModal = false;
+    this.editingContact = null;
+    this.saveError = '';
+    this.newContact = { name: '', taxId: '', email: '', phone: '', type: 'CUSTOMER' };
+  }
+
+  saveContact(): void {
+    if (!this.newContact.name) {
+      return;
+    }
+
+    this.saving.set(true);
+    this.saveError = '';
+
+    const payload = {
+      name: this.newContact.name,
+      taxId: this.newContact.taxId || null,
+      email: this.newContact.email || null,
+      phone: this.newContact.phone || null,
+      type: this.newContact.type,
+    };
+
+    const request = this.editingContact
+      ? this.api.put(`/contacts/${this.editingContact.id}`, payload)
+      : this.api.post('/contacts', payload);
+
+    request.subscribe({
       next: () => {
-        this.showModal = false;
-        this.newContact = { name: '', taxId: '', email: '', phone: '', type: 'CUSTOMER' };
+        this.saving.set(false);
+        this.closeModal();
         this.loadContacts();
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.saveError = err.error?.message || 'Error saving contact';
       },
     });
   }

@@ -39,10 +39,10 @@ interface ExchangeBalance {
       <header class="page-header">
         <div>
           <h1>Exchanges</h1>
-          <p class="text-muted">Conecta tus cuentas de exchanges para importar transacciones</p>
+          <p class="text-muted">Connect your exchange accounts to import transactions</p>
         </div>
         <div class="d-flex gap-md">
-          <button class="btn btn-primary" (click)="showAddModal = true">+ Añadir Exchange</button>
+          <button class="btn btn-primary" (click)="showAddModal = true">+ Add Exchange</button>
         </div>
       </header>
 
@@ -51,15 +51,15 @@ interface ExchangeBalance {
         <a routerLink="/crypto/portfolio" class="nav-tab">Portfolio</a>
         <a routerLink="/crypto/wallets" class="nav-tab">Wallets</a>
         <a routerLink="/crypto/exchanges" class="nav-tab active">Exchanges</a>
-        <a routerLink="/crypto/transactions" class="nav-tab">Transacciones</a>
-        <a routerLink="/crypto/assets" class="nav-tab">Activos</a>
-        <a routerLink="/crypto/tax-report" class="nav-tab">Informe Fiscal</a>
+        <a routerLink="/crypto/transactions" class="nav-tab">Transactions</a>
+        <a routerLink="/crypto/assets" class="nav-tab">Assets</a>
+        <a routerLink="/crypto/tax-report" class="nav-tab">Tax Report</a>
       </div>
 
       <!-- Connected Exchanges -->
       <div class="card mb-lg">
         <div class="card-header">
-          <h3>Exchanges Conectados</h3>
+          <h3>Connected Exchanges</h3>
         </div>
         <div class="card-body" style="padding: 0;">
           @if (loading()) {
@@ -71,11 +71,11 @@ interface ExchangeBalance {
               <thead>
                 <tr>
                   <th>Exchange</th>
-                  <th>Etiqueta</th>
+                  <th>Label</th>
                   <th>API Key</th>
-                  <th>Estado</th>
-                  <th>Última Sync</th>
-                  <th>Acciones</th>
+                  <th>Status</th>
+                  <th>Last Sync</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,17 +94,17 @@ interface ExchangeBalance {
                         {{ getSyncStatusLabel(account.syncStatus) }}
                       </span>
                     </td>
-                    <td>{{ account.lastSyncAt ? (account.lastSyncAt | date:'short') : 'Nunca' }}</td>
+                    <td>{{ account.lastSyncAt ? (account.lastSyncAt | date:'short') : 'Never' }}</td>
                     <td>
                       <div class="d-flex gap-sm">
-                        <button class="btn btn-sm btn-secondary" (click)="viewBalances(account)" title="Ver saldos">
+                        <button class="btn btn-sm btn-secondary" (click)="viewBalances(account)" title="View balances">
                           💰
                         </button>
                         <button class="btn btn-sm btn-primary" (click)="syncAccount(account)"
-                                [disabled]="account.syncStatus === 'SYNCING'" title="Sincronizar">
+                                [disabled]="account.syncStatus === 'SYNCING'" title="Sync">
                           🔄
                         </button>
-                        <button class="btn btn-sm btn-danger" (click)="deleteAccount(account)" title="Eliminar">
+                        <button class="btn btn-sm btn-danger" (click)="deleteAccount(account)" title="Delete">
                           🗑️
                         </button>
                       </div>
@@ -113,7 +113,7 @@ interface ExchangeBalance {
                 } @empty {
                   <tr>
                     <td colspan="6" class="text-center text-muted p-lg">
-                      No tienes exchanges conectados
+                      No exchanges connected
                     </td>
                   </tr>
                 }
@@ -128,7 +128,7 @@ interface ExchangeBalance {
         <div class="modal-overlay" (click)="showAddModal = false">
           <div class="modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3>Añadir Exchange</h3>
+              <h3>Add Exchange</h3>
               <button class="btn-close" (click)="showAddModal = false">×</button>
             </div>
             <div class="modal-body">
@@ -143,30 +143,30 @@ interface ExchangeBalance {
                 </select>
               </div>
               <div class="form-group">
-                <label>Etiqueta (opcional)</label>
+                <label>Label (optional)</label>
                 <input type="text" class="form-control" [(ngModel)]="newAccount.label"
-                       placeholder="Mi cuenta principal">
+                       placeholder="My main account">
               </div>
               <div class="form-group">
                 <label>API Key</label>
                 <input type="text" class="form-control" [(ngModel)]="newAccount.apiKey"
-                       placeholder="Tu API Key">
+                       placeholder="Your API Key">
               </div>
               <div class="form-group">
                 <label>API Secret</label>
                 <input type="password" class="form-control" [(ngModel)]="newAccount.apiSecret"
-                       placeholder="Tu API Secret">
+                       placeholder="Your API Secret">
               </div>
               <div class="alert alert-info">
-                <strong>Permisos requeridos:</strong> Solo lectura (Read-only).
-                No necesitas permisos de trading o retiro.
+                <strong>Required permissions:</strong> Read-only.
+                You don't need trading or withdrawal permissions.
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="showAddModal = false">Cancelar</button>
+              <button class="btn btn-secondary" (click)="showAddModal = false">Cancel</button>
               <button class="btn btn-primary" (click)="addAccount()"
                       [disabled]="!newAccount.exchange || !newAccount.apiKey || !newAccount.apiSecret || saving()">
-                {{ saving() ? 'Conectando...' : 'Conectar' }}
+                {{ saving() ? 'Connecting...' : 'Connect' }}
               </button>
             </div>
           </div>
@@ -178,7 +178,7 @@ interface ExchangeBalance {
         <div class="modal-overlay" (click)="showBalancesModal = false">
           <div class="modal modal-lg" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h3>Saldos - {{ selectedAccount?.label }}</h3>
+              <h3>Balances - {{ selectedAccount?.label }}</h3>
               <button class="btn-close" (click)="showBalancesModal = false">×</button>
             </div>
             <div class="modal-body">
@@ -190,9 +190,9 @@ interface ExchangeBalance {
                 <table class="table">
                   <thead>
                     <tr>
-                      <th>Activo</th>
-                      <th class="text-right">Disponible</th>
-                      <th class="text-right">Bloqueado</th>
+                      <th>Asset</th>
+                      <th class="text-right">Available</th>
+                      <th class="text-right">Locked</th>
                       <th class="text-right">Total</th>
                     </tr>
                   </thead>
@@ -206,7 +206,7 @@ interface ExchangeBalance {
                       </tr>
                     } @empty {
                       <tr>
-                        <td colspan="4" class="text-center text-muted">Sin saldos</td>
+                        <td colspan="4" class="text-center text-muted">No balances</td>
                       </tr>
                     }
                   </tbody>
@@ -214,7 +214,7 @@ interface ExchangeBalance {
               }
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" (click)="showBalancesModal = false">Cerrar</button>
+              <button class="btn btn-secondary" (click)="showBalancesModal = false">Close</button>
             </div>
           </div>
         </div>
@@ -461,9 +461,9 @@ export class ExchangesListComponent implements OnInit {
 
   getSyncStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      SYNCED: 'Sincronizado',
-      SYNCING: 'Sincronizando...',
-      PENDING: 'Pendiente',
+      SYNCED: 'Synced',
+      SYNCING: 'Syncing...',
+      PENDING: 'Pending',
       ERROR: 'Error',
     };
     return labels[status] || status;
@@ -508,17 +508,17 @@ export class ExchangesListComponent implements OnInit {
       `/crypto/exchanges/accounts/${account.id}/sync/all`, {}
     ).subscribe({
       next: (result) => {
-        alert(`Sincronización completada:\n- Trades: ${result.trades}\n- Depósitos: ${result.deposits}\n- Retiros: ${result.withdrawals}`);
+        alert(`Sync completed:\n- Trades: ${result.trades}\n- Deposits: ${result.deposits}\n- Withdrawals: ${result.withdrawals}`);
         this.loadAccounts();
       },
       error: (err) => {
-        alert('Error al sincronizar: ' + err.message);
+        alert('Error syncing: ' + err.message);
       },
     });
   }
 
   deleteAccount(account: ExchangeAccount): void {
-    if (!confirm(`¿Eliminar la conexión con ${account.label}?`)) {
+    if (!confirm(`Delete connection with ${account.label}?`)) {
       return;
     }
 

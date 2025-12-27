@@ -101,6 +101,60 @@ interface Account {
           }
         </div>
       </div>
+
+      <!-- Create Account Modal -->
+      @if (showCreateModal) {
+        <div class="modal-overlay" (click)="showCreateModal = false">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editingAccount ? 'Edit Account' : 'New Account' }}</h3>
+              <button class="btn-close" (click)="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Code *</label>
+                <input type="text" class="form-control" [(ngModel)]="newAccount.code"
+                       placeholder="e.g., 100, 4300, 57200">
+              </div>
+              <div class="form-group">
+                <label>Name *</label>
+                <input type="text" class="form-control" [(ngModel)]="newAccount.name"
+                       placeholder="Account name">
+              </div>
+              <div class="form-group">
+                <label>Type *</label>
+                <select class="form-control" [(ngModel)]="newAccount.type">
+                  <option value="">Select type...</option>
+                  <option value="ASSET">Asset</option>
+                  <option value="LIABILITY">Liability</option>
+                  <option value="EQUITY">Equity</option>
+                  <option value="INCOME">Income</option>
+                  <option value="EXPENSE">Expense</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Parent Account (optional)</label>
+                <select class="form-control" [(ngModel)]="newAccount.parentId">
+                  <option value="">None (top-level account)</option>
+                  @for (acc of accounts(); track acc.id) {
+                    <option [value]="acc.id">{{ acc.code }} - {{ acc.name }}</option>
+                  }
+                </select>
+              </div>
+              @if (saveError) {
+                <div class="alert alert-danger">{{ saveError }}</div>
+              }
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+              <button class="btn btn-primary" (click)="saveAccount()"
+                      [disabled]="!newAccount.code || !newAccount.name || !newAccount.type || saving()">
+                {{ saving() ? 'Saving...' : (editingAccount ? 'Update' : 'Create') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -121,14 +175,111 @@ interface Account {
     .filters {
       margin-bottom: var(--spacing-lg);
     }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--gray-200);
+
+      h3 { margin: 0; }
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray-500);
+
+      &:hover { color: var(--gray-700); }
+    }
+
+    .modal-body {
+      padding: var(--spacing-lg);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-md);
+
+      label {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+        font-weight: 500;
+      }
+    }
+
+    .form-control {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+    }
+
+    .alert-danger {
+      padding: var(--spacing-md);
+      background: var(--danger-light);
+      color: var(--danger);
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-md);
+    }
   `],
 })
 export class AccountsListComponent implements OnInit {
   accounts = signal<Account[]>([]);
   loading = signal(true);
+  saving = signal(false);
   searchTerm = '';
   filterType = '';
   showCreateModal = false;
+  editingAccount: Account | null = null;
+  saveError = '';
+
+  newAccount = {
+    code: '',
+    name: '',
+    type: '',
+    parentId: '',
+  };
 
   constructor(private api: ApiService) {}
 
@@ -160,7 +311,53 @@ export class AccountsListComponent implements OnInit {
   }
 
   editAccount(account: Account): void {
-    console.log('Edit account:', account);
+    this.editingAccount = account;
+    this.newAccount = {
+      code: account.code,
+      name: account.name,
+      type: account.type,
+      parentId: account.parentId || '',
+    };
+    this.showCreateModal = true;
+  }
+
+  closeModal(): void {
+    this.showCreateModal = false;
+    this.editingAccount = null;
+    this.saveError = '';
+    this.newAccount = { code: '', name: '', type: '', parentId: '' };
+  }
+
+  saveAccount(): void {
+    if (!this.newAccount.code || !this.newAccount.name || !this.newAccount.type) {
+      return;
+    }
+
+    this.saving.set(true);
+    this.saveError = '';
+
+    const payload = {
+      code: this.newAccount.code,
+      name: this.newAccount.name,
+      type: this.newAccount.type,
+      parentId: this.newAccount.parentId || null,
+    };
+
+    const request = this.editingAccount
+      ? this.api.put(`/accounts/${this.editingAccount.id}`, payload)
+      : this.api.post('/accounts', payload);
+
+    request.subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.closeModal();
+        this.loadAccounts();
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.saveError = err.error?.message || 'Error saving account';
+      },
+    });
   }
 
   getTypeBadgeClass(type: string): string {
