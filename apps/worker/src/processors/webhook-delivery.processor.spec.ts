@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WebhookDeliveryProcessor } from './webhook-delivery.processor';
+import { WebhookDeliveryProcessor } from './webhook-delivery.processor.js';
 import { PrismaService } from '@crypto-erp/database';
-import { Job } from 'bullmq';
+import { Job } from 'bull';
 import axios from 'axios';
 
 jest.mock('axios');

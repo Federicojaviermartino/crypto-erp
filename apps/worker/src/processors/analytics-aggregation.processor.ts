@@ -75,33 +75,41 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
       )
     `;
 
-    // Track invoice creation events
-    const invoiceEvents = await this.prisma.invoice.groupBy({
-      by: ['companyId'],
-      _count: true,
-      _sum: {
-        totalAmount: true,
-      },
+    // Track invoice creation events - use findMany and aggregate manually
+    const invoices = await this.prisma.invoice.findMany({
       where: {
-        companyId: companyId,
+        ...(companyId ? { companyId } : {}),
         createdAt: {
           gte: startDate,
           lt: endDate,
         },
       },
+      select: {
+        companyId: true,
+        total: true,
+      },
     });
 
+    // Group by company manually
+    const invoicesByCompany = new Map<string, { count: number; total: Decimal }>();
+    for (const inv of invoices) {
+      const current = invoicesByCompany.get(inv.companyId) || { count: 0, total: new Decimal(0) };
+      current.count++;
+      current.total = current.total.add(inv.total);
+      invoicesByCompany.set(inv.companyId, current);
+    }
+
     // Create analytics events for each company's invoices
-    for (const event of invoiceEvents) {
+    for (const [invCompanyId, data] of invoicesByCompany) {
       await this.prisma.analyticsEvent.create({
         data: {
-          companyId: event.companyId,
+          companyId: invCompanyId,
           eventType: 'invoice.created',
           category: 'revenue',
-          value: event._sum.totalAmount || new Decimal(0),
-          currency: 'EUR', // TODO: Get from company
+          value: data.total,
+          currency: 'EUR',
           metadata: {
-            count: event._count,
+            count: data.count,
             period: 'hourly',
           },
           timestamp: startDate,
@@ -110,7 +118,7 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
     }
 
     this.logger.log(
-      `Aggregated ${invoiceEvents.length} hourly invoice metrics`,
+      `Aggregated ${invoicesByCompany.size} hourly invoice metrics`,
     );
   }
 
@@ -140,33 +148,49 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
       )
     `;
 
-    // Aggregate crypto transactions
-    const cryptoTransactions = await this.prisma.cryptoTransaction.groupBy({
-      by: ['companyId', 'type'],
-      _count: true,
-      _sum: {
-        amountFiat: true,
-      },
+    // Get wallets for the company to filter transactions
+    const wallets = companyId
+      ? await this.prisma.wallet.findMany({ where: { companyId }, select: { id: true } })
+      : [];
+    const walletIds = wallets.map(w => w.id);
+
+    // Get crypto transactions
+    const transactions = await this.prisma.cryptoTransaction.findMany({
       where: {
-        companyId: companyId,
-        date: {
+        ...(walletIds.length > 0 ? { walletId: { in: walletIds } } : {}),
+        blockTimestamp: {
           gte: startDate,
           lt: endDate,
         },
       },
+      select: {
+        type: true,
+        priceInEur: true,
+      },
     });
 
-    for (const tx of cryptoTransactions) {
+    // Group by type manually
+    const txByType = new Map<string, { count: number; total: Decimal }>();
+    for (const tx of transactions) {
+      const current = txByType.get(tx.type) || { count: 0, total: new Decimal(0) };
+      current.count++;
+      if (tx.priceInEur) {
+        current.total = current.total.add(tx.priceInEur);
+      }
+      txByType.set(tx.type, current);
+    }
+
+    for (const [txType, data] of txByType) {
       await this.prisma.analyticsEvent.create({
         data: {
-          companyId: tx.companyId,
-          eventType: `crypto.${tx.type.toLowerCase()}`,
+          companyId: companyId || null,
+          eventType: `crypto.${txType.toLowerCase()}`,
           category: 'crypto',
-          value: tx._sum.amountFiat || new Decimal(0),
+          value: data.total,
           currency: 'EUR',
           metadata: {
-            count: tx._count,
-            transactionType: tx.type,
+            count: data.count,
+            transactionType: txType,
             period: 'daily',
           },
           timestamp: startDate,
@@ -175,7 +199,7 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
     }
 
     this.logger.log(
-      `Aggregated ${cryptoTransactions.length} daily crypto metrics`,
+      `Aggregated ${txByType.size} daily crypto metrics`,
     );
   }
 
@@ -188,37 +212,44 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
     startDate: Date,
     endDate: Date,
   ): Promise<void> {
-    // Calculate Monthly Recurring Revenue (MRR)
-    const subscriptions = await this.prisma.subscription.groupBy({
-      by: ['companyId'],
-      _count: true,
-      _sum: {
-        amount: true,
-      },
+    // Calculate Monthly Recurring Revenue (MRR) from active subscriptions
+    // Get subscriptions with their plan prices
+    const activeSubscriptions = await this.prisma.subscription.findMany({
       where: {
-        companyId: companyId,
+        ...(companyId ? { companyId } : {}),
         status: 'ACTIVE',
         createdAt: {
           lt: endDate,
         },
       },
+      include: {
+        plan: true,
+      },
     });
 
-    for (const sub of subscriptions) {
-      const mrr = sub._sum.amount || new Decimal(0);
-      const arr = mrr.mul(12); // Annual Recurring Revenue
+    // Group by company and calculate MRR
+    const companyMrr = new Map<string, { mrr: Decimal; count: number }>();
+    for (const sub of activeSubscriptions) {
+      const current = companyMrr.get(sub.companyId) || { mrr: new Decimal(0), count: 0 };
+      current.mrr = current.mrr.add(sub.plan.monthlyPrice);
+      current.count++;
+      companyMrr.set(sub.companyId, current);
+    }
+
+    for (const [subCompanyId, data] of companyMrr) {
+      const arr = data.mrr.mul(12); // Annual Recurring Revenue
 
       // Create MRR event
       await this.prisma.analyticsEvent.create({
         data: {
-          companyId: sub.companyId,
+          companyId: subCompanyId,
           eventType: 'subscription.mrr',
           category: 'revenue',
-          value: mrr,
+          value: data.mrr,
           currency: 'EUR',
           metadata: {
             arr: arr.toString(),
-            activeSubscriptions: sub._count,
+            activeSubscriptions: data.count,
             period: 'monthly',
           },
           timestamp: startDate,
@@ -229,9 +260,9 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
     // Calculate churn rate
     const churnedSubscriptions = await this.prisma.subscription.count({
       where: {
-        companyId: companyId,
-        status: 'CANCELLED',
-        cancelledAt: {
+        ...(companyId ? { companyId } : {}),
+        status: 'CANCELED',
+        canceledAt: {
           gte: startDate,
           lt: endDate,
         },
@@ -240,7 +271,7 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
 
     const totalSubscriptions = await this.prisma.subscription.count({
       where: {
-        companyId: companyId,
+        ...(companyId ? { companyId } : {}),
         createdAt: {
           lt: startDate,
         },
@@ -252,7 +283,7 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
 
       await this.prisma.analyticsEvent.create({
         data: {
-          companyId: companyId || '',
+          companyId: companyId || null,
           eventType: 'subscription.churn',
           category: 'revenue',
           value: new Decimal(churnRate),
