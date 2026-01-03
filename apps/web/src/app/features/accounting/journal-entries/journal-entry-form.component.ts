@@ -17,7 +17,7 @@ interface Account {
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Nuevo Asiento Contable</h1>
+        <h1>New Journal Entry</h1>
       </header>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -25,16 +25,16 @@ interface Account {
           <div class="card-body">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Fecha</label>
+                <label class="form-label">Date</label>
                 <input type="date" class="form-input" formControlName="date" />
               </div>
               <div class="form-group" style="flex: 2;">
-                <label class="form-label">Descripción</label>
-                <input type="text" class="form-input" formControlName="description" placeholder="Descripción del asiento" />
+                <label class="form-label">Description</label>
+                <input type="text" class="form-input" formControlName="description" placeholder="Entry description" />
               </div>
               <div class="form-group">
-                <label class="form-label">Referencia</label>
-                <input type="text" class="form-input" formControlName="reference" placeholder="Ref. documento" />
+                <label class="form-label">Reference</label>
+                <input type="text" class="form-input" formControlName="reference" placeholder="Doc. reference" />
               </div>
             </div>
           </div>
@@ -43,19 +43,19 @@ interface Account {
         <!-- Lines -->
         <div class="card mb-lg">
           <div class="card-header d-flex justify-between align-center">
-            <h3>Líneas del Asiento</h3>
+            <h3>Entry Lines</h3>
             <button type="button" class="btn btn-sm btn-secondary" (click)="addLine()">
-              + Añadir Línea
+              + Add Line
             </button>
           </div>
           <div class="card-body" style="padding: 0;">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Cuenta</th>
-                  <th>Descripción</th>
-                  <th style="width: 150px;">Debe</th>
-                  <th style="width: 150px;">Haber</th>
+                  <th>Account</th>
+                  <th>Description</th>
+                  <th style="width: 150px;">Debit</th>
+                  <th style="width: 150px;">Credit</th>
                   <th style="width: 50px;"></th>
                 </tr>
               </thead>
@@ -64,14 +64,14 @@ interface Account {
                   <tr [formGroupName]="i">
                     <td>
                       <select class="form-select" formControlName="accountCode">
-                        <option value="">Seleccionar cuenta</option>
+                        <option value="">Select account</option>
                         @for (account of accounts(); track account.id) {
                           <option [value]="account.code">{{ account.code }} - {{ account.name }}</option>
                         }
                       </select>
                     </td>
                     <td>
-                      <input type="text" class="form-input" formControlName="description" placeholder="Descripción" />
+                      <input type="text" class="form-input" formControlName="description" placeholder="Description" />
                     </td>
                     <td>
                       <input type="number" class="form-input text-right" formControlName="debit" step="0.01" min="0" />
@@ -89,19 +89,19 @@ interface Account {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="2" class="text-right"><strong>Totales:</strong></td>
+                  <td colspan="2" class="text-right"><strong>Totals:</strong></td>
                   <td class="text-right"><strong>{{ totalDebit() | number:'1.2-2' }}</strong></td>
                   <td class="text-right"><strong>{{ totalCredit() | number:'1.2-2' }}</strong></td>
                   <td></td>
                 </tr>
                 <tr>
-                  <td colspan="2" class="text-right">Diferencia:</td>
+                  <td colspan="2" class="text-right">Difference:</td>
                   <td colspan="2" class="text-center" [class.text-danger]="!isBalanced()" [class.text-success]="isBalanced()">
                     <strong>{{ difference() | number:'1.2-2' }}</strong>
                     @if (isBalanced()) {
-                      ✓ Cuadrado
+                      ✓ Balanced
                     } @else {
-                      ⚠ Descuadrado
+                      ⚠ Unbalanced
                     }
                   </td>
                   <td></td>
@@ -116,13 +116,13 @@ interface Account {
         }
 
         <div class="d-flex gap-md justify-between">
-          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
           <div class="d-flex gap-md">
             <button type="submit" class="btn btn-secondary" [disabled]="saving() || !isBalanced()">
-              Guardar Borrador
+              Save Draft
             </button>
             <button type="button" class="btn btn-primary" [disabled]="saving() || !isBalanced()" (click)="saveAndPost()">
-              Guardar y Publicar
+              Save and Post
             </button>
           </div>
         </div>
@@ -240,7 +240,7 @@ export class JournalEntryFormComponent implements OnInit {
 
   onSubmit(): void {
     if (!this.isBalanced()) {
-      this.error.set('El asiento debe estar cuadrado');
+      this.error.set('Entry must be balanced');
       return;
     }
 
@@ -254,7 +254,7 @@ export class JournalEntryFormComponent implements OnInit {
             next: () => this.router.navigate(['/accounting/journal-entries']),
             error: (err) => {
               this.saving.set(false);
-              this.error.set(err.error?.message || 'Error al publicar');
+              this.error.set(err.error?.message || 'Error posting entry');
             },
           });
         } else {
@@ -264,7 +264,7 @@ export class JournalEntryFormComponent implements OnInit {
       error: (err) => {
         this.saving.set(false);
         this.postAfterSave = false;
-        this.error.set(err.error?.message || 'Error al guardar');
+        this.error.set(err.error?.message || 'Error saving entry');
       },
     });
   }

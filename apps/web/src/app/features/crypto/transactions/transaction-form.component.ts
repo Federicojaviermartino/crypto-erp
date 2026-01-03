@@ -17,7 +17,7 @@ interface CryptoAsset {
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Nueva Transacción Crypto</h1>
+        <h1>New Crypto Transaction</h1>
       </header>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -25,66 +25,66 @@ interface CryptoAsset {
           <div class="card-body">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Tipo de Transacción *</label>
+                <label class="form-label">Transaction Type *</label>
                 <select class="form-select" formControlName="type">
-                  <option value="BUY">Compra</option>
-                  <option value="SELL">Venta</option>
-                  <option value="SWAP">Intercambio</option>
-                  <option value="TRANSFER_IN">Transferencia Entrada</option>
-                  <option value="TRANSFER_OUT">Transferencia Salida</option>
-                  <option value="STAKING_REWARD">Recompensa Staking</option>
+                  <option value="BUY">Buy</option>
+                  <option value="SELL">Sell</option>
+                  <option value="SWAP">Swap</option>
+                  <option value="TRANSFER_IN">Transfer In</option>
+                  <option value="TRANSFER_OUT">Transfer Out</option>
+                  <option value="STAKING_REWARD">Staking Reward</option>
                   <option value="AIRDROP">Airdrop</option>
-                  <option value="MINING">Minería</option>
+                  <option value="MINING">Mining</option>
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Activo *</label>
+                <label class="form-label">Asset *</label>
                 <select class="form-select" formControlName="assetId">
-                  <option value="">Seleccionar activo</option>
+                  <option value="">Select asset</option>
                   @for (asset of assets(); track asset.id) {
                     <option [value]="asset.id">{{ asset.symbol }} - {{ asset.name }}</option>
                   }
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Fecha y Hora *</label>
+                <label class="form-label">Date and Time *</label>
                 <input type="datetime-local" class="form-input" formControlName="date" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Cantidad *</label>
+                <label class="form-label">Amount *</label>
                 <input type="number" class="form-input" formControlName="amount" step="0.00000001" min="0" placeholder="0.00000000" />
               </div>
               <div class="form-group">
-                <label class="form-label">Precio por Unidad (€)</label>
+                <label class="form-label">Price per Unit (€)</label>
                 <input type="number" class="form-input" formControlName="pricePerUnit" step="0.01" min="0" placeholder="0.00" />
               </div>
               <div class="form-group">
-                <label class="form-label">Valor Total (€)</label>
-                <input type="number" class="form-input" formControlName="fiatValue" step="0.01" min="0" placeholder="Calculado automáticamente" />
+                <label class="form-label">Total Value (€)</label>
+                <input type="number" class="form-input" formControlName="fiatValue" step="0.01" min="0" placeholder="Auto-calculated" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Exchange/Wallet</label>
-                <input type="text" class="form-input" formControlName="exchange" placeholder="Ej: Binance, Coinbase, MetaMask" />
+                <input type="text" class="form-input" formControlName="exchange" placeholder="E.g.: Binance, Coinbase, MetaMask" />
               </div>
               <div class="form-group">
-                <label class="form-label">Hash de Transacción</label>
+                <label class="form-label">Transaction Hash</label>
                 <input type="text" class="form-input" formControlName="txHash" placeholder="0x..." />
               </div>
               <div class="form-group">
-                <label class="form-label">Comisión (en cripto)</label>
+                <label class="form-label">Fee (in crypto)</label>
                 <input type="number" class="form-input" formControlName="fee" step="0.00000001" min="0" placeholder="0.00000000" />
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label">Notas</label>
-              <textarea class="form-textarea" formControlName="notes" rows="2" placeholder="Notas adicionales"></textarea>
+              <label class="form-label">Notes</label>
+              <textarea class="form-textarea" formControlName="notes" rows="2" placeholder="Additional notes"></textarea>
             </div>
           </div>
         </div>
@@ -94,13 +94,13 @@ interface CryptoAsset {
         }
 
         <div class="d-flex gap-md justify-between">
-          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
           <button type="submit" class="btn btn-primary" [disabled]="saving()">
             @if (saving()) {
               <span class="spinner"></span>
-              Guardando...
+              Saving...
             } @else {
-              Guardar Transacción
+              Save Transaction
             }
           </button>
         </div>
@@ -205,7 +205,7 @@ export class TransactionFormComponent implements OnInit {
       },
       error: (err) => {
         this.saving.set(false);
-        this.error.set(err.error?.message || 'Error al guardar');
+        this.error.set(err.error?.message || 'Error saving transaction');
       },
     });
   }

@@ -20,11 +20,11 @@ interface InvoiceSeries {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Series de Facturación</h1>
-          <p class="text-muted">Configura las series de numeración</p>
+          <h1>Invoice Series</h1>
+          <p class="text-muted">Configure numbering series</p>
         </div>
         <button class="btn btn-primary" (click)="showCreateModal = true">
-          + Nueva Serie
+          + New Series
         </button>
       </header>
 
@@ -38,12 +38,12 @@ interface InvoiceSeries {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Prefijo</th>
-                  <th>Nombre</th>
-                  <th>Siguiente Nº</th>
-                  <th>Tipo</th>
-                  <th>Por Defecto</th>
-                  <th>Estado</th>
+                  <th>Prefix</th>
+                  <th>Name</th>
+                  <th>Next No.</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -54,26 +54,26 @@ interface InvoiceSeries {
                     <td>{{ series.nextNumber }}</td>
                     <td>
                       <span class="badge" [class]="series.isSales ? 'badge-info' : 'badge-warning'">
-                        {{ series.isSales ? 'Ventas' : 'Compras' }}
+                        {{ series.isSales ? 'Sales' : 'Purchases' }}
                       </span>
                     </td>
                     <td>
                       @if (series.isDefault) {
-                        <span class="badge badge-success">✓ Sí</span>
+                        <span class="badge badge-success">✓ Yes</span>
                       } @else {
                         <span class="text-muted">No</span>
                       }
                     </td>
                     <td>
                       <span class="badge" [class]="series.isActive ? 'badge-success' : 'badge-secondary'">
-                        {{ series.isActive ? 'Activa' : 'Inactiva' }}
+                        {{ series.isActive ? 'Active' : 'Inactive' }}
                       </span>
                     </td>
                   </tr>
                 } @empty {
                   <tr>
                     <td colspan="6" class="text-center text-muted p-lg">
-                      No hay series configuradas
+                      No series configured
                     </td>
                   </tr>
                 }

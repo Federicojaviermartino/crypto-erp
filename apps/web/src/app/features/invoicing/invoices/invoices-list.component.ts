@@ -89,7 +89,12 @@ interface Invoice {
                   <th>{{ direction === 'SALES' ? 'Customer' : 'Supplier' }}</th>
                   <th class="text-right">Amount</th>
                   <th>Status</th>
-                  <th>Verifactu</th>
+                  <th class="verifactu-header">
+                    <span class="header-with-tooltip">
+                      VeriFactu
+                      <span class="help-icon" data-tooltip="Spanish Invoice Verification System (VeriFactu) from AEAT. Indicates if the invoice complies with Spanish electronic invoicing regulations.">?</span>
+                    </span>
+                  </th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -180,6 +185,65 @@ interface Invoice {
 
     .filters {
       margin-bottom: var(--spacing-lg);
+    }
+
+    .header-with-tooltip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .help-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--gray-300);
+      color: var(--gray-600);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: help;
+      position: relative;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      &:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: var(--gray-900);
+        color: var(--white);
+        font-size: 12px;
+        font-weight: 400;
+        white-space: normal;
+        width: 250px;
+        border-radius: var(--radius-md);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 100;
+        line-height: 1.4;
+      }
+
+      &:hover::before {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 4px;
+        border: 4px solid transparent;
+        border-bottom-color: var(--gray-900);
+        z-index: 100;
+      }
     }
   `],
 })

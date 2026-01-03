@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-company-settings',
@@ -10,8 +11,8 @@ import { ApiService } from '@core/services/api.service';
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Configuración de Empresa</h1>
-        <p class="text-muted">Datos fiscales y configuración general</p>
+        <h1>Company Settings</h1>
+        <p class="text-muted">Tax information and general configuration</p>
       </header>
 
       @if (loading()) {
@@ -22,35 +23,35 @@ import { ApiService } from '@core/services/api.service';
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="card mb-lg">
             <div class="card-header">
-              <h3>Datos Fiscales</h3>
+              <h3>Tax Information</h3>
             </div>
             <div class="card-body">
               <div class="form-row">
                 <div class="form-group" style="flex: 2;">
-                  <label class="form-label">Razón Social *</label>
+                  <label class="form-label">Company Name *</label>
                   <input type="text" class="form-input" formControlName="name" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">NIF/CIF *</label>
+                  <label class="form-label">Tax ID *</label>
                   <input type="text" class="form-input" formControlName="taxId" placeholder="B12345678" />
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Dirección</label>
+                <label class="form-label">Address</label>
                 <input type="text" class="form-input" formControlName="address" />
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Ciudad</label>
+                  <label class="form-label">City</label>
                   <input type="text" class="form-input" formControlName="city" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Código Postal</label>
+                  <label class="form-label">Postal Code</label>
                   <input type="text" class="form-input" formControlName="postalCode" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">País</label>
-                  <input type="text" class="form-input" formControlName="country" value="España" />
+                  <label class="form-label">Country</label>
+                  <input type="text" class="form-input" formControlName="country" value="Spain" />
                 </div>
               </div>
             </div>
@@ -58,7 +59,7 @@ import { ApiService } from '@core/services/api.service';
 
           <div class="card mb-lg">
             <div class="card-header">
-              <h3>Contacto</h3>
+              <h3>Contact</h3>
             </div>
             <div class="card-body">
               <div class="form-row">
@@ -67,11 +68,11 @@ import { ApiService } from '@core/services/api.service';
                   <input type="email" class="form-input" formControlName="email" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Teléfono</label>
+                  <label class="form-label">Phone</label>
                   <input type="text" class="form-input" formControlName="phone" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Web</label>
+                  <label class="form-label">Website</label>
                   <input type="text" class="form-input" formControlName="website" placeholder="https://" />
                 </div>
               </div>
@@ -79,7 +80,7 @@ import { ApiService } from '@core/services/api.service';
           </div>
 
           @if (success()) {
-            <div class="alert alert-success mb-lg">Cambios guardados correctamente</div>
+            <div class="alert alert-success mb-lg">Changes saved successfully</div>
           }
 
           @if (error()) {
@@ -90,7 +91,7 @@ import { ApiService } from '@core/services/api.service';
             @if (saving()) {
               <span class="spinner"></span>
             }
-            Guardar Cambios
+            Save Changes
           </button>
         </form>
       }
@@ -128,6 +129,7 @@ export class CompanySettingsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private api: ApiService,
+    private notificationService: NotificationService,
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -135,7 +137,7 @@ export class CompanySettingsComponent implements OnInit {
       address: [''],
       city: [''],
       postalCode: [''],
-      country: ['España'],
+      country: ['Spain'],
       email: [''],
       phone: [''],
       website: [''],
@@ -159,6 +161,7 @@ export class CompanySettingsComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.notificationService.error('Please complete all required fields');
       return;
     }
 
@@ -170,11 +173,14 @@ export class CompanySettingsComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.success.set(true);
+        this.notificationService.success('Settings saved successfully');
         setTimeout(() => this.success.set(false), 3000);
       },
       error: (err) => {
         this.saving.set(false);
-        this.error.set(err.error?.message || 'Error al guardar');
+        const errorMessage = err.error?.message || 'Error saving changes';
+        this.error.set(errorMessage);
+        this.notificationService.error(errorMessage);
       },
     });
   }

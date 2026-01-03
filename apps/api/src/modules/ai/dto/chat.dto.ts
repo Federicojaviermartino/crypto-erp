@@ -13,6 +13,11 @@ class ChatMessageDto {
 }
 
 class AiContextDto {
+  @ApiProperty({ required: false, description: 'Company ID for RAG context' })
+  @IsOptional()
+  @IsString()
+  companyId?: string;
+
   @ApiProperty({ required: false, description: 'Company name' })
   @IsOptional()
   @IsString()
@@ -32,6 +37,10 @@ class AiContextDto {
   @IsOptional()
   @IsString()
   accountBalances?: string;
+
+  @ApiProperty({ required: false, description: 'Enable RAG-enhanced responses', default: false })
+  @IsOptional()
+  useRAG?: boolean;
 
   @ApiProperty({
     required: false,

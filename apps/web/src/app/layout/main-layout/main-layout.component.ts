@@ -18,14 +18,14 @@ interface NavItem {
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <h2 class="logo">
+          <a routerLink="/dashboard" class="logo-link">
             @if (!sidebarCollapsed()) {
-              Crypto ERP
+              <span class="logo-text">Crypto ERP</span>
             } @else {
-              CE
+              <span class="logo-icon">₿</span>
             }
-          </h2>
-          <button class="toggle-btn" (click)="toggleSidebar()">
+          </a>
+          <button class="toggle-btn" (click)="toggleSidebar()" [title]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
             {{ sidebarCollapsed() ? '→' : '←' }}
           </button>
         </div>
@@ -36,7 +36,8 @@ interface NavItem {
               [routerLink]="item.path"
               routerLinkActive="active"
               class="nav-item"
-              [title]="item.label"
+              [class.show-tooltip]="sidebarCollapsed()"
+              [attr.data-tooltip]="item.label"
             >
               <span class="nav-icon">{{ item.icon }}</span>
               @if (!sidebarCollapsed()) {
@@ -95,13 +96,29 @@ interface NavItem {
       border-bottom: 1px solid var(--gray-700);
     }
 
-    .logo {
+    .logo-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .logo-text {
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--primary-light);
-      margin: 0;
       white-space: nowrap;
-      overflow: hidden;
+    }
+
+    .logo-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: var(--radius-md);
+      font-size: 1.25rem;
+      color: var(--white);
     }
 
     .toggle-btn {
@@ -137,6 +154,7 @@ interface NavItem {
       border-radius: var(--radius-md);
       margin-bottom: var(--spacing-xs);
       transition: all var(--transition-fast);
+      position: relative;
 
       &:hover {
         background: var(--gray-800);
@@ -146,6 +164,49 @@ interface NavItem {
       &.active {
         background: var(--primary);
         color: var(--white);
+      }
+
+      // Custom tooltip for collapsed sidebar
+      &.show-tooltip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 12px;
+        padding: 6px 12px;
+        background: var(--gray-900);
+        color: var(--white);
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+        border-radius: var(--radius-md);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        z-index: 1000;
+      }
+
+      &.show-tooltip::before {
+        content: '';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 4px;
+        border: 4px solid transparent;
+        border-right-color: var(--gray-900);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        z-index: 1000;
+      }
+
+      &.show-tooltip:hover::after,
+      &.show-tooltip:hover::before {
+        opacity: 1;
+        visibility: visible;
       }
     }
 

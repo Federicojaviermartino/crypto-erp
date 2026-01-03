@@ -25,11 +25,11 @@ interface PortfolioSummary {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Portfolio Crypto</h1>
-          <p class="text-muted">Resumen de tus activos digitales</p>
+          <h1>Crypto Portfolio</h1>
+          <p class="text-muted">Summary of your digital assets</p>
         </div>
         <div class="d-flex gap-md">
-          <a routerLink="/crypto/transactions/new" class="btn btn-primary">+ Nueva Transacción</a>
+          <a routerLink="/crypto/transactions/new" class="btn btn-primary">+ New Transaction</a>
         </div>
       </header>
 
@@ -39,14 +39,14 @@ interface PortfolioSummary {
           <span class="summary-icon">💰</span>
           <div class="summary-info">
             <h3>{{ portfolio()?.totalCostBasis | number:'1.2-2' }} €</h3>
-            <p>Costo Base Total</p>
+            <p>Total Cost Basis</p>
           </div>
         </div>
         <div class="summary-card">
           <span class="summary-icon">📊</span>
           <div class="summary-info">
             <h3>{{ portfolio()?.positions?.length || 0 }}</h3>
-            <p>Posiciones Activas</p>
+            <p>Active Positions</p>
           </div>
         </div>
       </div>
@@ -56,15 +56,15 @@ interface PortfolioSummary {
         <a routerLink="/crypto/portfolio" class="nav-tab active">Portfolio</a>
         <a routerLink="/crypto/wallets" class="nav-tab">Wallets</a>
         <a routerLink="/crypto/exchanges" class="nav-tab">Exchanges</a>
-        <a routerLink="/crypto/transactions" class="nav-tab">Transacciones</a>
-        <a routerLink="/crypto/assets" class="nav-tab">Activos</a>
-        <a routerLink="/crypto/tax-report" class="nav-tab">Informe Fiscal</a>
+        <a routerLink="/crypto/transactions" class="nav-tab">Transactions</a>
+        <a routerLink="/crypto/assets" class="nav-tab">Assets</a>
+        <a routerLink="/crypto/tax-report" class="nav-tab">Tax Report</a>
       </div>
 
       <!-- Positions Table -->
       <div class="card">
         <div class="card-header">
-          <h3>Posiciones</h3>
+          <h3>Positions</h3>
         </div>
         <div class="card-body" style="padding: 0;">
           @if (loading()) {
@@ -75,11 +75,11 @@ interface PortfolioSummary {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Activo</th>
-                  <th class="text-right">Cantidad</th>
-                  <th class="text-right">Costo Promedio</th>
-                  <th class="text-right">Costo Base Total</th>
-                  <th>Acciones</th>
+                  <th>Asset</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-right">Average Cost</th>
+                  <th class="text-right">Total Cost Basis</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -96,14 +96,14 @@ interface PortfolioSummary {
                     <td class="text-right">{{ position.totalCostBasis | number:'1.2-2' }} €</td>
                     <td>
                       <a routerLink="/crypto/transactions" [queryParams]="{assetId: position.assetId}" class="btn btn-sm btn-secondary">
-                        Ver Movimientos
+                        View Transactions
                       </a>
                     </td>
                   </tr>
                 } @empty {
                   <tr>
                     <td colspan="5" class="text-center text-muted p-lg">
-                      No tienes posiciones abiertas
+                      You have no open positions
                     </td>
                   </tr>
                 }

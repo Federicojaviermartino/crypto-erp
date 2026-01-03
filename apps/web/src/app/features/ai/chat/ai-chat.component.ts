@@ -614,9 +614,7 @@ export class AiChatComponent implements AfterViewChecked, OnInit, OnDestroy {
       error: () => {
         const errorMessage: ChatMessage = {
           role: 'assistant',
-          content: this.language() === 'es'
-            ? 'Lo siento, ha ocurrido un error. Por favor, intenta de nuevo.'
-            : 'Sorry, an error occurred. Please try again.',
+          content: 'Sorry, an error occurred. Please try again.',
           timestamp: new Date(),
         };
         this.messages.update(msgs => [...msgs, errorMessage]);
@@ -651,7 +649,7 @@ export class AiChatComponent implements AfterViewChecked, OnInit, OnDestroy {
       error: () => {
         const errorMessage: ChatMessage = {
           role: 'assistant',
-          content: 'Error al procesar el archivo adjunto.',
+          content: 'Error processing attached file.',
           timestamp: new Date(),
         };
         this.messages.update(msgs => [...msgs, errorMessage]);

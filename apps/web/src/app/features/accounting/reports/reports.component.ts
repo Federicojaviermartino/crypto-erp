@@ -10,34 +10,34 @@ import { ApiService } from '@core/services/api.service';
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Informes Contables</h1>
-        <p class="text-muted">Genera informes financieros</p>
+        <h1>Accounting Reports</h1>
+        <p class="text-muted">Generate financial reports</p>
       </header>
 
       <!-- Report Selection -->
       <div class="reports-grid">
         <div class="report-card" [class.active]="selectedReport() === 'trial-balance'" (click)="selectReport('trial-balance')">
           <span class="report-icon">📊</span>
-          <h3>Balance de Comprobación</h3>
-          <p>Sumas y saldos de todas las cuentas</p>
+          <h3>Trial Balance</h3>
+          <p>Sums and balances of all accounts</p>
         </div>
 
         <div class="report-card" [class.active]="selectedReport() === 'balance-sheet'" (click)="selectReport('balance-sheet')">
           <span class="report-icon">📋</span>
-          <h3>Balance General</h3>
-          <p>Activos, pasivos y patrimonio</p>
+          <h3>Balance Sheet</h3>
+          <p>Assets, liabilities and equity</p>
         </div>
 
         <div class="report-card" [class.active]="selectedReport() === 'income-statement'" (click)="selectReport('income-statement')">
           <span class="report-icon">📈</span>
-          <h3>Cuenta de Resultados</h3>
-          <p>Ingresos, gastos y beneficio</p>
+          <h3>Income Statement</h3>
+          <p>Income, expenses and profit</p>
         </div>
 
         <div class="report-card" [class.active]="selectedReport() === 'general-ledger'" (click)="selectReport('general-ledger')">
           <span class="report-icon">📒</span>
-          <h3>Libro Mayor</h3>
-          <p>Movimientos por cuenta</p>
+          <h3>General Ledger</h3>
+          <p>Account movements</p>
         </div>
       </div>
 
@@ -47,16 +47,16 @@ import { ApiService } from '@core/services/api.service';
           <div class="card-body d-flex gap-md align-center">
             @if (selectedReport() !== 'balance-sheet') {
               <div class="form-group mb-0">
-                <label class="form-label">Desde</label>
+                <label class="form-label">From</label>
                 <input type="date" class="form-input" [(ngModel)]="startDate" />
               </div>
               <div class="form-group mb-0">
-                <label class="form-label">Hasta</label>
+                <label class="form-label">To</label>
                 <input type="date" class="form-input" [(ngModel)]="endDate" />
               </div>
             } @else {
               <div class="form-group mb-0">
-                <label class="form-label">A fecha de</label>
+                <label class="form-label">As of</label>
                 <input type="date" class="form-input" [(ngModel)]="asOfDate" />
               </div>
             }
@@ -64,7 +64,7 @@ import { ApiService } from '@core/services/api.service';
               @if (loading()) {
                 <span class="spinner"></span>
               } @else {
-                Generar Informe
+                Generate Report
               }
             </button>
           </div>
@@ -75,7 +75,7 @@ import { ApiService } from '@core/services/api.service';
           <div class="card">
             <div class="card-header d-flex justify-between align-center">
               <h3>{{ getReportTitle() }}</h3>
-              <button class="btn btn-sm btn-secondary">Exportar PDF</button>
+              <button class="btn btn-sm btn-secondary">Export PDF</button>
             </div>
             <div class="card-body">
               @switch (selectedReport()) {
@@ -83,11 +83,11 @@ import { ApiService } from '@core/services/api.service';
                   <table class="table">
                     <thead>
                       <tr>
-                        <th>Código</th>
-                        <th>Cuenta</th>
-                        <th class="text-right">Debe</th>
-                        <th class="text-right">Haber</th>
-                        <th class="text-right">Saldo</th>
+                        <th>Code</th>
+                        <th>Account</th>
+                        <th class="text-right">Debit</th>
+                        <th class="text-right">Credit</th>
+                        <th class="text-right">Balance</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -105,7 +105,7 @@ import { ApiService } from '@core/services/api.service';
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="2"><strong>TOTALES</strong></td>
+                        <td colspan="2"><strong>TOTALS</strong></td>
                         <td class="text-right"><strong>{{ reportData().totals?.totalDebits | number:'1.2-2' }}</strong></td>
                         <td class="text-right"><strong>{{ reportData().totals?.totalCredits | number:'1.2-2' }}</strong></td>
                         <td></td>
@@ -116,7 +116,7 @@ import { ApiService } from '@core/services/api.service';
                 @case ('balance-sheet') {
                   <div class="balance-sheet-grid">
                     <div>
-                      <h4>ACTIVO</h4>
+                      <h4>ASSETS</h4>
                       @for (row of reportData().assets?.accounts; track row.accountId) {
                         <div class="bs-row">
                           <span>{{ row.accountName }}</span>
@@ -124,12 +124,12 @@ import { ApiService } from '@core/services/api.service';
                         </div>
                       }
                       <div class="bs-total">
-                        <span>Total Activo</span>
+                        <span>Total Assets</span>
                         <span>{{ reportData().assets?.total | number:'1.2-2' }}</span>
                       </div>
                     </div>
                     <div>
-                      <h4>PASIVO</h4>
+                      <h4>LIABILITIES</h4>
                       @for (row of reportData().liabilities?.accounts; track row.accountId) {
                         <div class="bs-row">
                           <span>{{ row.accountName }}</span>
@@ -137,10 +137,10 @@ import { ApiService } from '@core/services/api.service';
                         </div>
                       }
                       <div class="bs-total">
-                        <span>Total Pasivo</span>
+                        <span>Total Liabilities</span>
                         <span>{{ reportData().liabilities?.total | number:'1.2-2' }}</span>
                       </div>
-                      <h4 class="mt-lg">PATRIMONIO</h4>
+                      <h4 class="mt-lg">EQUITY</h4>
                       @for (row of reportData().equity?.accounts; track row.accountId) {
                         <div class="bs-row">
                           <span>{{ row.accountName }}</span>
@@ -148,7 +148,7 @@ import { ApiService } from '@core/services/api.service';
                         </div>
                       }
                       <div class="bs-total">
-                        <span>Total Patrimonio</span>
+                        <span>Total Equity</span>
                         <span>{{ reportData().equity?.total | number:'1.2-2' }}</span>
                       </div>
                     </div>
@@ -259,10 +259,10 @@ export class ReportsComponent {
 
   getReportTitle(): string {
     const titles: Record<string, string> = {
-      'trial-balance': 'Balance de Comprobación',
-      'balance-sheet': 'Balance General',
-      'income-statement': 'Cuenta de Resultados',
-      'general-ledger': 'Libro Mayor',
+      'trial-balance': 'Trial Balance',
+      'balance-sheet': 'Balance Sheet',
+      'income-statement': 'Income Statement',
+      'general-ledger': 'General Ledger',
     };
     return titles[this.selectedReport() || ''] || '';
   }

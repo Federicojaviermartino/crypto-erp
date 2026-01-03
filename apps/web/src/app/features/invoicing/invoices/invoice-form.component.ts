@@ -17,13 +17,13 @@ interface Contact {
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Nueva Factura de Venta</h1>
+        <h1>New Sales Invoice</h1>
       </header>
 
       <!-- OCR Upload Section -->
       <div class="card mb-lg ocr-section">
         <div class="card-header">
-          <h3>📄 Auto-rellenar con OCR</h3>
+          <h3>📄 Auto-fill with OCR</h3>
         </div>
         <div class="card-body">
           <div class="ocr-upload">
@@ -37,8 +37,8 @@ interface Contact {
             @if (!selectedFile()) {
               <div class="upload-prompt" (click)="fileInput.click()">
                 <span class="upload-icon">📁</span>
-                <p class="upload-text">Click para seleccionar factura (imagen o PDF)</p>
-                <small class="upload-hint">El OCR extraerá automáticamente los datos</small>
+                <p class="upload-text">Click to select invoice (image or PDF)</p>
+                <small class="upload-hint">OCR will automatically extract the data</small>
               </div>
             } @else {
               <div class="file-selected">
@@ -49,7 +49,7 @@ interface Contact {
                     type="button"
                     class="btn btn-sm btn-danger"
                     (click)="removeFile()">
-                    × Quitar
+                    × Remove
                   </button>
                 </div>
 
@@ -58,14 +58,14 @@ interface Contact {
                     type="button"
                     class="btn btn-primary"
                     (click)="extractInvoiceData()">
-                    🔍 Extraer Datos con OCR
+                    🔍 Extract Data with OCR
                   </button>
                 }
 
                 @if (ocrProcessing()) {
                   <div class="ocr-loading">
                     <span class="spinner"></span>
-                    <span>Procesando factura con OCR...</span>
+                    <span>Processing invoice with OCR...</span>
                   </div>
                 }
 
@@ -75,7 +75,7 @@ interface Contact {
                     [class.high]="ocrConfidence()! > 0.8"
                     [class.medium]="ocrConfidence()! > 0.6 && ocrConfidence()! <= 0.8"
                     [class.low]="ocrConfidence()! <= 0.6">
-                    Confianza: {{ ocrConfidence()! * 100 | number:'1.0-0' }}%
+                    Confidence: {{ ocrConfidence()! * 100 | number:'1.0-0' }}%
                   </div>
                 }
 
@@ -95,26 +95,26 @@ interface Contact {
           <div class="card-body">
             <div class="form-row">
               <div class="form-group" style="flex: 2;">
-                <label class="form-label">Cliente *</label>
+                <label class="form-label">Customer *</label>
                 <select class="form-select" formControlName="contactId">
-                  <option value="">Seleccionar cliente</option>
+                  <option value="">Select customer</option>
                   @for (contact of contacts(); track contact.id) {
-                    <option [value]="contact.id">{{ contact.name }} ({{ contact.taxId || 'Sin NIF' }})</option>
+                    <option [value]="contact.id">{{ contact.name }} ({{ contact.taxId || 'No Tax ID' }})</option>
                   }
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Fecha *</label>
+                <label class="form-label">Date *</label>
                 <input type="date" class="form-input" formControlName="date" />
               </div>
               <div class="form-group">
-                <label class="form-label">Vencimiento</label>
+                <label class="form-label">Due Date</label>
                 <input type="date" class="form-input" formControlName="dueDate" />
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Notas</label>
-              <textarea class="form-textarea" formControlName="notes" rows="2" placeholder="Notas o comentarios"></textarea>
+              <label class="form-label">Notes</label>
+              <textarea class="form-textarea" formControlName="notes" rows="2" placeholder="Notes or comments"></textarea>
             </div>
           </div>
         </div>
@@ -122,19 +122,19 @@ interface Contact {
         <!-- Lines -->
         <div class="card mb-lg">
           <div class="card-header d-flex justify-between align-center">
-            <h3>Líneas de Factura</h3>
+            <h3>Invoice Lines</h3>
             <button type="button" class="btn btn-sm btn-secondary" (click)="addLine()">
-              + Añadir Línea
+              + Add Line
             </button>
           </div>
           <div class="card-body" style="padding: 0;">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Descripción</th>
-                  <th style="width: 100px;">Cantidad</th>
-                  <th style="width: 120px;">Precio</th>
-                  <th style="width: 80px;">IVA %</th>
+                  <th>Description</th>
+                  <th style="width: 100px;">Quantity</th>
+                  <th style="width: 120px;">Price</th>
+                  <th style="width: 80px;">VAT %</th>
                   <th style="width: 120px;">Total</th>
                   <th style="width: 50px;"></th>
                 </tr>
@@ -143,7 +143,7 @@ interface Contact {
                 @for (line of linesArray.controls; track line; let i = $index) {
                   <tr [formGroupName]="i">
                     <td>
-                      <input type="text" class="form-input" formControlName="description" placeholder="Descripción" />
+                      <input type="text" class="form-input" formControlName="description" placeholder="Description" />
                     </td>
                     <td>
                       <input type="number" class="form-input text-right" formControlName="quantity" min="0" step="0.01" />
@@ -178,11 +178,11 @@ interface Contact {
         <div class="totals-card card mb-lg">
           <div class="card-body">
             <div class="totals-row">
-              <span>Base Imponible:</span>
+              <span>Subtotal:</span>
               <span>{{ subtotal() | number:'1.2-2' }} €</span>
             </div>
             <div class="totals-row">
-              <span>IVA:</span>
+              <span>VAT:</span>
               <span>{{ vatAmount() | number:'1.2-2' }} €</span>
             </div>
             <div class="totals-row total">
@@ -197,13 +197,13 @@ interface Contact {
         }
 
         <div class="d-flex gap-md justify-between">
-          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancelar</button>
+          <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
           <div class="d-flex gap-md">
             <button type="submit" class="btn btn-secondary" [disabled]="saving()">
-              Guardar Borrador
+              Save Draft
             </button>
             <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="saveAndIssue()">
-              Guardar y Emitir
+              Save and Issue
             </button>
           </div>
         </div>
@@ -475,7 +475,7 @@ export class InvoiceFormComponent implements OnInit {
             next: () => this.router.navigate(['/invoicing/invoices']),
             error: (err) => {
               this.saving.set(false);
-              this.error.set(err.error?.message || 'Error al emitir');
+              this.error.set(err.error?.message || 'Error issuing invoice');
             },
           });
         } else {
@@ -485,7 +485,7 @@ export class InvoiceFormComponent implements OnInit {
       error: (err) => {
         this.saving.set(false);
         this.issueAfterSave = false;
-        this.error.set(err.error?.message || 'Error al guardar');
+        this.error.set(err.error?.message || 'Error saving invoice');
       },
     });
   }
@@ -545,12 +545,12 @@ export class InvoiceFormComponent implements OnInit {
           this.populateFormFromOcr(result.data);
           this.ocrConfidence.set(result.data.confidence);
         } else {
-          this.ocrError.set(result.error || 'No se pudieron extraer los datos');
+          this.ocrError.set(result.error || 'Could not extract the data');
         }
         this.ocrProcessing.set(false);
       },
       error: (err) => {
-        this.ocrError.set(err.error?.message || 'Error al procesar la factura');
+        this.ocrError.set(err.error?.message || 'Error processing invoice');
         this.ocrProcessing.set(false);
       },
     });

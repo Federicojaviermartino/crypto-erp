@@ -34,8 +34,8 @@ interface TaxReport {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Informe Fiscal Crypto</h1>
-          <p class="text-muted">Ganancias y pérdidas realizadas para declaración</p>
+          <h1>Crypto Tax Report</h1>
+          <p class="text-muted">Realized gains and losses for tax declaration</p>
         </div>
       </header>
 
@@ -43,7 +43,7 @@ interface TaxReport {
       <div class="card mb-lg">
         <div class="card-body d-flex gap-md align-center">
           <div class="form-group mb-0">
-            <label class="form-label">Año Fiscal</label>
+            <label class="form-label">Fiscal Year</label>
             <select class="form-select" [(ngModel)]="selectedYear" (ngModelChange)="updateDates()">
               <option [value]="2024">2024</option>
               <option [value]="2023">2023</option>
@@ -51,18 +51,18 @@ interface TaxReport {
             </select>
           </div>
           <div class="form-group mb-0">
-            <label class="form-label">Desde</label>
+            <label class="form-label">From</label>
             <input type="date" class="form-input" [(ngModel)]="startDate" />
           </div>
           <div class="form-group mb-0">
-            <label class="form-label">Hasta</label>
+            <label class="form-label">To</label>
             <input type="date" class="form-input" [(ngModel)]="endDate" />
           </div>
           <button class="btn btn-primary" (click)="generateReport()" [disabled]="loading()" style="margin-top: 24px;">
             @if (loading()) {
               <span class="spinner"></span>
             } @else {
-              Generar Informe
+              Generate Report
             }
           </button>
         </div>
@@ -72,15 +72,15 @@ interface TaxReport {
         <!-- Summary -->
         <div class="summary-grid mb-lg">
           <div class="summary-card">
-            <h4>Ventas Totales</h4>
+            <h4>Total Proceeds</h4>
             <p class="amount">{{ report()!.summary.totalProceeds | number:'1.2-2' }} €</p>
           </div>
           <div class="summary-card">
-            <h4>Costo Base Total</h4>
+            <h4>Total Cost Basis</h4>
             <p class="amount">{{ report()!.summary.totalCostBasis | number:'1.2-2' }} €</p>
           </div>
           <div class="summary-card" [class.positive]="report()!.summary.totalGainLoss > 0" [class.negative]="report()!.summary.totalGainLoss < 0">
-            <h4>Ganancia/Pérdida Total</h4>
+            <h4>Total Gain/Loss</h4>
             <p class="amount">{{ report()!.summary.totalGainLoss | number:'1.2-2' }} €</p>
           </div>
         </div>
@@ -88,7 +88,7 @@ interface TaxReport {
         <div class="row-2 mb-lg">
           <div class="card">
             <div class="card-header">
-              <h3>Corto Plazo (&lt;1 año)</h3>
+              <h3>Short Term (&lt;1 year)</h3>
             </div>
             <div class="card-body text-center">
               <p class="big-number" [class.text-success]="report()!.summary.shortTermGainLoss > 0" [class.text-danger]="report()!.summary.shortTermGainLoss < 0">
@@ -98,7 +98,7 @@ interface TaxReport {
           </div>
           <div class="card">
             <div class="card-header">
-              <h3>Largo Plazo (≥1 año)</h3>
+              <h3>Long Term (≥1 year)</h3>
             </div>
             <div class="card-body text-center">
               <p class="big-number" [class.text-success]="report()!.summary.longTermGainLoss > 0" [class.text-danger]="report()!.summary.longTermGainLoss < 0">
@@ -111,20 +111,20 @@ interface TaxReport {
         <!-- Detail Table -->
         <div class="card">
           <div class="card-header d-flex justify-between align-center">
-            <h3>Detalle de Operaciones</h3>
-            <button class="btn btn-sm btn-secondary">Exportar CSV</button>
+            <h3>Transaction Details</h3>
+            <button class="btn btn-sm btn-secondary">Export CSV</button>
           </div>
           <div class="card-body" style="padding: 0;">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-                  <th>Activo</th>
-                  <th class="text-right">Cantidad</th>
-                  <th class="text-right">Venta</th>
-                  <th class="text-right">Costo</th>
-                  <th class="text-right">Ganancia/Pérdida</th>
-                  <th>Período</th>
+                  <th>Date</th>
+                  <th>Asset</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-right">Proceeds</th>
+                  <th class="text-right">Cost</th>
+                  <th class="text-right">Gain/Loss</th>
+                  <th>Period</th>
                 </tr>
               </thead>
               <tbody>
@@ -140,14 +140,14 @@ interface TaxReport {
                     </td>
                     <td>
                       <span class="badge" [class]="entry.holdingPeriod === 'LONG' ? 'badge-info' : 'badge-warning'">
-                        {{ entry.holdingPeriod === 'LONG' ? 'Largo' : 'Corto' }}
+                        {{ entry.holdingPeriod === 'LONG' ? 'Long' : 'Short' }}
                       </span>
                     </td>
                   </tr>
                 } @empty {
                   <tr>
                     <td colspan="7" class="text-center text-muted p-lg">
-                      No hay operaciones en el período seleccionado
+                      No transactions in the selected period
                     </td>
                   </tr>
                 }

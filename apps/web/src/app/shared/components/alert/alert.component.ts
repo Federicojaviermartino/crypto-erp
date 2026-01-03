@@ -20,7 +20,7 @@ export type AlertType = 'error' | 'success' | 'warning' | 'info';
         *ngIf="dismissible"
         class="alert-dismiss"
         (click)="dismiss()"
-        aria-label="Cerrar"
+        aria-label="Close"
       >
         ✕
       </button>

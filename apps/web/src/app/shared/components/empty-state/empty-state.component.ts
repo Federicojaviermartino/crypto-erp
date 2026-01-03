@@ -90,8 +90,8 @@ import { RouterLink } from '@angular/router';
 })
 export class EmptyStateComponent {
   @Input() icon = '📋';
-  @Input() title = 'No hay datos';
-  @Input() description = 'No se encontraron resultados para mostrar';
+  @Input() title = 'No data';
+  @Input() description = 'No results found to display';
   @Input() actionText?: string;
   @Input() actionLink?: string;
 

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Patch,
   Delete,
   Body,
@@ -38,6 +39,26 @@ export class CompaniesController {
   @ApiResponse({ status: 200, description: 'List of companies' })
   async findAll(@CurrentUser() user: JwtPayload) {
     return this.companiesService.findAllByUser(user.sub);
+  }
+
+  @Get('current')
+  @ApiOperation({ summary: 'Get current (default) company for user' })
+  @ApiResponse({ status: 200, description: 'Current company details' })
+  @ApiResponse({ status: 404, description: 'No company found for user' })
+  async findCurrent(@CurrentUser() user: JwtPayload) {
+    return this.companiesService.findCurrentByUser(user.sub);
+  }
+
+  @Put('current')
+  @ApiOperation({ summary: 'Update current (default) company' })
+  @ApiResponse({ status: 200, description: 'Company updated' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'No company found for user' })
+  async updateCurrent(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateCompanyDto,
+  ) {
+    return this.companiesService.updateCurrent(user.sub, dto);
   }
 
   @Get(':id')

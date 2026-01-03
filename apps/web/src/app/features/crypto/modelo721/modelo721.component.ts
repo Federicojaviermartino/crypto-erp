@@ -40,8 +40,8 @@ interface ValidationResult {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Modelo 721 - Declaración de Criptoactivos</h1>
-          <p class="text-muted">Declaración informativa sobre monedas virtuales situadas en el extranjero</p>
+          <h1>Modelo 721 - Crypto Asset Declaration</h1>
+          <p class="text-muted">Informative declaration on virtual currencies located abroad</p>
         </div>
         <div class="d-flex gap-md">
           <select class="form-control" [(ngModel)]="selectedYear" (change)="loadData()">
@@ -57,9 +57,9 @@ interface ValidationResult {
         <a routerLink="/crypto/portfolio" class="nav-tab">Portfolio</a>
         <a routerLink="/crypto/wallets" class="nav-tab">Wallets</a>
         <a routerLink="/crypto/exchanges" class="nav-tab">Exchanges</a>
-        <a routerLink="/crypto/transactions" class="nav-tab">Transacciones</a>
-        <a routerLink="/crypto/assets" class="nav-tab">Activos</a>
-        <a routerLink="/crypto/tax-report" class="nav-tab active">Informe Fiscal</a>
+        <a routerLink="/crypto/transactions" class="nav-tab">Transactions</a>
+        <a routerLink="/crypto/assets" class="nav-tab">Assets</a>
+        <a routerLink="/crypto/tax-report" class="nav-tab active">Tax Report</a>
       </div>
 
       <!-- Summary Cards -->
@@ -68,29 +68,29 @@ interface ValidationResult {
           <div class="summary-card" [class.alert-danger]="modelo()?.obligadoDeclarar">
             <span class="summary-icon">📋</span>
             <div class="summary-info">
-              <h3>{{ modelo()?.obligadoDeclarar ? 'Sí' : 'No' }}</h3>
-              <p>Obligado a declarar</p>
+              <h3>{{ modelo()?.obligadoDeclarar ? 'Yes' : 'No' }}</h3>
+              <p>Required to declare</p>
             </div>
           </div>
           <div class="summary-card">
             <span class="summary-icon">💰</span>
             <div class="summary-info">
               <h3>{{ modelo()?.totalValorEur | number:'1.2-2' }} €</h3>
-              <p>Valor total a 31/12</p>
+              <p>Total value as of 12/31</p>
             </div>
           </div>
           <div class="summary-card">
             <span class="summary-icon">📊</span>
             <div class="summary-info">
               <h3>{{ modelo()?.posiciones?.length || 0 }}</h3>
-              <p>Posiciones en el extranjero</p>
+              <p>Foreign positions</p>
             </div>
           </div>
           <div class="summary-card" [class.alert-warning]="modelo()?.variacionSignificativa">
             <span class="summary-icon">📈</span>
             <div class="summary-info">
-              <h3>{{ modelo()?.variacionSignificativa ? 'Sí' : 'No' }}</h3>
-              <p>Variación significativa</p>
+              <h3>{{ modelo()?.variacionSignificativa ? 'Yes' : 'No' }}</h3>
+              <p>Significant variation</p>
             </div>
           </div>
         </div>
@@ -98,8 +98,8 @@ interface ValidationResult {
         <!-- Info Alert -->
         @if (modelo()?.obligadoDeclarar) {
           <div class="alert alert-warning mb-lg">
-            <strong>⚠️ Atención:</strong> El valor total supera 50.000 €. Estás obligado a presentar el Modelo 721
-            antes del 31 de marzo del año siguiente al ejercicio fiscal.
+            <strong>⚠️ Attention:</strong> The total value exceeds €50,000. You are required to file Modelo 721
+            before March 31 of the year following the fiscal year.
           </div>
         }
 
@@ -107,13 +107,13 @@ interface ValidationResult {
         @if (validation()) {
           <div class="card mb-lg">
             <div class="card-header">
-              <h3>Validación</h3>
+              <h3>Validation</h3>
             </div>
             <div class="card-body">
               @if (validation()?.valid) {
-                <p class="text-success">✅ Todos los datos están completos para presentar el modelo.</p>
+                <p class="text-success">✅ All data is complete to file the form.</p>
               } @else {
-                <p class="text-danger">❌ Hay errores que corregir:</p>
+                <p class="text-danger">❌ There are errors to fix:</p>
                 <ul>
                   @for (error of validation()?.errors; track error) {
                     <li class="text-danger">{{ error }}</li>
@@ -121,7 +121,7 @@ interface ValidationResult {
                 </ul>
               }
               @if (validation()?.warnings?.length) {
-                <p class="text-warning">⚠️ Advertencias:</p>
+                <p class="text-warning">⚠️ Warnings:</p>
                 <ul>
                   @for (warning of validation()?.warnings; track warning) {
                     <li class="text-warning">{{ warning }}</li>
@@ -135,10 +135,10 @@ interface ValidationResult {
         <!-- Export Buttons -->
         <div class="d-flex gap-md mb-lg">
           <button class="btn btn-primary" (click)="exportCSV()">
-            📥 Exportar CSV
+            📥 Export CSV
           </button>
           <button class="btn btn-secondary" (click)="exportAEAT()">
-            📄 Exportar formato AEAT
+            📄 Export AEAT Format
           </button>
         </div>
       }
@@ -146,7 +146,7 @@ interface ValidationResult {
       <!-- Positions Table -->
       <div class="card">
         <div class="card-header">
-          <h3>Posiciones en el Extranjero - Ejercicio {{ selectedYear }}</h3>
+          <h3>Foreign Positions - Fiscal Year {{ selectedYear }}</h3>
         </div>
         <div class="card-body" style="padding: 0;">
           @if (loading()) {
@@ -157,13 +157,13 @@ interface ValidationResult {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Criptomoneda</th>
+                  <th>Cryptocurrency</th>
                   <th>Exchange/Wallet</th>
-                  <th>País</th>
-                  <th class="text-right">Saldo 31/12</th>
-                  <th class="text-right">Valor EUR</th>
-                  <th class="text-right">Adquisición</th>
-                  <th>Fecha Adq.</th>
+                  <th>Country</th>
+                  <th class="text-right">Balance 12/31</th>
+                  <th class="text-right">EUR Value</th>
+                  <th class="text-right">Acquisition</th>
+                  <th>Acq. Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,7 +187,7 @@ interface ValidationResult {
                 } @empty {
                   <tr>
                     <td colspan="7" class="text-center text-muted p-lg">
-                      No tienes criptoactivos en el extranjero para este ejercicio
+                      No crypto assets abroad for this fiscal year
                     </td>
                   </tr>
                 }
@@ -208,12 +208,12 @@ interface ValidationResult {
 
       <!-- Info Section -->
       <div class="info-section mt-lg">
-        <h4>Información sobre el Modelo 721</h4>
+        <h4>About Modelo 721</h4>
         <ul>
-          <li><strong>¿Qué es?</strong> Declaración informativa sobre monedas virtuales situadas en el extranjero.</li>
-          <li><strong>¿Quién debe presentarlo?</strong> Residentes fiscales en España con criptoactivos en exchanges extranjeros cuyo valor supere 50.000 €.</li>
-          <li><strong>¿Cuándo?</strong> Entre el 1 de enero y el 31 de marzo del año siguiente al ejercicio.</li>
-          <li><strong>Variación significativa:</strong> Se debe presentar si el valor aumenta más de 20.000 € respecto al año anterior.</li>
+          <li><strong>What is it?</strong> Informative declaration on virtual currencies located abroad.</li>
+          <li><strong>Who must file?</strong> Tax residents in Spain with crypto assets in foreign exchanges valued over €50,000.</li>
+          <li><strong>When?</strong> Between January 1 and March 31 of the year following the fiscal year.</li>
+          <li><strong>Significant variation:</strong> Must be filed if the value increases by more than €20,000 compared to the previous year.</li>
         </ul>
       </div>
     </div>
@@ -373,7 +373,7 @@ export class Modelo721Component implements OnInit {
   validation = signal<ValidationResult | null>(null);
   loading = signal(true);
 
-  selectedYear = new Date().getFullYear() - 1; // Año anterior por defecto
+  selectedYear = new Date().getFullYear() - 1; // Previous year by default
   availableYears: number[] = [];
 
   constructor(private api: ApiService) {

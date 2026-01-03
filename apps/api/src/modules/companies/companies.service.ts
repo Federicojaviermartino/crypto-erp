@@ -136,6 +136,72 @@ export class CompaniesService {
     return { ...companyUser.company, role: companyUser.role };
   }
 
+  async findCurrentByUser(userId: string) {
+    const companyUser = await this.prisma.companyUser.findFirst({
+      where: { userId, isDefault: true },
+      include: { company: true },
+    });
+
+    if (!companyUser) {
+      // If no default company, try to get the first one
+      const firstCompanyUser = await this.prisma.companyUser.findFirst({
+        where: { userId },
+        include: { company: true },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      if (!firstCompanyUser) {
+        throw new NotFoundException('No company found for user');
+      }
+
+      return { ...firstCompanyUser.company, role: firstCompanyUser.role };
+    }
+
+    return { ...companyUser.company, role: companyUser.role };
+  }
+
+  async updateCurrent(userId: string, dto: UpdateCompanyDto) {
+    const companyUser = await this.prisma.companyUser.findFirst({
+      where: { userId, isDefault: true },
+    });
+
+    if (!companyUser) {
+      // If no default company, try to get the first one
+      const firstCompanyUser = await this.prisma.companyUser.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      if (!firstCompanyUser) {
+        throw new NotFoundException('No company found for user');
+      }
+
+      if (
+        firstCompanyUser.role !== UserRole.OWNER &&
+        firstCompanyUser.role !== UserRole.ADMIN
+      ) {
+        throw new ForbiddenException('Only OWNER or ADMIN can update company');
+      }
+
+      return this.prisma.company.update({
+        where: { id: firstCompanyUser.companyId },
+        data: dto,
+      });
+    }
+
+    if (
+      companyUser.role !== UserRole.OWNER &&
+      companyUser.role !== UserRole.ADMIN
+    ) {
+      throw new ForbiddenException('Only OWNER or ADMIN can update company');
+    }
+
+    return this.prisma.company.update({
+      where: { id: companyUser.companyId },
+      data: dto,
+    });
+  }
+
   async update(companyId: string, userId: string, dto: UpdateCompanyDto) {
     const companyUser = await this.prisma.companyUser.findUnique({
       where: { userId_companyId: { userId, companyId } },

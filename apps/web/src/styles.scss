@@ -620,6 +620,66 @@ a {
   }
 }
 
+// ============================================================================
+// CTA BUTTON FIXES (prevent truncation)
+// ============================================================================
+
+.btn-primary,
+button.btn-primary,
+a.btn-primary {
+  min-width: 150px;
+  white-space: nowrap;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+// Page header CTA buttons (slightly wider)
+.page-header {
+  .btn-primary,
+  button.btn-primary,
+  a.btn-primary {
+    min-width: 160px;
+  }
+}
+
+// ============================================================================
+// TABLE FIXES (prevent column truncation)
+// ============================================================================
+
+.table {
+  th, td {
+    min-width: 80px;
+
+    &.actions-column {
+      min-width: 100px;
+    }
+
+    &.status-column {
+      min-width: 100px;
+    }
+
+    &.amount-column {
+      min-width: 120px;
+      text-align: right;
+    }
+
+    &.date-column {
+      min-width: 100px;
+    }
+  }
+}
+
+// Horizontal scroll wrapper for tables on mobile
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: var(--spacing-md);
+
+  .table {
+    min-width: 600px;
+  }
+}
+
 // Responsive
 @media (max-width: 768px) {
   html {
@@ -633,5 +693,12 @@ a {
     .empty-icon {
       font-size: 3rem;
     }
+  }
+
+  // Reduce button min-width on mobile
+  .btn-primary,
+  button.btn-primary,
+  a.btn-primary {
+    min-width: 120px;
   }
 }

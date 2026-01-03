@@ -21,11 +21,11 @@ interface JournalEntry {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Asientos Contables</h1>
-          <p class="text-muted">Gestiona los asientos del libro diario</p>
+          <h1>Journal Entries</h1>
+          <p class="text-muted">Manage daily ledger entries</p>
         </div>
         <a routerLink="/accounting/journal-entries/new" class="btn btn-primary">
-          + Nuevo Asiento
+          + New Entry
         </a>
       </header>
 
@@ -35,16 +35,16 @@ interface JournalEntry {
           <input
             type="text"
             class="form-input"
-            placeholder="Buscar..."
+            placeholder="Search..."
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearch()"
             style="max-width: 250px;"
           />
           <select class="form-select" [(ngModel)]="filterStatus" (ngModelChange)="loadEntries()" style="max-width: 150px;">
-            <option value="">Todos</option>
-            <option value="DRAFT">Borrador</option>
-            <option value="POSTED">Publicado</option>
-            <option value="VOIDED">Anulado</option>
+            <option value="">All</option>
+            <option value="DRAFT">Draft</option>
+            <option value="POSTED">Posted</option>
+            <option value="VOIDED">Voided</option>
           </select>
           <input
             type="date"
@@ -74,13 +74,13 @@ interface JournalEntry {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Número</th>
-                  <th>Fecha</th>
-                  <th>Descripción</th>
-                  <th class="text-right">Debe</th>
-                  <th class="text-right">Haber</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>Number</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th class="text-right">Debit</th>
+                  <th class="text-right">Credit</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,9 +98,9 @@ interface JournalEntry {
                     </td>
                     <td>
                       <div class="d-flex gap-sm">
-                        <button class="btn btn-sm btn-secondary">Ver</button>
+                        <button class="btn btn-sm btn-secondary">View</button>
                         @if (entry.status === 'DRAFT') {
-                          <button class="btn btn-sm btn-primary" (click)="postEntry(entry)">Publicar</button>
+                          <button class="btn btn-sm btn-primary" (click)="postEntry(entry)">Post</button>
                         }
                       </div>
                     </td>
@@ -108,7 +108,7 @@ interface JournalEntry {
                 } @empty {
                   <tr>
                     <td colspan="7" class="text-center text-muted p-lg">
-                      No se encontraron asientos
+                      No entries found
                     </td>
                   </tr>
                 }
@@ -202,9 +202,9 @@ export class JournalEntriesListComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      DRAFT: 'Borrador',
-      POSTED: 'Publicado',
-      VOIDED: 'Anulado',
+      DRAFT: 'Draft',
+      POSTED: 'Posted',
+      VOIDED: 'Voided',
     };
     return labels[status] || status;
   }

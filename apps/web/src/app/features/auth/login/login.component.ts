@@ -31,28 +31,6 @@ type UserRole = 'client' | 'admin';
           <p>Sign in to your account</p>
         </div>
 
-        <!-- Role Selection -->
-        <div class="role-selection">
-          <button
-            type="button"
-            class="role-btn"
-            [class.active]="selectedRole() === 'client'"
-            (click)="selectRole('client')"
-          >
-            <span class="role-icon">👤</span>
-            <span class="role-label">Client</span>
-          </button>
-          <button
-            type="button"
-            class="role-btn"
-            [class.active]="selectedRole() === 'admin'"
-            (click)="selectRole('admin')"
-          >
-            <span class="role-icon">🛡️</span>
-            <span class="role-label">Administrator</span>
-          </button>
-        </div>
-
         @if (error()) {
           <div class="alert alert-danger">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -126,11 +104,11 @@ type UserRole = 'client' | 'admin';
         <div class="demo-credentials">
           <p class="demo-title">Demo Credentials</p>
           <div class="demo-options">
-            <button type="button" class="demo-btn" (click)="fillDemoCredentials('admin')">
-              <span>🛡️</span> Admin Demo
-            </button>
             <button type="button" class="demo-btn" (click)="fillDemoCredentials('client')">
               <span>👤</span> Client Demo
+            </button>
+            <button type="button" class="demo-btn" (click)="fillDemoCredentials('admin')">
+              <span>🛡️</span> Admin Demo
             </button>
           </div>
         </div>
@@ -203,47 +181,6 @@ type UserRole = 'client' | 'admin';
     .auth-header p {
       color: var(--gray-500);
       font-size: 0.95rem;
-    }
-
-    .role-selection {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .role-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      padding: 16px;
-      background: var(--gray-50);
-      border: 2px solid var(--gray-200);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .role-btn:hover {
-      border-color: var(--primary-light);
-      background: rgba(99, 102, 241, 0.05);
-    }
-
-    .role-btn.active {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.1);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-    }
-
-    .role-icon {
-      font-size: 1.5rem;
-    }
-
-    .role-label {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--gray-700);
     }
 
     .alert {

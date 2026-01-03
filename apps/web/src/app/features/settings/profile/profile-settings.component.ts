@@ -11,8 +11,8 @@ import { ApiService } from '@core/services/api.service';
   template: `
     <div class="page">
       <header class="page-header">
-        <h1>Mi Perfil</h1>
-        <p class="text-muted">Gestiona tu información personal y seguridad</p>
+        <h1>My Profile</h1>
+        <p class="text-muted">Manage your personal information and security</p>
       </header>
 
       @if (loading()) {
@@ -24,29 +24,29 @@ import { ApiService } from '@core/services/api.service';
         <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
           <div class="card mb-lg">
             <div class="card-header">
-              <h3>Información Personal</h3>
+              <h3>Personal Information</h3>
             </div>
             <div class="card-body">
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Nombre *</label>
+                  <label class="form-label">First Name *</label>
                   <input type="text" class="form-input" formControlName="firstName" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Apellidos *</label>
+                  <label class="form-label">Last Name *</label>
                   <input type="text" class="form-input" formControlName="lastName" />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Email</label>
                 <input type="email" class="form-input" formControlName="email" />
-                <small class="form-hint">El email no se puede cambiar</small>
+                <small class="form-hint">Email cannot be changed</small>
               </div>
             </div>
           </div>
 
           @if (profileSuccess()) {
-            <div class="alert alert-success mb-lg">Perfil actualizado correctamente</div>
+            <div class="alert alert-success mb-lg">Profile updated successfully</div>
           }
 
           @if (profileError()) {
@@ -57,7 +57,7 @@ import { ApiService } from '@core/services/api.service';
             @if (savingProfile()) {
               <span class="spinner"></span>
             }
-            Guardar Cambios
+            Save Changes
           </button>
         </form>
 
@@ -65,21 +65,21 @@ import { ApiService } from '@core/services/api.service';
         <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
           <div class="card mb-lg">
             <div class="card-header">
-              <h3>Cambiar Contraseña</h3>
+              <h3>Change Password</h3>
             </div>
             <div class="card-body">
               <div class="form-group">
-                <label class="form-label">Contraseña Actual *</label>
+                <label class="form-label">Current Password *</label>
                 <input type="password" class="form-input" formControlName="currentPassword" />
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Nueva Contraseña *</label>
+                  <label class="form-label">New Password *</label>
                   <input type="password" class="form-input" formControlName="newPassword" />
-                  <small class="form-hint">Mínimo 8 caracteres</small>
+                  <small class="form-hint">Minimum 8 characters</small>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Confirmar Contraseña *</label>
+                  <label class="form-label">Confirm Password *</label>
                   <input type="password" class="form-input" formControlName="confirmPassword" />
                 </div>
               </div>
@@ -87,7 +87,7 @@ import { ApiService } from '@core/services/api.service';
           </div>
 
           @if (passwordSuccess()) {
-            <div class="alert alert-success mb-lg">Contraseña cambiada correctamente</div>
+            <div class="alert alert-success mb-lg">Password changed successfully</div>
           }
 
           @if (passwordError()) {
@@ -98,26 +98,26 @@ import { ApiService } from '@core/services/api.service';
             @if (savingPassword()) {
               <span class="spinner"></span>
             }
-            Cambiar Contraseña
+            Change Password
           </button>
         </form>
 
         <!-- Sessions -->
         <div class="card mt-xl">
           <div class="card-header d-flex justify-between align-center">
-            <h3>Sesiones Activas</h3>
+            <h3>Active Sessions</h3>
             <button class="btn btn-sm btn-danger" (click)="logoutAllSessions()">
-              Cerrar Todas
+              Close All
             </button>
           </div>
           <div class="card-body">
             <div class="session-list">
               <div class="session-item current">
                 <div class="session-info">
-                  <span class="session-device">Este dispositivo</span>
-                  <span class="session-details">Sesión actual</span>
+                  <span class="session-device">This device</span>
+                  <span class="session-details">Current session</span>
                 </div>
-                <span class="badge badge-success">Activa</span>
+                <span class="badge badge-success">Active</span>
               </div>
             </div>
           </div>
@@ -255,7 +255,7 @@ export class ProfileSettingsComponent implements OnInit {
       },
       error: (err) => {
         this.savingProfile.set(false);
-        this.profileError.set(err.error?.message || 'Error al guardar');
+        this.profileError.set(err.error?.message || 'Error saving profile');
       },
     });
   }
@@ -269,7 +269,7 @@ export class ProfileSettingsComponent implements OnInit {
     const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
 
     if (newPassword !== confirmPassword) {
-      this.passwordError.set('Las contraseñas no coinciden');
+      this.passwordError.set('Passwords do not match');
       return;
     }
 
@@ -286,13 +286,13 @@ export class ProfileSettingsComponent implements OnInit {
       },
       error: (err) => {
         this.savingPassword.set(false);
-        this.passwordError.set(err.error?.message || 'Error al cambiar contraseña');
+        this.passwordError.set(err.error?.message || 'Error changing password');
       },
     });
   }
 
   logoutAllSessions(): void {
-    if (confirm('¿Cerrar todas las sesiones? Tendrás que iniciar sesión de nuevo.')) {
+    if (confirm('Close all sessions? You will need to log in again.')) {
       this.auth.logout();
     }
   }

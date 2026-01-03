@@ -19,11 +19,11 @@ interface FiscalYear {
     <div class="page">
       <header class="page-header">
         <div>
-          <h1>Años Fiscales</h1>
-          <p class="text-muted">Gestiona los ejercicios contables</p>
+          <h1>Fiscal Years</h1>
+          <p class="text-muted">Manage accounting periods</p>
         </div>
         <button class="btn btn-primary" (click)="showCreateForm = true">
-          + Nuevo Año Fiscal
+          + New Fiscal Year
         </button>
       </header>
 
@@ -37,11 +37,11 @@ interface FiscalYear {
             <table class="table">
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Fecha Inicio</th>
-                  <th>Fecha Fin</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>Name</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -52,17 +52,17 @@ interface FiscalYear {
                     <td>{{ year.endDate | date:'dd/MM/yyyy' }}</td>
                     <td>
                       <span class="badge" [class]="year.isClosed ? 'badge-secondary' : 'badge-success'">
-                        {{ year.isClosed ? 'Cerrado' : 'Abierto' }}
+                        {{ year.isClosed ? 'Closed' : 'Open' }}
                       </span>
                     </td>
                     <td>
                       @if (!year.isClosed) {
                         <button class="btn btn-sm btn-secondary" (click)="closeYear(year)">
-                          Cerrar Año
+                          Close Year
                         </button>
                       } @else {
                         <button class="btn btn-sm btn-secondary" (click)="reopenYear(year)">
-                          Reabrir
+                          Reopen
                         </button>
                       }
                     </td>
@@ -70,7 +70,7 @@ interface FiscalYear {
                 } @empty {
                   <tr>
                     <td colspan="5" class="text-center text-muted p-lg">
-                      No hay años fiscales configurados
+                      No fiscal years configured
                     </td>
                   </tr>
                 }
@@ -117,7 +117,7 @@ export class FiscalYearsListComponent implements OnInit {
   }
 
   closeYear(year: FiscalYear): void {
-    if (confirm(`¿Cerrar el año fiscal ${year.name}?`)) {
+    if (confirm(`Close fiscal year ${year.name}?`)) {
       this.api.patch(`/fiscal-years/${year.id}/close`, {}).subscribe({
         next: () => this.loadFiscalYears(),
       });
@@ -125,7 +125,7 @@ export class FiscalYearsListComponent implements OnInit {
   }
 
   reopenYear(year: FiscalYear): void {
-    if (confirm(`¿Reabrir el año fiscal ${year.name}?`)) {
+    if (confirm(`Reopen fiscal year ${year.name}?`)) {
       this.api.patch(`/fiscal-years/${year.id}/reopen`, {}).subscribe({
         next: () => this.loadFiscalYears(),
       });

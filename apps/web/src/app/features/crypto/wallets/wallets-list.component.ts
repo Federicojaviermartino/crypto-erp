@@ -234,7 +234,7 @@ const WALLET_TYPES: Record<string, string> = {
                     <tr>
                       <th>Token</th>
                       <th class="text-right">Balance</th>
-                      <th class="text-right">Valor EUR</th>
+                      <th class="text-right">EUR Value</th>
                     </tr>
                   </thead>
                   <tbody>
