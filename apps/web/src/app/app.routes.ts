@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { companyGuard } from './core/guards/company.guard';
 
 export const routes: Routes = [
   {
@@ -24,14 +25,17 @@ export const routes: Routes = [
       },
       {
         path: 'accounting',
+        canActivate: [companyGuard],
         loadChildren: () => import('./features/accounting/accounting.routes').then(m => m.ACCOUNTING_ROUTES),
       },
       {
         path: 'invoicing',
+        canActivate: [companyGuard],
         loadChildren: () => import('./features/invoicing/invoicing.routes').then(m => m.INVOICING_ROUTES),
       },
       {
         path: 'crypto',
+        canActivate: [companyGuard],
         loadChildren: () => import('./features/crypto/crypto.routes').then(m => m.CRYPTO_ROUTES),
       },
       {
@@ -40,6 +44,7 @@ export const routes: Routes = [
       },
       {
         path: 'ai',
+        canActivate: [companyGuard],
         loadChildren: () => import('./features/ai/ai.routes').then(m => m.AI_ROUTES),
       },
     ],

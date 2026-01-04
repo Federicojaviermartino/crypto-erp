@@ -100,6 +100,12 @@ interface NavItem {
       display: flex;
       align-items: center;
       text-decoration: none;
+      outline: none;
+      border-radius: var(--radius-md);
+
+      &:focus-visible {
+        box-shadow: 0 0 0 2px var(--primary);
+      }
     }
 
     .logo-text {

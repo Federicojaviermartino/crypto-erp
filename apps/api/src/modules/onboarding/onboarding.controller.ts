@@ -6,12 +6,12 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { OnboardingService } from './onboarding.service.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { GetUser } from '../auth/decorators/get-user.decorator.js';
-import { User } from '@prisma/client';
 
 @ApiTags('onboarding')
 @ApiBearerAuth()
@@ -29,8 +29,11 @@ export class OnboardingController {
     status: 200,
     description: 'Onboarding progress retrieved successfully',
   })
-  async getProgress(@GetUser() user: User) {
-    return this.onboarding.getOnboardingProgress(user.id);
+  async getProgress(@GetUser() userId: string | null) {
+    if (!userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+    return this.onboarding.getOnboardingProgress(userId);
   }
 
   @Get('steps')
@@ -42,8 +45,11 @@ export class OnboardingController {
     status: 200,
     description: 'Onboarding steps retrieved successfully',
   })
-  async getSteps(@GetUser() user: User) {
-    return this.onboarding.getOnboardingSteps(user.id);
+  async getSteps(@GetUser() userId: string | null) {
+    if (!userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+    return this.onboarding.getOnboardingSteps(userId);
   }
 
   @Post('steps/:stepId/complete')
@@ -60,8 +66,11 @@ export class OnboardingController {
     status: 404,
     description: 'Step not found',
   })
-  async completeStep(@GetUser() user: User, @Param('stepId') stepId: string) {
-    return this.onboarding.completeStep(user.id, stepId);
+  async completeStep(@GetUser() userId: string | null, @Param('stepId') stepId: string) {
+    if (!userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+    return this.onboarding.completeStep(userId, stepId);
   }
 
   @Post('steps/:stepId/skip')
@@ -78,8 +87,11 @@ export class OnboardingController {
     status: 404,
     description: 'Step not found',
   })
-  async skipStep(@GetUser() user: User, @Param('stepId') stepId: string) {
-    return this.onboarding.skipStep(user.id, stepId);
+  async skipStep(@GetUser() userId: string | null, @Param('stepId') stepId: string) {
+    if (!userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+    return this.onboarding.skipStep(userId, stepId);
   }
 
   @Post('dismiss')
@@ -92,8 +104,11 @@ export class OnboardingController {
     status: 204,
     description: 'Onboarding dismissed',
   })
-  async dismissOnboarding(@GetUser() user: User) {
-    await this.onboarding.dismissOnboarding(user.id);
+  async dismissOnboarding(@GetUser() userId: string | null) {
+    if (!userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+    await this.onboarding.dismissOnboarding(userId);
   }
 
   @Post('restart')
@@ -106,8 +121,11 @@ export class OnboardingController {
     status: 200,
     description: 'Onboarding restarted',
   })
-  async restartOnboarding(@GetUser() user: User) {
-    return this.onboarding.restartOnboarding(user.id);
+  async restartOnboarding(@GetUser() userId: string | null) {
+    if (!userId) {
+      throw new BadRequestException('User not authenticated');
+    }
+    return this.onboarding.restartOnboarding(userId);
   }
 
   @Get('stats')
