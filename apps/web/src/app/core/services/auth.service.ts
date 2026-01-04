@@ -145,6 +145,7 @@ const COMPANY_ID_KEY = 'company_id';
     private handleAuthResponse(response: AuthResponse): void {
           this.setTokens({ accessToken: response.accessToken, refreshToken: response.refreshToken });
           this.currentUserSignal.set(response.user);
+            this.autoSetCompanyId(response.user);
     }
 
     private setTokens(tokens: AuthTokens): void {
