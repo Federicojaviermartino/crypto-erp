@@ -129,6 +129,31 @@ a {
 
     &:hover:not(:disabled) {
       background-color: var(--gray-50);
+      border-color: var(--gray-400);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &-outline {
+    background-color: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+
+    &:hover:not(:disabled) {
+      background-color: rgba(79, 70, 229, 0.1);
+      transform: translateY(-1px);
+    }
+  }
+
+  &-ghost {
+    background-color: transparent;
+    color: var(--gray-600);
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+      background-color: var(--gray-100);
+      color: var(--gray-900);
     }
   }
 

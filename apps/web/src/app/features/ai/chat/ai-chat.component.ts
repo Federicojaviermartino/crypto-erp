@@ -31,8 +31,9 @@ interface ChatMessage {
             class="btn btn-sm"
             [class.btn-primary]="language() === 'es'"
             [class.btn-secondary]="language() === 'en'"
-            (click)="toggleLanguage()">
-            {{ language() === 'es' ? '🇪🇸 ES' : '🇬🇧 EN' }}
+            (click)="toggleLanguage()"
+            title="Change response language / Cambiar idioma de respuesta">
+            🌐 {{ language() === 'es' ? 'ES' : 'EN' }}
           </button>
           <button class="btn btn-sm btn-secondary" (click)="clearChat()">
             Clear Chat

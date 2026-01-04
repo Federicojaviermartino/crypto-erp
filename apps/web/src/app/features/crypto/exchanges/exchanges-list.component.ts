@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -547,6 +547,16 @@ export class ExchangesListComponent implements OnInit {
   };
 
   constructor(private api: ApiService) {}
+
+  @HostListener('document:keydown.escape')
+  onEscapePress(): void {
+    if (this.showAddModal) {
+      this.showAddModal = false;
+    }
+    if (this.showBalancesModal) {
+      this.showBalancesModal = false;
+    }
+  }
 
   ngOnInit(): void {
     this.loadSupportedExchanges();

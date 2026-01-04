@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface PortfolioPosition {
   assetId: string;
@@ -20,7 +21,7 @@ interface PortfolioSummary {
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -38,7 +39,7 @@ interface PortfolioSummary {
         <div class="summary-card">
           <span class="summary-icon">💰</span>
           <div class="summary-info">
-            <h3>{{ portfolio()?.totalCostBasis | number:'1.2-2' }} €</h3>
+            <h3>{{ (portfolio()?.totalCostBasis ?? 0) | number:'1.2-2' }} €</h3>
             <p>Total Cost Basis</p>
           </div>
         </div>
@@ -102,8 +103,17 @@ interface PortfolioSummary {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="5" class="text-center text-muted p-lg">
-                      You have no open positions
+                    <td colspan="5">
+                      <app-empty-state
+                        icon="📈"
+                        title="No open positions"
+                        description="Start building your portfolio by recording your first crypto transaction"
+                        actionText="+ New Transaction"
+                        (action)="navigateToNewTransaction()"
+                        [features]="['Track holdings across assets', 'Monitor cost basis & P/L', 'Generate tax reports']"
+                        color="purple"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }
@@ -197,7 +207,7 @@ export class PortfolioComponent implements OnInit {
   portfolio = signal<PortfolioSummary | null>(null);
   loading = signal(true);
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadPortfolio();
@@ -212,5 +222,9 @@ export class PortfolioComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  navigateToNewTransaction(): void {
+    this.router.navigate(['/crypto/transactions/new']);
   }
 }

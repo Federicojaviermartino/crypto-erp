@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
@@ -156,7 +156,7 @@ const WALLET_TYPES: Record<string, string> = {
                   type="text"
                   class="form-input"
                   [(ngModel)]="walletForm.address"
-                  placeholder="0x..."
+                  placeholder="Enter wallet address (0x...)"
                   [disabled]="!!editingWallet"
                 />
               </div>
@@ -545,6 +545,16 @@ export class WalletsListComponent implements OnInit {
   };
 
   constructor(private api: ApiService) {}
+
+  @HostListener('document:keydown.escape')
+  onEscapePress(): void {
+    if (this.showModal) {
+      this.closeModal();
+    }
+    if (this.showBalancesModal) {
+      this.showBalancesModal = false;
+    }
+  }
 
   ngOnInit(): void {
     this.loadWallets();
