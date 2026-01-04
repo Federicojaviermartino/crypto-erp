@@ -151,7 +151,7 @@ export class CompaniesService {
       });
 
       if (!firstCompanyUser) {
-        throw new NotFoundException('No company found for user');
+        return null;
       }
 
       return { ...firstCompanyUser.company, role: firstCompanyUser.role };
