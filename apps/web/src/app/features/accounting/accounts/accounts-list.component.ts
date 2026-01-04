@@ -2,6 +2,8 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
+import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
 interface Account {
   id: string;
@@ -15,7 +17,7 @@ interface Account {
 @Component({
   selector: 'app-accounts-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, SkeletonLoaderComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -54,9 +56,11 @@ interface Account {
       <div class="card">
         <div class="card-body" style="padding: 0;">
           @if (loading()) {
-            <div class="text-center p-lg">
-              <span class="spinner"></span>
-            </div>
+            <app-skeleton-loader
+              type="table"
+              [rowCount]="6"
+              [columnWidths]="['15%', '30%', '20%', '15%', '20%']"
+            />
           } @else {
             <table class="table">
               <thead>
@@ -91,8 +95,17 @@ interface Account {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="5" class="text-center text-muted p-lg">
-                      No accounts found
+                    <td colspan="5">
+                      <app-empty-state
+                        icon="📒"
+                        title="No accounts yet"
+                        description="Create your first account to start organizing your chart of accounts"
+                        actionText="+ New Account"
+                        (action)="showCreateModal = true"
+                        [features]="['Organize finances by category', 'Track assets, liabilities & equity', 'Generate financial reports']"
+                        color="blue"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }

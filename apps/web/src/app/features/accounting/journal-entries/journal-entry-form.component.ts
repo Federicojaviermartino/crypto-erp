@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
+import { BreadcrumbsComponent } from '@shared/components/breadcrumbs/breadcrumbs.component';
 
 interface Account {
   id: string;
@@ -13,9 +14,15 @@ interface Account {
 @Component({
   selector: 'app-journal-entry-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BreadcrumbsComponent],
   template: `
     <div class="page">
+      <app-breadcrumbs [items]="[
+        { label: 'Accounting', link: '/accounting', icon: '📒' },
+        { label: 'Journal Entries', link: '/accounting/journal-entries' },
+        { label: 'New Entry' }
+      ]" />
+
       <header class="page-header">
         <h1>New Journal Entry</h1>
       </header>

@@ -56,6 +56,44 @@ interface ExchangeBalance {
         <a routerLink="/crypto/tax-report" class="nav-tab">Tax Report</a>
       </div>
 
+      <!-- Supported Exchanges Grid -->
+      <div class="card mb-lg">
+        <div class="card-header">
+          <h3>Supported Exchanges</h3>
+        </div>
+        <div class="card-body">
+          <div class="exchanges-grid">
+            @for (exchange of supportedExchanges(); track exchange.id) {
+              <div
+                class="exchange-card"
+                [class.supported]="exchange.supported"
+                [class.coming-soon]="!exchange.supported"
+                (click)="exchange.supported && selectExchange(exchange)"
+              >
+                <div class="exchange-logo">
+                  @if (exchange.logo) {
+                    <img [src]="exchange.logo" [alt]="exchange.name" />
+                  } @else {
+                    <span class="exchange-initial">{{ exchange.name.charAt(0) }}</span>
+                  }
+                </div>
+                <div class="exchange-details">
+                  <span class="exchange-name">{{ exchange.name }}</span>
+                  <span class="exchange-country">{{ exchange.country }}</span>
+                </div>
+                @if (!exchange.supported) {
+                  <span class="coming-soon-badge">Coming Soon</span>
+                }
+              </div>
+            } @empty {
+              <div class="text-center text-muted p-lg">
+                Loading exchanges...
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
       <!-- Connected Exchanges -->
       <div class="card mb-lg">
         <div class="card-header">
@@ -399,6 +437,94 @@ interface ExchangeBalance {
       border-radius: var(--radius-sm);
       font-family: monospace;
     }
+
+    // Exchanges Grid
+    .exchanges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--spacing-md);
+    }
+
+    .exchange-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--spacing-lg);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      text-align: center;
+
+      &.supported {
+        &:hover {
+          border-color: var(--primary);
+          background: var(--gray-50);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+      }
+
+      &.coming-soon {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: var(--gray-50);
+      }
+    }
+
+    .exchange-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-100);
+      margin-bottom: var(--spacing-sm);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+
+    .exchange-initial {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .exchange-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .exchange-name {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .exchange-country {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+
+    .coming-soon-badge {
+      position: absolute;
+      top: var(--spacing-sm);
+      right: var(--spacing-sm);
+      background: var(--warning);
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
   `],
 })
 export class ExchangesListComponent implements OnInit {
@@ -447,6 +573,11 @@ export class ExchangesListComponent implements OnInit {
   getExchangeName(exchangeId: string): string {
     const exchange = this.supportedExchanges().find(e => e.id === exchangeId);
     return exchange?.name || exchangeId;
+  }
+
+  selectExchange(exchange: ExchangeInfo): void {
+    this.newAccount.exchange = exchange.id;
+    this.showAddModal = true;
   }
 
   getSyncStatusClass(status: string): string {

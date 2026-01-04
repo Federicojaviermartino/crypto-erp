@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface CryptoTransaction {
   id: string;
@@ -23,7 +24,7 @@ interface CryptoTransaction {
 @Component({
   selector: 'app-transactions-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -108,8 +109,17 @@ interface CryptoTransaction {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="8" class="text-center text-muted p-lg">
-                      No transactions found
+                    <td colspan="8">
+                      <app-empty-state
+                        icon="📈"
+                        title="No transactions yet"
+                        description="Add your first crypto transaction or sync from your wallets"
+                        actionText="+ New Transaction"
+                        actionLink="/crypto/transactions/new"
+                        [features]="['Track buys, sells & swaps', 'Calculate cost basis', 'Gain/loss reporting']"
+                        color="amber"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }

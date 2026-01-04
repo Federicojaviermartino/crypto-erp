@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface InvoiceSeries {
   id: string;
@@ -15,7 +16,7 @@ interface InvoiceSeries {
 @Component({
   selector: 'app-series-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -72,8 +73,17 @@ interface InvoiceSeries {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="6" class="text-center text-muted p-lg">
-                      No series configured
+                    <td colspan="6">
+                      <app-empty-state
+                        icon="🔢"
+                        title="No invoice series yet"
+                        description="Configure your first numbering series for sales or purchase invoices"
+                        actionText="+ New Series"
+                        (action)="showCreateModal = true"
+                        [features]="['Automatic numbering', 'Separate series for sales/purchases', 'Set defaults']"
+                        color="green"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }

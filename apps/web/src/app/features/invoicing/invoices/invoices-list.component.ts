@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
+import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
 interface Invoice {
   id: string;
@@ -20,7 +22,7 @@ interface Invoice {
 @Component({
   selector: 'app-invoices-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, EmptyStateComponent, SkeletonLoaderComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -75,13 +77,15 @@ interface Invoice {
 
       <!-- Invoices Table -->
       <div class="card">
-        <div class="card-body" style="padding: 0;">
+        <div class="card-body table-responsive" style="padding: 0;">
           @if (loading()) {
-            <div class="text-center p-lg">
-              <span class="spinner"></span>
-            </div>
+            <app-skeleton-loader
+              type="table"
+              [rowCount]="6"
+              [columnWidths]="['12%', '12%', '20%', '14%', '12%', '10%', '20%']"
+            />
           } @else {
-            <table class="table">
+            <table class="table invoices-table">
               <thead>
                 <tr>
                   <th>Number</th>
@@ -131,8 +135,17 @@ interface Invoice {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="7" class="text-center text-muted p-lg">
-                      No invoices found
+                    <td colspan="7">
+                      <app-empty-state
+                        icon="🧾"
+                        [title]="direction === 'SALES' ? 'No sales invoices yet' : 'No purchase invoices yet'"
+                        [description]="direction === 'SALES' ? 'Create your first sales invoice to start billing customers' : 'Record your first purchase invoice to track expenses'"
+                        actionText="+ New Invoice"
+                        actionLink="/invoicing/invoices/new"
+                        [features]="['VeriFactu compliant invoicing', 'Automatic numbering', 'PDF export & email']"
+                        color="green"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }
@@ -185,6 +198,27 @@ interface Invoice {
 
     .filters {
       margin-bottom: var(--spacing-lg);
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .invoices-table {
+      min-width: 800px;
+
+      th, td {
+        white-space: nowrap;
+
+        &:nth-child(1) { min-width: 100px; } // Number
+        &:nth-child(2) { min-width: 100px; } // Date
+        &:nth-child(3) { min-width: 150px; } // Customer/Supplier
+        &:nth-child(4) { min-width: 100px; } // Amount
+        &:nth-child(5) { min-width: 80px; }  // Status
+        &:nth-child(6) { min-width: 90px; }  // VeriFactu
+        &:nth-child(7) { min-width: 180px; } // Actions
+      }
     }
 
     .header-with-tooltip {

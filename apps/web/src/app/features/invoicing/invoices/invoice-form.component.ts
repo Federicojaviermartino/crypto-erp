@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
+import { BreadcrumbsComponent } from '@shared/components/breadcrumbs/breadcrumbs.component';
 
 interface Contact {
   id: string;
@@ -13,9 +14,15 @@ interface Contact {
 @Component({
   selector: 'app-invoice-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BreadcrumbsComponent],
   template: `
     <div class="page">
+      <app-breadcrumbs [items]="[
+        { label: 'Invoicing', link: '/invoicing', icon: '🧾' },
+        { label: 'Invoices', link: '/invoicing/invoices' },
+        { label: 'New Invoice' }
+      ]" />
+
       <header class="page-header">
         <h1>New Sales Invoice</h1>
       </header>

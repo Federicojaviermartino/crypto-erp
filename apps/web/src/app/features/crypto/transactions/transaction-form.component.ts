@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
+import { BreadcrumbsComponent } from '@shared/components/breadcrumbs/breadcrumbs.component';
 
 interface CryptoAsset {
   id: string;
@@ -13,9 +14,15 @@ interface CryptoAsset {
 @Component({
   selector: 'app-transaction-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BreadcrumbsComponent],
   template: `
     <div class="page">
+      <app-breadcrumbs [items]="[
+        { label: 'Crypto', link: '/crypto', icon: '₿' },
+        { label: 'Transactions', link: '/crypto/transactions' },
+        { label: 'New Transaction' }
+      ]" />
+
       <header class="page-header">
         <h1>New Crypto Transaction</h1>
       </header>

@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface Wallet {
   id: string;
@@ -42,7 +43,7 @@ const WALLET_TYPES: Record<string, string> = {
 @Component({
   selector: 'app-wallets-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -127,14 +128,15 @@ const WALLET_TYPES: Record<string, string> = {
               </div>
             </div>
           } @empty {
-            <div class="empty-state">
-              <span class="empty-icon">+</span>
-              <h3>No wallets configured</h3>
-              <p>Add your first wallet to start syncing transactions</p>
-              <button class="btn btn-primary" (click)="showModal = true">
-                Add Wallet
-              </button>
-            </div>
+            <app-empty-state
+              icon="💳"
+              title="No wallets configured"
+              description="Add your first blockchain wallet to start syncing transactions and tracking balances"
+              actionText="+ Add Wallet"
+              (action)="showModal = true"
+              [features]="['Track multiple chains', 'Auto-sync transactions', 'View real-time balances']"
+              color="amber"
+            />
           }
         </div>
       }
@@ -405,25 +407,6 @@ const WALLET_TYPES: Record<string, string> = {
       gap: var(--spacing-sm);
       padding: var(--spacing-md);
       border-top: 1px solid var(--gray-100);
-    }
-
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: var(--spacing-2xl);
-      background: var(--white);
-      border-radius: var(--radius-lg);
-      border: 2px dashed var(--gray-200);
-
-      .empty-icon {
-        display: block;
-        font-size: 3rem;
-        color: var(--gray-300);
-        margin-bottom: var(--spacing-md);
-      }
-
-      h3 { margin: 0 0 var(--spacing-sm); }
-      p { color: var(--gray-500); margin: 0 0 var(--spacing-lg); }
     }
 
     .form-row {

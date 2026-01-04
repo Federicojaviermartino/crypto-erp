@@ -192,17 +192,123 @@ a {
 
   &.is-invalid {
     border-color: var(--danger);
+    background-color: #fef2f2;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+      border-color: var(--danger);
+    }
+  }
+
+  &.is-valid {
+    border-color: var(--success);
+    background-color: #f0fdf4;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+      border-color: var(--success);
+    }
+  }
+
+  // Touched but empty (warning state)
+  &.is-touched:not(.is-valid):not(.is-invalid) {
+    &:invalid {
+      border-color: var(--warning);
+      background-color: #fffbeb;
     }
   }
 }
 
+// Form validation messages
 .form-error {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   margin-top: var(--spacing-xs);
   font-size: 0.75rem;
   color: var(--danger);
+  animation: slideDown 0.2s ease;
+
+  &::before {
+    content: '✕';
+    font-weight: bold;
+  }
+}
+
+.form-success {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--success);
+  animation: slideDown 0.2s ease;
+
+  &::before {
+    content: '✓';
+    font-weight: bold;
+  }
+}
+
+.form-hint {
+  display: block;
+  margin-top: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+// Required field indicator
+.form-label.required::after {
+  content: ' *';
+  color: var(--danger);
+}
+
+// Form group with validation feedback
+.form-group {
+  &.has-error {
+    .form-label {
+      color: var(--danger);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      border-color: var(--danger);
+      background-color: #fef2f2;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+      }
+    }
+  }
+
+  &.has-success {
+    .form-label {
+      color: var(--success);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      border-color: var(--success);
+      background-color: #f0fdf4;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // Cards

@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface Contact {
   id: string;
@@ -16,7 +17,7 @@ interface Contact {
 @Component({
   selector: 'app-contacts-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -85,8 +86,17 @@ interface Contact {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="6" class="text-center text-muted p-lg">
-                      No contacts found
+                    <td colspan="6">
+                      <app-empty-state
+                        icon="👥"
+                        title="No contacts yet"
+                        description="Add your first customer or supplier to start managing your contacts"
+                        actionText="+ New Contact"
+                        (action)="showModal = true"
+                        [features]="['Manage customers & suppliers', 'Store contact details', 'Link to invoices']"
+                        color="purple"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }

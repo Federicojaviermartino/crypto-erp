@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface CryptoAsset {
   id: string;
@@ -15,7 +16,7 @@ interface CryptoAsset {
 @Component({
   selector: 'app-assets-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -64,8 +65,17 @@ interface CryptoAsset {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="6" class="text-center text-muted p-lg">
-                      No assets configured
+                    <td colspan="6">
+                      <app-empty-state
+                        icon="₿"
+                        title="No crypto assets yet"
+                        description="Configure your first cryptocurrency to track prices and manage your portfolio"
+                        actionText="+ New Asset"
+                        (action)="showModal = true"
+                        [features]="['Track any cryptocurrency', 'Auto price updates via CoinGecko', 'Portfolio valuation']"
+                        color="amber"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }

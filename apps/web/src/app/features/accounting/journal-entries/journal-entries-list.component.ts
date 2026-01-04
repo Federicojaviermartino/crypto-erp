@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 interface JournalEntry {
   id: string;
@@ -16,7 +17,7 @@ interface JournalEntry {
 @Component({
   selector: 'app-journal-entries-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, EmptyStateComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -107,8 +108,17 @@ interface JournalEntry {
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="7" class="text-center text-muted p-lg">
-                      No entries found
+                    <td colspan="7">
+                      <app-empty-state
+                        icon="📝"
+                        title="No journal entries yet"
+                        description="Create your first journal entry to start tracking your accounting records"
+                        actionText="+ New Entry"
+                        actionLink="/accounting/journal-entries/new"
+                        [features]="['Double-entry bookkeeping', 'Automatic balancing', 'Post to general ledger']"
+                        color="blue"
+                        variant="compact"
+                      />
                     </td>
                   </tr>
                 }
