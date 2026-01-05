@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
+import { AuthService } from '@core/services/auth.service';
 
 interface Insight {
   category: 'tax' | 'crypto' | 'accounting' | 'optimization';
@@ -245,13 +246,22 @@ export class AiInsightsComponent implements OnInit {
   error = signal(false);
   insights = signal<Insight[]>([]);
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadInsights();
   }
 
   loadInsights(): void {
+    // Only load insights if user has a company
+    if (!this.authService.getCompanyId()) {
+      this.loading.set(false);
+      return;
+    }
+
     this.loading.set(true);
     this.error.set(false);
 

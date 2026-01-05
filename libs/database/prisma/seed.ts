@@ -353,18 +353,34 @@ Reference: Real Decreto 1007/2023, Orden HFP/1177/2024
 
 const DEMO_USERS = [
   {
-        email: 'admin@crypto-erp.com',
-        password: 'Admin123!',
-        firstName: 'Admin',
-        lastName: 'Demo',
+    email: 'admin@crypto-erp.com',
+    password: 'Admin123!',
+    firstName: 'Admin',
+    lastName: 'Demo',
+    role: 'ADMIN' as const,
   },
   {
-        email: 'client@crypto-erp.com',
-        password: 'Client123!',
-        firstName: 'Client',
-        lastName: 'Demo',
+    email: 'client@crypto-erp.com',
+    password: 'Client123!',
+    firstName: 'Client',
+    lastName: 'Demo',
+    role: 'USER' as const,
   },
-  ];
+];
+
+const DEMO_COMPANY = {
+  name: 'Demo Company',
+  legalName: 'Demo Company S.L.',
+  taxId: 'B12345678',
+  address: 'Calle Demo 123',
+  city: 'Madrid',
+  province: 'Madrid',
+  postalCode: '28001',
+  country: 'ES',
+  email: 'demo@crypto-erp.com',
+  phone: '+34 912 345 678',
+  currency: 'EUR',
+};
 
 async function seed() {
   console.log('🌱 Starting database seed...\n');
@@ -372,30 +388,68 @@ async function seed() {
   // Note: This seed creates template data that will be copied for each company
   // The actual seeding happens when a company is created
 
+  // Create or get demo company
+  console.log('🏢 Creating demo company...');
+  let demoCompany = await prisma.company.findFirst({
+    where: { taxId: DEMO_COMPANY.taxId },
+  });
 
-    // Create demo users
-    console.log('👤 Creating demo users...');
-    for (const demoUser of DEMO_USERS) {
-          const existingUser = await prisma.user.findUnique({
-                  where: { email: demoUser.email },
-          });
+  if (!demoCompany) {
+    demoCompany = await prisma.company.create({
+      data: DEMO_COMPANY,
+    });
+    console.log(`  ✅ Created company: ${demoCompany.name}`);
+  } else {
+    console.log(`  ⏭️ Company already exists: ${demoCompany.name}`);
+  }
 
-          if (!existingUser) {
-                  const passwordHash = await bcrypt.hash(demoUser.password, 12);
-                  await prisma.user.create({
-                            data: {
-                                        email: demoUser.email,
-                                        passwordHash,
-                                        firstName: demoUser.firstName,
-                                        lastName: demoUser.lastName,
-                                        isActive: true,
-                            },
-                  });
-                  console.log(`  ✅ Created user: ${demoUser.email}`);
-          } else {
-                  console.log(`  ⏭️ User already exists: ${demoUser.email}`);
-          }
+  // Create demo users and associate with company
+  console.log('👤 Creating demo users...');
+  for (const demoUser of DEMO_USERS) {
+    let user = await prisma.user.findUnique({
+      where: { email: demoUser.email },
+    });
+
+    if (!user) {
+      const passwordHash = await bcrypt.hash(demoUser.password, 12);
+      user = await prisma.user.create({
+        data: {
+          email: demoUser.email,
+          passwordHash,
+          firstName: demoUser.firstName,
+          lastName: demoUser.lastName,
+          isActive: true,
+        },
+      });
+      console.log(`  ✅ Created user: ${demoUser.email}`);
+    } else {
+      console.log(`  ⏭️ User already exists: ${demoUser.email}`);
     }
+
+    // Associate user with demo company
+    const existingCompanyUser = await prisma.companyUser.findUnique({
+      where: {
+        userId_companyId: {
+          userId: user.id,
+          companyId: demoCompany.id,
+        },
+      },
+    });
+
+    if (!existingCompanyUser) {
+      await prisma.companyUser.create({
+        data: {
+          userId: user.id,
+          companyId: demoCompany.id,
+          role: demoUser.role,
+          isDefault: true,
+        },
+      });
+      console.log(`  ✅ Associated ${demoUser.email} with ${demoCompany.name} as ${demoUser.role}`);
+    } else {
+      console.log(`  ⏭️ User already associated with company: ${demoUser.email}`);
+    }
+  }
   
   console.log('📚 Seed data prepared:');
   console.log(`   - ${SPANISH_CHART_OF_ACCOUNTS.length} chart of accounts entries`);
