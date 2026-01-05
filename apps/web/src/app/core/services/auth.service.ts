@@ -161,11 +161,6 @@ const COMPANY_ID_KEY = 'company_id';
     }
 
     private autoSetCompanyId(user: User): void {
-          // Only set if not already stored
-          if (this.getCompanyId()) {
-                  return;
-          }
-
           if (user.companies && user.companies.length > 0) {
                   // First try to find the default company
                   const defaultCompany = user.companies.find(c => c.isDefault);
