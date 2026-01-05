@@ -76,6 +76,22 @@ export class AiController {
     return { explanation };
   }
 
+  @Post('generate-insights')
+  @ApiOperation({ summary: 'Generate AI-powered insights for dashboard' })
+  @ApiResponse({ status: 200, description: 'Generated insights' })
+  @HttpCode(HttpStatus.OK)
+  async generateInsights(): Promise<{ insights: Array<{
+    category: 'tax' | 'crypto' | 'accounting' | 'optimization';
+    message: string;
+    priority: 'high' | 'medium' | 'low';
+    actionLabel?: string;
+    actionPath?: string;
+  }> }> {
+    // TODO: Implement actual AI-powered insights based on company data
+    // For now, return empty array (shows "No recommendations at this time")
+    return { insights: [] };
+  }
+
   // ============================================================================
   // OCR Endpoints
   // ============================================================================

@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtAuthGuard, TenantGuard } from '../../../common/guards/index.js';
-import { CurrentCompany, CurrentUser } from '../../../common/decorators/index.js';
+import { CurrentCompany, CurrentUser, AllowNoCompany } from '../../../common/decorators/index.js';
 import { InvoicesService } from '../services/index.js';
 import { InvoicePdfService } from '../services/invoice-pdf.service.js';
 import { CreateInvoiceDto, QueryInvoicesDto } from '../dto/index.js';
@@ -37,6 +37,7 @@ interface JwtPayload {
 @ApiTags('Invoices')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, TenantGuard)
+@AllowNoCompany()
 @Controller('invoices')
 export class InvoicesController {
   constructor(
@@ -48,9 +49,12 @@ export class InvoicesController {
   @ApiOperation({ summary: 'List all invoices' })
   @ApiResponse({ status: 200, description: 'Returns paginated list of invoices' })
   async findAll(
-    @CurrentCompany() companyId: string,
+    @CurrentCompany() companyId: string | null,
     @Query() query: QueryInvoicesDto,
   ) {
+    if (!companyId) {
+      return { invoices: [], total: 0 };
+    }
     return this.invoicesService.findAll(companyId, query);
   }
 

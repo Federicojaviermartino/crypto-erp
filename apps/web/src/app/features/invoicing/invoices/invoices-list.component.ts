@@ -297,7 +297,9 @@ export class InvoicesListComponent implements OnInit {
   loadInvoices(): void {
     this.loading.set(true);
 
-    const params: Record<string, string> = { direction: this.direction };
+    // Map UI direction to API direction enum
+    const apiDirection = this.direction === 'SALES' ? 'ISSUED' : 'RECEIVED';
+    const params: Record<string, string> = { direction: apiDirection };
     if (this.searchTerm) params['search'] = this.searchTerm;
     if (this.filterStatus) params['status'] = this.filterStatus;
 

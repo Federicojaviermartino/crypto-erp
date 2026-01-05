@@ -22,7 +22,7 @@ import {
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { JwtAuthGuard, TenantGuard } from '../../../common/guards/index.js';
-import { CurrentCompany } from '../../../common/decorators/index.js';
+import { CurrentCompany, AllowNoCompany } from '../../../common/decorators/index.js';
 import { CryptoTransactionsService, CostBasisService, TaxReportEntry } from '../services/index.js';
 import { CryptoTxType } from '@prisma/client';
 import {
@@ -34,6 +34,7 @@ import {
 @ApiTags('Crypto Transactions')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, TenantGuard)
+@AllowNoCompany()
 @Controller('crypto/transactions')
 export class CryptoTransactionsController {
   constructor(
@@ -76,7 +77,10 @@ export class CryptoTransactionsController {
   @Get('portfolio')
   @ApiOperation({ summary: 'Get portfolio summary with cost basis' })
   @ApiResponse({ status: 200, description: 'Returns portfolio positions' })
-  async getPortfolioSummary(@CurrentCompany() companyId: string) {
+  async getPortfolioSummary(@CurrentCompany() companyId: string | null) {
+    if (!companyId) {
+      return { positions: [], totalValue: 0, totalCostBasis: 0, totalUnrealizedGain: 0 };
+    }
     return this.transactionsService.getPortfolioSummary(companyId);
   }
 
