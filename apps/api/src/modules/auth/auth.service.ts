@@ -85,7 +85,7 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    return this.generateTokens(fullUser);
+    return this.generateTokensWithCompanies(fullUser.id);
   }
 
   async validateUser(
@@ -248,6 +248,58 @@ export class AuthService {
 </EntityDescriptor>`;
   }
 
+  async generateTokensWithCompanies(userId: string): Promise<TokenResponseDto> {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      include: {
+        companyUsers: {
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                taxId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const payload: JwtPayload = { sub: user.id, email: user.email };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('jwt.secret'),
+      expiresIn: this.configService.get<string>('jwt.accessExpiresIn') || '15m',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('jwt.refreshSecret'),
+      expiresIn: this.configService.get<string>('jwt.refreshExpiresIn') || '7d',
+    });
+
+    const companies = user.companyUsers.map((cu) => ({
+      id: cu.company.id,
+      name: cu.company.name,
+      taxId: cu.company.taxId,
+      role: cu.role,
+      isDefault: cu.isDefault,
+    }));
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: 900,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        companies,
+      },
+    };
+  }
+
   generateTokens(user: {
     id: string;
     email: string;
@@ -269,7 +321,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 900, // 15 minutes in seconds
+      expiresIn: 900,
       user: {
         id: user.id,
         email: user.email,
