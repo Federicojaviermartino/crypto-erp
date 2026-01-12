@@ -63,7 +63,10 @@ type UserRole = 'client' | 'admin';
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="password">Password</label>
+            <div class="label-row">
+              <label class="form-label" for="password">Password</label>
+              <a routerLink="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+            </div>
             <div class="input-wrapper">
               <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -81,6 +84,14 @@ type UserRole = 'client' | 'admin';
             @if (isFieldInvalid('password')) {
               <div class="form-error">Password is required</div>
             }
+          </div>
+
+          <div class="remember-row">
+            <label class="checkbox-wrapper">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Remember me</span>
+            </label>
           </div>
 
           <button
@@ -105,10 +116,17 @@ type UserRole = 'client' | 'admin';
           <p class="demo-title">Demo Credentials</p>
           <div class="demo-options">
             <button type="button" class="demo-btn" (click)="fillDemoCredentials('client')">
-              <span>👤</span> Client Demo
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Client Demo
             </button>
             <button type="button" class="demo-btn" (click)="fillDemoCredentials('admin')">
-              <span>🛡️</span> Admin Demo
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              Admin Demo
             </button>
           </div>
         </div>
@@ -211,6 +229,27 @@ type UserRole = 'client' | 'admin';
       margin-bottom: 8px;
     }
 
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .label-row .form-label {
+      margin-bottom: 0;
+    }
+
+    .forgot-link {
+      font-size: 0.85rem;
+      color: #6366f1;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
     .input-wrapper {
       position: relative;
     }
@@ -251,6 +290,60 @@ type UserRole = 'client' | 'admin';
       margin-top: 6px;
       font-size: 0.85rem;
       color: #ef4444;
+    }
+
+    .remember-row {
+      margin-bottom: 20px;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .checkmark {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: var(--white);
+    }
+
+    .checkbox-wrapper:hover .checkmark {
+      border-color: #6366f1;
+    }
+
+    .checkbox-wrapper input[type="checkbox"]:checked ~ .checkmark {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-color: transparent;
+    }
+
+    .checkbox-wrapper input[type="checkbox"]:checked ~ .checkmark::after {
+      content: '';
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+
+    .checkbox-label {
+      font-size: 0.9rem;
+      color: var(--gray-600);
     }
 
     .btn {
@@ -393,6 +486,7 @@ export class LoginComponent {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false],
     });
   }
 

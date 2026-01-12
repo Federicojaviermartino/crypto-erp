@@ -123,6 +123,17 @@ import { AuthService } from '@core/services/auth.service';
             @if (isFieldInvalid('password')) {
               <div class="form-error">Minimum 8 characters required</div>
             }
+            @if (form.get('password')?.value) {
+              <div class="password-strength">
+                <div class="strength-bars">
+                  <div class="strength-bar" [class.active]="passwordStrength() >= 1" [class]="strengthClass()"></div>
+                  <div class="strength-bar" [class.active]="passwordStrength() >= 2" [class]="strengthClass()"></div>
+                  <div class="strength-bar" [class.active]="passwordStrength() >= 3" [class]="strengthClass()"></div>
+                  <div class="strength-bar" [class.active]="passwordStrength() >= 4" [class]="strengthClass()"></div>
+                </div>
+                <span class="strength-text" [class]="strengthClass()">{{ strengthLabel() }}</span>
+              </div>
+            }
           </div>
 
           <div class="form-group">
@@ -146,10 +157,23 @@ import { AuthService } from '@core/services/auth.service';
             }
           </div>
 
+          <div class="terms-row">
+            <label class="checkbox-wrapper" [class.is-invalid]="isFieldInvalid('acceptTerms')">
+              <input type="checkbox" formControlName="acceptTerms" />
+              <span class="checkmark"></span>
+              <span class="checkbox-label">
+                I agree to the <a href="#" (click)="$event.preventDefault()">Terms of Service</a> and <a href="#" (click)="$event.preventDefault()">Privacy Policy</a>
+              </span>
+            </label>
+            @if (isFieldInvalid('acceptTerms')) {
+              <div class="form-error">You must accept the terms to continue</div>
+            }
+          </div>
+
           <button
             type="submit"
             class="btn btn-primary w-100"
-            [disabled]="loading()"
+            [disabled]="loading() || !form.get('acceptTerms')?.value"
           >
             @if (loading()) {
               <span class="spinner"></span>
@@ -306,6 +330,136 @@ import { AuthService } from '@core/services/auth.service';
       color: #ef4444;
     }
 
+    .password-strength {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .strength-bars {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .strength-bar {
+      height: 4px;
+      flex: 1;
+      background: var(--gray-200);
+      border-radius: 2px;
+      transition: background-color 0.2s ease;
+    }
+
+    .strength-bar.active.weak {
+      background: #ef4444;
+    }
+
+    .strength-bar.active.fair {
+      background: #f59e0b;
+    }
+
+    .strength-bar.active.good {
+      background: #10b981;
+    }
+
+    .strength-bar.active.strong {
+      background: #059669;
+    }
+
+    .strength-text {
+      font-size: 0.8rem;
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    .strength-text.weak {
+      color: #ef4444;
+    }
+
+    .strength-text.fair {
+      color: #f59e0b;
+    }
+
+    .strength-text.good {
+      color: #10b981;
+    }
+
+    .strength-text.strong {
+      color: #059669;
+    }
+
+    .terms-row {
+      margin-bottom: 20px;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .checkmark {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: var(--white);
+      margin-top: 2px;
+    }
+
+    .checkbox-wrapper:hover .checkmark {
+      border-color: #6366f1;
+    }
+
+    .checkbox-wrapper.is-invalid .checkmark {
+      border-color: #ef4444;
+    }
+
+    .checkbox-wrapper input[type="checkbox"]:checked ~ .checkmark {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-color: transparent;
+    }
+
+    .checkbox-wrapper input[type="checkbox"]:checked ~ .checkmark::after {
+      content: '';
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+
+    .checkbox-label {
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      line-height: 1.4;
+    }
+
+    .checkbox-label a {
+      color: #6366f1;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .checkbox-label a:hover {
+      text-decoration: underline;
+    }
+
     .btn {
       padding: 14px 24px;
       border-radius: 12px;
@@ -399,6 +553,7 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
+      acceptTerms: [false, [Validators.requiredTrue]],
     });
   }
 
@@ -414,6 +569,34 @@ export class RegisterComponent {
       confirmPassword?.touched &&
       password?.value !== confirmPassword?.value
     );
+  }
+
+  passwordStrength(): number {
+    const password = this.form.get('password')?.value || '';
+    let strength = 0;
+
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+    return strength;
+  }
+
+  strengthClass(): string {
+    const strength = this.passwordStrength();
+    if (strength <= 1) return 'weak';
+    if (strength === 2) return 'fair';
+    if (strength === 3) return 'good';
+    return 'strong';
+  }
+
+  strengthLabel(): string {
+    const strength = this.passwordStrength();
+    if (strength <= 1) return 'Weak';
+    if (strength === 2) return 'Fair';
+    if (strength === 3) return 'Good';
+    return 'Strong';
   }
 
   onSubmit(): void {

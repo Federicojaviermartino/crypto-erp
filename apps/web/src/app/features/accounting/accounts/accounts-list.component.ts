@@ -1,6 +1,7 @@
-import { Component, OnInit, signal, HostListener } from '@angular/core';
+import { Component, OnInit, signal, HostListener, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '@core/services/api.service';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
@@ -97,7 +98,7 @@ interface Account {
                   <tr>
                     <td colspan="5">
                       <app-empty-state
-                        icon="📒"
+                        icon="book"
                         title="No accounts yet"
                         description="Create your first account to start organizing your chart of accounts"
                         actionText="+ New Account"
@@ -127,16 +128,25 @@ interface Account {
               <div class="form-group">
                 <label>Code *</label>
                 <input type="text" class="form-control" [(ngModel)]="newAccount.code"
-                       placeholder="e.g., 100, 4300, 57200">
+                       placeholder="e.g., 100, 4300, 57200"
+                       [class.is-invalid]="formErrors.code">
+                @if (formErrors.code) {
+                  <span class="error-text">{{ formErrors.code }}</span>
+                }
               </div>
               <div class="form-group">
                 <label>Name *</label>
                 <input type="text" class="form-control" [(ngModel)]="newAccount.name"
-                       placeholder="Account name">
+                       placeholder="Account name"
+                       [class.is-invalid]="formErrors.name">
+                @if (formErrors.name) {
+                  <span class="error-text">{{ formErrors.name }}</span>
+                }
               </div>
               <div class="form-group">
                 <label>Type *</label>
-                <select class="form-control" [(ngModel)]="newAccount.type">
+                <select class="form-control" [(ngModel)]="newAccount.type"
+                        [class.is-invalid]="formErrors.type">
                   <option value="">Select type...</option>
                   <option value="ASSET">Asset</option>
                   <option value="LIABILITY">Liability</option>
@@ -144,15 +154,20 @@ interface Account {
                   <option value="INCOME">Income</option>
                   <option value="EXPENSE">Expense</option>
                 </select>
+                @if (formErrors.type) {
+                  <span class="error-text">{{ formErrors.type }}</span>
+                }
               </div>
               <div class="form-group">
-                <label>Parent Account (optional)</label>
-                <select class="form-control" [(ngModel)]="newAccount.parentId">
-                  <option value="">None (top-level account)</option>
-                  @for (acc of accounts(); track acc.id) {
-                    <option [value]="acc.id">{{ acc.code }} - {{ acc.name }}</option>
-                  }
-                </select>
+                <label>Parent Account Code (optional)</label>
+                <input type="text" class="form-control" [(ngModel)]="newAccount.parentCode"
+                       placeholder="e.g., 572 for sub-accounts of Banks">
+                <span class="help-text">Enter the parent account code if this is a sub-account</span>
+              </div>
+              <div class="form-group">
+                <label>Description (optional)</label>
+                <input type="text" class="form-control" [(ngModel)]="newAccount.description"
+                       placeholder="Optional description">
               </div>
               @if (saveError) {
                 <div class="alert alert-danger">{{ saveError }}</div>
@@ -275,9 +290,34 @@ interface Account {
       border-radius: var(--radius-md);
       margin-top: var(--spacing-md);
     }
+
+    .error-text {
+      color: var(--danger);
+      font-size: 0.875rem;
+      margin-top: var(--spacing-xs);
+      display: block;
+    }
+
+    .help-text {
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      margin-top: var(--spacing-xs);
+      display: block;
+    }
+
+    .form-control.is-invalid {
+      border-color: var(--danger);
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+      }
+    }
   `],
 })
 export class AccountsListComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
+  private api = inject(ApiService);
+
   accounts = signal<Account[]>([]);
   loading = signal(true);
   saving = signal(false);
@@ -291,10 +331,16 @@ export class AccountsListComponent implements OnInit {
     code: '',
     name: '',
     type: '',
-    parentId: '',
+    parentCode: '',
+    description: '',
   };
 
-  constructor(private api: ApiService) {}
+  // Form validation errors
+  formErrors = {
+    code: '',
+    name: '',
+    type: '',
+  };
 
   @HostListener('document:keydown.escape')
   onEscapePress(): void {
@@ -314,7 +360,9 @@ export class AccountsListComponent implements OnInit {
     if (this.searchTerm) params['search'] = this.searchTerm;
     if (this.filterType) params['type'] = this.filterType;
 
-    this.api.get<Account[]>('/accounts', params).subscribe({
+    this.api.get<Account[]>('/accounts', params).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (accounts) => {
         this.accounts.set(accounts);
         this.loading.set(false);
@@ -336,7 +384,8 @@ export class AccountsListComponent implements OnInit {
       code: account.code,
       name: account.name,
       type: account.type,
-      parentId: account.parentId || '',
+      parentCode: '',
+      description: '',
     };
     this.showCreateModal = true;
   }
@@ -345,29 +394,68 @@ export class AccountsListComponent implements OnInit {
     this.showCreateModal = false;
     this.editingAccount = null;
     this.saveError = '';
-    this.newAccount = { code: '', name: '', type: '', parentId: '' };
+    this.newAccount = { code: '', name: '', type: '', parentCode: '', description: '' };
+    this.formErrors = { code: '', name: '', type: '' };
+  }
+
+  validateForm(): boolean {
+    let isValid = true;
+    this.formErrors = { code: '', name: '', type: '' };
+
+    if (!this.newAccount.code) {
+      this.formErrors.code = 'Account code is required';
+      isValid = false;
+    } else if (!/^\d{2,}$/.test(this.newAccount.code)) {
+      this.formErrors.code = 'Code must be numeric (e.g., 1000)';
+      isValid = false;
+    }
+
+    if (!this.newAccount.name) {
+      this.formErrors.name = 'Account name is required';
+      isValid = false;
+    } else if (this.newAccount.name.length < 2) {
+      this.formErrors.name = 'Name must be at least 2 characters';
+      isValid = false;
+    }
+
+    if (!this.newAccount.type) {
+      this.formErrors.type = 'Account type is required';
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   saveAccount(): void {
-    if (!this.newAccount.code || !this.newAccount.name || !this.newAccount.type) {
+    if (!this.validateForm()) {
       return;
     }
 
     this.saving.set(true);
     this.saveError = '';
 
-    const payload = {
+    // Build payload, only include parentCode if it has a value
+    const payload: Record<string, unknown> = {
       code: this.newAccount.code,
       name: this.newAccount.name,
       type: this.newAccount.type,
-      parentId: this.newAccount.parentId || null,
     };
+
+    if (this.newAccount.parentCode && this.newAccount.parentCode.trim() !== '') {
+      payload['parentCode'] = this.newAccount.parentCode;
+    }
+
+    if (this.newAccount.description && this.newAccount.description.trim() !== '') {
+      payload['description'] = this.newAccount.description;
+    }
 
     const request = this.editingAccount
       ? this.api.put(`/accounts/${this.editingAccount.id}`, payload)
       : this.api.post('/accounts', payload);
 
-    request.subscribe({
+    request.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: () => {
         this.saving.set(false);
         this.closeModal();
