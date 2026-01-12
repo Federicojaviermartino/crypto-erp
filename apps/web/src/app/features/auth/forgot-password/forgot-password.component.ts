@@ -106,37 +106,16 @@ import { ApiService } from '@core/services/api.service';
       align-items: center;
       justify-content: center;
       padding: var(--spacing-lg);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .auth-container::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-      animation: pulse 15s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      background-color: #f8fafc;
     }
 
     .auth-card {
       width: 100%;
       max-width: 420px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      padding: 40px;
-      position: relative;
-      z-index: 1;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 32px;
     }
 
     .auth-header {
@@ -149,12 +128,9 @@ import { ApiService } from '@core/services/api.service';
     }
 
     .auth-header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
       margin-bottom: 8px;
     }
 
@@ -264,7 +240,7 @@ import { ApiService } from '@core/services/api.service';
 
     .btn {
       padding: 14px 24px;
-      border-radius: 12px;
+      border-radius: 6px;
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
@@ -277,14 +253,14 @@ import { ApiService } from '@core/services/api.service';
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      background: var(--primary);
       color: white;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
 
     .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      background: var(--primary-dark);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
     }
 
     .btn-primary:disabled {

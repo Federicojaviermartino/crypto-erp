@@ -24,7 +24,7 @@ interface NavItem {
               [routerLink]="item.path"
               routerLinkActive="active"
               class="nav-item"
-              [title]="item.label"
+              [attr.data-tooltip]="item.label"
             >
               <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path [attr.d]="item.svgPath"/>
@@ -34,7 +34,7 @@ interface NavItem {
         </nav>
 
         <div class="sidebar-footer">
-          <button class="nav-item logout-btn" (click)="logout()" title="Sign Out">
+          <button class="nav-item logout-btn" (click)="logout()" data-tooltip="Sign Out">
             <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
@@ -89,6 +89,51 @@ interface NavItem {
       border: none;
       background: none;
       width: 100%;
+      position: relative;
+
+      // Tooltip
+      &::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 12px;
+        padding: 6px 12px;
+        background: #1f2937;
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 6px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s, visibility 0.15s;
+        z-index: 1000;
+        pointer-events: none;
+      }
+
+      // Tooltip arrow
+      &::before {
+        content: '';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 6px;
+        border: 5px solid transparent;
+        border-right-color: #1f2937;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s, visibility 0.15s;
+        z-index: 1000;
+      }
+
+      &:hover::after,
+      &:hover::before {
+        opacity: 1;
+        visibility: visible;
+      }
 
       &:hover {
         background: var(--gray-800);
