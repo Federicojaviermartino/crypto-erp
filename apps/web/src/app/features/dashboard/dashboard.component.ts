@@ -56,7 +56,7 @@ interface QuickAction {
         <!-- Quick Actions -->
         <section class="quick-actions">
           @for (action of quickActions; track action.path) {
-            <a [routerLink]="action.path" class="action-card" [style.border-color]="action.color">
+            <a [routerLink]="action.path" class="action-card">
               <span class="action-icon">{{ action.icon }}</span>
               <span class="action-label">{{ action.label }}</span>
             </a>
@@ -189,14 +189,16 @@ interface QuickAction {
       padding: var(--spacing-lg);
       background: var(--white);
       border-radius: var(--radius-lg);
-      border: 2px solid var(--gray-200);
+      border: 1px solid var(--gray-200);
       text-decoration: none;
       color: var(--gray-700);
       transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        border-color: var(--gray-300);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
 
       .action-icon {
