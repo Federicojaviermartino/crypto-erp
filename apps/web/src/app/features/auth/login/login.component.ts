@@ -348,7 +348,7 @@ type UserRole = 'client' | 'admin';
 
     .btn {
       padding: 14px 24px;
-      border-radius: 12px;
+      border-radius: 6px;
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
@@ -361,14 +361,14 @@ type UserRole = 'client' | 'admin';
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      background: var(--primary);
       color: white;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
 
     .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      background: var(--primary-dark);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
     }
 
     .btn-primary:disabled {
@@ -433,7 +433,7 @@ type UserRole = 'client' | 'admin';
       padding: 10px 16px;
       background: var(--gray-50);
       border: 1px solid var(--gray-200);
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s ease;

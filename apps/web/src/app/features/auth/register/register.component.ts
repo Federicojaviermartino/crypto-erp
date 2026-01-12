@@ -173,7 +173,7 @@ import { AuthService } from '@core/services/auth.service';
           <button
             type="submit"
             class="btn btn-primary w-100"
-            [disabled]="loading() || !form.get('acceptTerms')?.value"
+            [disabled]="loading()"
           >
             @if (loading()) {
               <span class="spinner"></span>
@@ -462,7 +462,7 @@ import { AuthService } from '@core/services/auth.service';
 
     .btn {
       padding: 14px 24px;
-      border-radius: 12px;
+      border-radius: 6px;
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
@@ -475,14 +475,14 @@ import { AuthService } from '@core/services/auth.service';
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      background: var(--primary);
       color: white;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
 
     .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      background: var(--primary-dark);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
     }
 
     .btn-primary:disabled {
