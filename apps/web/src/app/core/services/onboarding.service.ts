@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, switchMap, map } from 'rxjs';
 
 export interface OnboardingProgress {
   userId: string;
@@ -57,10 +57,8 @@ export class OnboardingService {
 
   loadProgress(): Observable<OnboardingProgress> {
     return this.api.get<OnboardingProgress>('/onboarding/progress').pipe(
-      tap((progress) => {
-        this.progressSignal.set(progress);
-        this.loadSteps().subscribe();
-      })
+      tap((progress) => this.progressSignal.set(progress)),
+      switchMap((progress) => this.loadSteps().pipe(map(() => progress)))
     );
   }
 
@@ -72,19 +70,15 @@ export class OnboardingService {
 
   completeStep(stepId: string): Observable<OnboardingProgress> {
     return this.api.post<OnboardingProgress>(`/onboarding/steps/${stepId}/complete`, {}).pipe(
-      tap((progress) => {
-        this.progressSignal.set(progress);
-        this.loadSteps().subscribe();
-      })
+      tap((progress) => this.progressSignal.set(progress)),
+      switchMap((progress) => this.loadSteps().pipe(map(() => progress)))
     );
   }
 
   skipStep(stepId: string): Observable<OnboardingProgress> {
     return this.api.post<OnboardingProgress>(`/onboarding/steps/${stepId}/skip`, {}).pipe(
-      tap((progress) => {
-        this.progressSignal.set(progress);
-        this.loadSteps().subscribe();
-      })
+      tap((progress) => this.progressSignal.set(progress)),
+      switchMap((progress) => this.loadSteps().pipe(map(() => progress)))
     );
   }
 
@@ -98,10 +92,8 @@ export class OnboardingService {
 
   restartOnboarding(): Observable<OnboardingProgress> {
     return this.api.post<OnboardingProgress>('/onboarding/restart', {}).pipe(
-      tap((progress) => {
-        this.progressSignal.set(progress);
-        this.loadSteps().subscribe();
-      })
+      tap((progress) => this.progressSignal.set(progress)),
+      switchMap((progress) => this.loadSteps().pipe(map(() => progress)))
     );
   }
 }

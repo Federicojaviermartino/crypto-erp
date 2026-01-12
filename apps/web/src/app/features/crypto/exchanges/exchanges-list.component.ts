@@ -1,8 +1,10 @@
-import { Component, OnInit, signal, HostListener } from '@angular/core';
+import { Component, OnInit, signal, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { DialogService } from '@core/services/dialog.service';
+import { NotificationService } from '@core/services/notification.service';
 
 interface ExchangeInfo {
   id: string;
@@ -546,6 +548,9 @@ export class ExchangesListComponent implements OnInit {
     apiSecret: '',
   };
 
+  private dialogService = inject(DialogService);
+  private notificationService = inject(NotificationService);
+
   constructor(private api: ApiService) {}
 
   @HostListener('document:keydown.escape')
@@ -649,22 +654,28 @@ export class ExchangesListComponent implements OnInit {
       `/crypto/exchanges/accounts/${account.id}/sync/all`, {}
     ).subscribe({
       next: (result) => {
-        alert(`Sync completed:\n- Trades: ${result.trades}\n- Deposits: ${result.deposits}\n- Withdrawals: ${result.withdrawals}`);
+        this.notificationService.success(
+          `Sync completed: ${result.trades} trades, ${result.deposits} deposits, ${result.withdrawals} withdrawals`
+        );
         this.loadAccounts();
       },
       error: (err) => {
-        alert('Error syncing: ' + err.message);
+        this.notificationService.error('Error syncing: ' + (err.error?.message || err.message));
       },
     });
   }
 
-  deleteAccount(account: ExchangeAccount): void {
-    if (!confirm(`Delete connection with ${account.label}?`)) {
+  async deleteAccount(account: ExchangeAccount): Promise<void> {
+    const confirmed = await this.dialogService.confirmDelete(account.label);
+    if (!confirmed) {
       return;
     }
 
     this.api.delete(`/crypto/exchanges/accounts/${account.id}`).subscribe({
-      next: () => this.loadAccounts(),
+      next: () => {
+        this.notificationService.success('Connection deleted successfully');
+        this.loadAccounts();
+      },
     });
   }
 }

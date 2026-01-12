@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '@core/services/api.service';
+import { DialogService } from '@core/services/dialog.service';
+import { NotificationService } from '@core/services/notification.service';
 
 interface FiscalYear {
   id: string;
@@ -99,6 +101,9 @@ export class FiscalYearsListComponent implements OnInit {
   loading = signal(true);
   showCreateForm = false;
 
+  private dialogService = inject(DialogService);
+  private notificationService = inject(NotificationService);
+
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
@@ -116,18 +121,40 @@ export class FiscalYearsListComponent implements OnInit {
     });
   }
 
-  closeYear(year: FiscalYear): void {
-    if (confirm(`Close fiscal year ${year.name}?`)) {
+  async closeYear(year: FiscalYear): Promise<void> {
+    const confirmed = await this.dialogService.confirm({
+      title: 'Close Fiscal Year',
+      message: `Are you sure you want to close fiscal year "${year.name}"? This will prevent further entries.`,
+      confirmText: 'Close Year',
+      cancelText: 'Cancel',
+      confirmColor: 'warning',
+    });
+
+    if (confirmed) {
       this.api.patch(`/fiscal-years/${year.id}/close`, {}).subscribe({
-        next: () => this.loadFiscalYears(),
+        next: () => {
+          this.notificationService.success(`Fiscal year "${year.name}" closed successfully`);
+          this.loadFiscalYears();
+        },
       });
     }
   }
 
-  reopenYear(year: FiscalYear): void {
-    if (confirm(`Reopen fiscal year ${year.name}?`)) {
+  async reopenYear(year: FiscalYear): Promise<void> {
+    const confirmed = await this.dialogService.confirm({
+      title: 'Reopen Fiscal Year',
+      message: `Are you sure you want to reopen fiscal year "${year.name}"?`,
+      confirmText: 'Reopen',
+      cancelText: 'Cancel',
+      confirmColor: 'primary',
+    });
+
+    if (confirmed) {
       this.api.patch(`/fiscal-years/${year.id}/reopen`, {}).subscribe({
-        next: () => this.loadFiscalYears(),
+        next: () => {
+          this.notificationService.success(`Fiscal year "${year.name}" reopened successfully`);
+          this.loadFiscalYears();
+        },
       });
     }
   }

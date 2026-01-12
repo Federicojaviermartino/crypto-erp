@@ -314,7 +314,7 @@ export class Modelo721Service {
     });
 
     if (!company) {
-      throw new Error('Empresa no encontrada');
+      throw new Error('Company not found');
     }
 
     // Formato XML según BOE para Modelo 721
@@ -377,7 +377,7 @@ export class Modelo721Service {
     });
 
     if (!company) {
-      throw new Error('Empresa no encontrada');
+      throw new Error('Company not found');
     }
 
     const totalValor = items.reduce(
@@ -474,8 +474,8 @@ export class Modelo721Service {
       ...rows.map((row) => row.join(';')),
       '',
       `Total Valor EUR;${modelo.totalValorEur.toFixed(2)}`,
-      `Obligado a declarar;${modelo.obligadoDeclarar ? 'Sí' : 'No'}`,
-      `Variación significativa;${modelo.variacionSignificativa ? 'Sí' : 'No'}`,
+      `Required to file;${modelo.obligadoDeclarar ? 'Yes' : 'No'}`,
+      `Significant variation;${modelo.variacionSignificativa ? 'Yes' : 'No'}`,
     ];
 
     return csv.join('\n');
@@ -534,7 +534,7 @@ export class Modelo721Service {
         const fallbackPrice = defaultPrices[asset.symbol] || 1;
         prices.set(asset.symbol, new Decimal(fallbackPrice));
         this.logger.warn(
-          `No hay precio histórico para ${asset.symbol} a ${this.formatDate(date)}, usando fallback: ${fallbackPrice} EUR`,
+          `No historical price for ${asset.symbol} at ${this.formatDate(date)}, using fallback: ${fallbackPrice} EUR`,
         );
       }
     }
@@ -581,47 +581,47 @@ export class Modelo721Service {
     });
 
     if (!company?.taxId) {
-      errors.push('La empresa no tiene NIF configurado');
+      errors.push('Company does not have a tax ID configured');
     }
 
     // Validaciones de posiciones
     for (const pos of modelo.posiciones) {
       if (!pos.paisExchange || pos.paisExchange.length !== 2) {
-        errors.push(`${pos.tipoMoneda}: País del exchange inválido (debe ser código ISO de 2 letras)`);
+        errors.push(`${pos.tipoMoneda}: Invalid exchange country (must be 2-letter ISO code)`);
       }
 
       if (pos.valorEurAFinDeAno.lte(0)) {
-        warnings.push(`${pos.tipoMoneda} en ${pos.nombreExchange}: Valor a fin de año es 0 o negativo`);
+        warnings.push(`${pos.tipoMoneda} at ${pos.nombreExchange}: Year-end value is 0 or negative`);
       }
 
       if (!pos.fechaAdquisicion) {
-        errors.push(`${pos.tipoMoneda}: Falta fecha de primera adquisición`);
+        errors.push(`${pos.tipoMoneda}: Missing first acquisition date`);
       }
 
       if (pos.valorAdquisicionEur.lte(0)) {
-        warnings.push(`${pos.tipoMoneda}: Valor de adquisición es 0 - verificar datos`);
+        warnings.push(`${pos.tipoMoneda}: Acquisition value is 0 - verify data`);
       }
 
-      // Verificar coherencia: valor actual vs coste
+      // Check consistency: current value vs cost
       const ratio = pos.valorEurAFinDeAno.div(pos.valorAdquisicionEur);
       if (ratio.gt(100) || ratio.lt(0.01)) {
         warnings.push(
-          `${pos.tipoMoneda}: Diferencia extrema entre valor actual (${pos.valorEurAFinDeAno.toFixed(2)} EUR) ` +
-            `y coste (${pos.valorAdquisicionEur.toFixed(2)} EUR) - verificar precios`,
+          `${pos.tipoMoneda}: Extreme difference between current value (${pos.valorEurAFinDeAno.toFixed(2)} EUR) ` +
+            `and cost (${pos.valorAdquisicionEur.toFixed(2)} EUR) - verify prices`,
         );
       }
     }
 
-    // Validaciones globales
+    // Global validations
     if (!modelo.obligadoDeclarar) {
       warnings.push(
-        `Valor total (${modelo.totalValorEur.toFixed(2)} EUR) no supera umbral de 50,000 EUR - ` +
-          `no hay obligación de declarar el Modelo 721`,
+        `Total value (${modelo.totalValorEur.toFixed(2)} EUR) does not exceed 50,000 EUR threshold - ` +
+          `no obligation to file Modelo 721`,
       );
     }
 
     if (modelo.obligadoDeclarar && modelo.posiciones.length === 0) {
-      errors.push('Obligado a declarar pero no hay posiciones - verificar datos de wallets y exchanges');
+      errors.push('Required to file but no positions found - verify wallet and exchange data');
     }
 
     // Verificar que hay precios históricos disponibles
@@ -637,8 +637,8 @@ export class Modelo721Service {
 
     if (priceCheck === 0) {
       warnings.push(
-        `No hay precios históricos para la fecha 31/12/${year}. ` +
-          `Los valores mostrados son estimaciones y deben verificarse.`,
+        `No historical prices available for 31/12/${year}. ` +
+          `The values shown are estimates and should be verified.`,
       );
     }
 

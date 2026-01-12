@@ -1,43 +1,69 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, throwError, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
+import { TokenRefreshService } from '../services/token-refresh.service';
 
-let isRefreshing = false;
-
+/**
+ * HTTP Error Interceptor
+ * Handles HTTP errors including automatic token refresh on 401 responses.
+ * Uses TokenRefreshService to prevent race conditions when multiple 401 errors occur.
+ */
 export const errorInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const authService = inject(AuthService);
   const notificationService = inject(NotificationService);
+  const tokenRefreshService = inject(TokenRefreshService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       // Handle 401 Unauthorized - Token refresh
       if (error.status === 401 && !req.url.includes('/auth/')) {
-        if (!isRefreshing) {
-          isRefreshing = true;
+        return tokenRefreshService.isRefreshing$.pipe(
+          take(1),
+          switchMap(isRefreshing => {
+            if (!isRefreshing) {
+              // Start the refresh process
+              tokenRefreshService.startRefresh();
 
-          return authService.refreshToken().pipe(
-            switchMap((tokens) => {
-              isRefreshing = false;
+              return authService.refreshToken().pipe(
+                switchMap((tokens) => {
+                  if (tokens) {
+                    tokenRefreshService.completeRefresh(tokens.accessToken);
 
-              if (tokens) {
-                const newReq = req.clone({
-                  headers: req.headers.set('Authorization', `Bearer ${tokens.accessToken}`),
-                });
-                return next(newReq);
-              }
+                    // Retry the original request with new token
+                    const newReq = req.clone({
+                      headers: req.headers.set('Authorization', `Bearer ${tokens.accessToken}`),
+                    });
+                    return next(newReq);
+                  }
 
-              authService.logout();
-              return throwError(() => error);
-            }),
-            catchError((refreshError) => {
-              isRefreshing = false;
-              authService.logout();
-              return throwError(() => refreshError);
-            }),
-          );
-        }
+                  tokenRefreshService.failRefresh();
+                  authService.logout();
+                  return throwError(() => error);
+                }),
+                catchError((refreshError) => {
+                  tokenRefreshService.failRefresh();
+                  authService.logout();
+                  return throwError(() => refreshError);
+                }),
+              );
+            } else {
+              // Token is already being refreshed, wait for it
+              return tokenRefreshService.waitForRefresh().pipe(
+                switchMap(token => {
+                  if (token) {
+                    const newReq = req.clone({
+                      headers: req.headers.set('Authorization', `Bearer ${token}`),
+                    });
+                    return next(newReq);
+                  }
+                  return throwError(() => error);
+                })
+              );
+            }
+          })
+        );
       }
 
       // Handle 400 Bad Request - Show user-friendly error

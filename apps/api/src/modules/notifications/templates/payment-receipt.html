@@ -1,16 +1,16 @@
-<h2 class="email-title">Recibo de pago</h2>
+<h2 class="email-title">Payment receipt</h2>
 
 <p class="email-text">
-  Hola <strong>{{firstName}}</strong>,
+  Hello <strong>{{firstName}}</strong>,
 </p>
 
 <p class="email-text">
-  Hemos recibido tu pago correctamente. ¡Gracias por confiar en Crypto-ERP!
+  We have received your payment successfully. Thank you for trusting Crypto-ERP!
 </p>
 
 <div class="email-card">
   <p style="margin: 0 0 10px 0; font-weight: 600; color: #0f172a;">
-    Detalles del pago
+    Payment details
   </p>
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="font-size: 14px;">
     <tr>
@@ -18,19 +18,19 @@
       <td style="padding: 5px 0;">{{planName}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Importe:</strong></td>
+      <td style="padding: 5px 0;"><strong>Amount:</strong></td>
       <td style="padding: 5px 0; font-weight: 600;">{{amount}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Fecha:</strong></td>
+      <td style="padding: 5px 0;"><strong>Date:</strong></td>
       <td style="padding: 5px 0;">{{paymentDate}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Método de pago:</strong></td>
+      <td style="padding: 5px 0;"><strong>Payment method:</strong></td>
       <td style="padding: 5px 0;">{{paymentMethod}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Próximo cargo:</strong></td>
+      <td style="padding: 5px 0;"><strong>Next charge:</strong></td>
       <td style="padding: 5px 0;">{{nextPaymentDate}}</td>
     </tr>
   </table>
@@ -40,20 +40,20 @@
   <tr>
     <td align="center">
       <a href="{{invoiceUrl}}" class="email-button">
-        Descargar factura
+        Download invoice
       </a>
     </td>
   </tr>
 </table>
 
 <p class="email-text">
-  Puedes gestionar tu suscripción y métodos de pago desde la <a href="{{settingsUrl}}" style="color: #667eea;">página de configuración</a> de tu cuenta.
+  You can manage your subscription and payment methods from the <a href="{{settingsUrl}}" style="color: #667eea;">settings page</a> of your account.
 </p>
 
 <p class="email-text">
-  ¡Gracias por tu confianza!
+  Thank you for your trust!
 </p>
 
 <p class="email-text">
-  El equipo de Crypto-ERP
+  The Crypto-ERP Team
 </p>

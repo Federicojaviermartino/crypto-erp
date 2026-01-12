@@ -75,7 +75,7 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "port": 5200,
+            "port": 5100,
             "proxyConfig": "proxy.conf.json"
           }
         },

@@ -1,7 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { OnboardingService, OnboardingStep } from '@core/services/onboarding.service';
+import { DialogService } from '@core/services/dialog.service';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-onboarding-wizard',
@@ -321,6 +323,9 @@ import { OnboardingService, OnboardingStep } from '@core/services/onboarding.ser
 export class OnboardingWizardComponent implements OnInit {
   loading = signal(false);
 
+  private dialogService = inject(DialogService);
+  private notificationService = inject(NotificationService);
+
   constructor(
     public onboarding: OnboardingService,
     private router: Router
@@ -359,20 +364,24 @@ export class OnboardingWizardComponent implements OnInit {
     this.onboarding.skipStep(stepId).subscribe();
   }
 
-  dismissOnboarding(): void {
-    if (confirm('Are you sure you want to close the guide? You can resume it from Settings.')) {
-      this.onboarding.dismissOnboarding().subscribe({
-        next: () => {
-          // Optionally reload or navigate
-        },
-      });
+  async dismissOnboarding(): Promise<void> {
+    const confirmed = await this.dialogService.confirm({
+      title: 'Close Guide',
+      message: 'Are you sure you want to close the guide? You can resume it from Settings.',
+      confirmText: 'Close',
+      cancelText: 'Continue',
+      confirmColor: 'primary',
+    });
+
+    if (confirmed) {
+      this.onboarding.dismissOnboarding().subscribe();
     }
   }
 
   completeOnboarding(): void {
     this.onboarding.dismissOnboarding().subscribe({
       next: () => {
-        alert('Guide completed! You can now use all features.');
+        this.notificationService.success('Guide completed! You can now use all features.');
       },
     });
   }

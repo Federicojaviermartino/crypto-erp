@@ -9,7 +9,19 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
+import * as path from 'path';
+
+// Multer file type for TypeScript
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
 import {
   ApiTags,
   ApiOperation,
@@ -31,15 +43,58 @@ import {
   OcrStatusResponseDto,
 } from '../dto/index.js';
 
+// Allowed file extensions for OCR
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
+const MAX_FILENAME_LENGTH = 255;
+
 @ApiTags('AI Assistant')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('ai')
 export class AiController {
+  private readonly logger = new Logger(AiController.name);
+
   constructor(
     private readonly aiService: AiService,
     private readonly ocrService: OcrService,
   ) {}
+
+  /**
+   * Sanitizes uploaded filename to prevent path traversal and other attacks
+   * @param filename Original filename from upload
+   * @returns Sanitized filename safe for logging/storage
+   */
+  private sanitizeFilename(filename: string): string {
+    if (!filename) return 'unknown';
+
+    // Get just the base name (no directory)
+    let sanitized = path.basename(filename);
+
+    // Remove null bytes and other dangerous characters
+    sanitized = sanitized.replace(/[\x00-\x1f\x80-\x9f]/g, '');
+
+    // Remove path traversal attempts
+    sanitized = sanitized.replace(/\.\./g, '');
+
+    // Only allow alphanumeric, dots, hyphens, underscores
+    sanitized = sanitized.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+
+    // Limit length
+    if (sanitized.length > MAX_FILENAME_LENGTH) {
+      const ext = path.extname(sanitized);
+      sanitized = sanitized.slice(0, MAX_FILENAME_LENGTH - ext.length) + ext;
+    }
+
+    return sanitized || 'unknown';
+  }
+
+  /**
+   * Validates file extension matches allowed list
+   */
+  private validateFileExtension(filename: string): boolean {
+    const ext = path.extname(filename).toLowerCase();
+    return ALLOWED_EXTENSIONS.includes(ext);
+  }
 
   @Post('chat')
   @ApiOperation({ summary: 'Chat with AI assistant' })
@@ -149,11 +204,25 @@ export class AiController {
   )
   @HttpCode(HttpStatus.OK)
   async extractInvoice(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
   ): Promise<OcrResponseDto> {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
+
+    // SECURITY: Sanitize and validate filename
+    const sanitizedFilename = this.sanitizeFilename(file.originalname);
+
+    // Double-check file extension (defense in depth)
+    if (!this.validateFileExtension(sanitizedFilename)) {
+      this.logger.warn(`Rejected file with invalid extension: ${sanitizedFilename}`);
+      throw new BadRequestException(
+        `Invalid file extension. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`,
+      );
+    }
+
+    // Log sanitized filename for audit purposes
+    this.logger.log(`Processing OCR for file: ${sanitizedFilename} (${file.mimetype}, ${file.size} bytes)`);
 
     const result = await this.ocrService.extractInvoiceData(
       file.buffer,

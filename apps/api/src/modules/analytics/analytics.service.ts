@@ -546,19 +546,15 @@ export class AnalyticsService {
     revenueGrowth: number;
     currency: string;
   }> {
-    // Get MRR from active subscriptions
-    const subscriptions = await this.prisma.subscription.aggregate({
-      where: {
-        companyId,
-        status: 'ACTIVE',
-      },
-      _sum: {
-        amount: true,
-      },
-      _count: true,
+    // Get MRR from active subscriptions - use plan pricing
+    const activeSubscription = await this.prisma.subscription.findUnique({
+      where: { companyId },
+      include: { plan: true },
     });
 
-    const mrr = subscriptions._sum.amount?.toNumber() || 0;
+    const mrr = activeSubscription?.status === 'ACTIVE'
+      ? activeSubscription.plan?.monthlyPrice?.toNumber() || 0
+      : 0;
     const arr = mrr * 12;
 
     // Get total revenue from paid invoices
@@ -572,11 +568,11 @@ export class AnalyticsService {
         status: 'PAID',
       },
       _sum: {
-        totalAmount: true,
+        total: true,
       },
     });
 
-    const totalRevenue = invoiceRevenue._sum.totalAmount?.toNumber() || 0;
+    const totalRevenue = invoiceRevenue._sum.total?.toNumber() || 0;
 
     // Calculate previous period revenue for growth
     const periodLength = endDate.getTime() - startDate.getTime();
@@ -591,11 +587,11 @@ export class AnalyticsService {
         status: 'PAID',
       },
       _sum: {
-        totalAmount: true,
+        total: true,
       },
     });
 
-    const previousTotal = previousRevenue._sum.totalAmount?.toNumber() || 0;
+    const previousTotal = previousRevenue._sum.total?.toNumber() || 0;
     const revenueGrowth = previousTotal > 0 ? ((totalRevenue - previousTotal) / previousTotal) * 100 : 0;
 
     // Calculate ARPU (Average Revenue Per User)
@@ -784,10 +780,10 @@ export class AnalyticsService {
     const averageInvoiceValue = totalInvoices > 0 ? totalAmount / totalInvoices : 0;
 
     // Calculate average days to payment
-    const paidInvoicesWithPayment = invoices.filter((i) => i.status === 'PAID' && i.paymentDate);
+    const paidInvoicesWithPayment = invoices.filter((i) => i.status === 'PAID' && i.paidAt);
     const totalDays = paidInvoicesWithPayment.reduce((sum, i) => {
       const issueDate = new Date(i.issueDate);
-      const paymentDate = new Date(i.paymentDate!);
+      const paymentDate = new Date(i.paidAt!);
       const days = Math.ceil((paymentDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24));
       return sum + Math.max(0, days);
     }, 0);
@@ -1017,7 +1013,7 @@ export class AnalyticsService {
     const activeCustomers = await this.prisma.contact.count({
       where: {
         companyId,
-        isCustomer: true,
+        type: { in: ['CUSTOMER', 'BOTH'] },
       },
     });
 

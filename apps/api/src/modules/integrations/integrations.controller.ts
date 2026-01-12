@@ -9,10 +9,43 @@ import {
   BadRequestException,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { BaseIntegrationService } from './base/base-integration.service.js';
 import { QuickBooksService } from './quickbooks/quickbooks.service.js';
 import { XeroService } from './xero/xero.service.js';
+
+/**
+ * Allowed redirect URI domains to prevent open redirect attacks.
+ * Add production domains here when deploying.
+ */
+const ALLOWED_REDIRECT_DOMAINS = [
+  'localhost:4200',
+  'localhost:5200',
+  'localhost:3000',
+  '127.0.0.1:4200',
+  '127.0.0.1:5200',
+];
+
+/**
+ * Validates that a redirect URI is from an allowed domain
+ */
+function isValidRedirectUri(uri: string, allowedDomains: string[]): boolean {
+  try {
+    const url = new URL(uri);
+    // Only allow https in production (http ok for localhost)
+    const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    if (!isLocalhost && url.protocol !== 'https:') {
+      return false;
+    }
+    // Check if host matches allowed domains
+    return allowedDomains.some(
+      domain => url.host === domain || url.host.endsWith(`.${domain.split(':')[0]}`)
+    );
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Integrations Controller
@@ -30,11 +63,30 @@ import { XeroService } from './xero/xero.service.js';
 @Controller('integrations')
 @UseGuards(JwtAuthGuard)
 export class IntegrationsController {
+  private allowedRedirectDomains: string[];
+
   constructor(
     private readonly baseService: BaseIntegrationService,
     private readonly quickbooksService: QuickBooksService,
     private readonly xeroService: XeroService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    // Build allowed domains list from env or use defaults
+    const envDomains = this.configService.get<string>('ALLOWED_REDIRECT_DOMAINS');
+    if (envDomains) {
+      this.allowedRedirectDomains = [...ALLOWED_REDIRECT_DOMAINS, ...envDomains.split(',').map(d => d.trim())];
+    } else {
+      this.allowedRedirectDomains = [...ALLOWED_REDIRECT_DOMAINS];
+    }
+    // Add frontend URL from config
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    if (frontendUrl) {
+      try {
+        const url = new URL(frontendUrl);
+        this.allowedRedirectDomains.push(url.host);
+      } catch { /* ignore invalid URL */ }
+    }
+  }
 
   private getCompanyId(headers: Record<string, string>): string {
     const companyId = headers['x-company-id'];
@@ -42,6 +94,17 @@ export class IntegrationsController {
       throw new BadRequestException('X-Company-Id header is required');
     }
     return companyId;
+  }
+
+  /**
+   * Validates redirect URI to prevent open redirect attacks
+   */
+  private validateRedirectUri(redirectUri: string): void {
+    if (!isValidRedirectUri(redirectUri, this.allowedRedirectDomains)) {
+      throw new BadRequestException(
+        'Invalid redirect URI. Must be from an allowed domain.'
+      );
+    }
   }
 
   /**
@@ -78,6 +141,9 @@ export class IntegrationsController {
     if (!redirectUri) {
       throw new BadRequestException('redirectUri query parameter is required');
     }
+
+    // Validate redirect URI to prevent open redirect attacks
+    this.validateRedirectUri(redirectUri);
 
     // Generate random state for CSRF protection
     const state = `${companyId}:${Math.random().toString(36).substring(7)}`;
@@ -139,6 +205,9 @@ export class IntegrationsController {
     if (!code || !redirectUri) {
       throw new BadRequestException('code and redirectUri are required');
     }
+
+    // Validate redirect URI to prevent open redirect attacks
+    this.validateRedirectUri(redirectUri);
 
     // Verify state contains companyId (CSRF protection)
     if (state && !state.startsWith(companyId)) {

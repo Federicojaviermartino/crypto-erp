@@ -1,39 +1,39 @@
-<h2 class="email-title">Factura enviada correctamente</h2>
+<h2 class="email-title">Invoice sent successfully</h2>
 
 <p class="email-text">
-  Hola <strong>{{firstName}}</strong>,
+  Hello <strong>{{firstName}}</strong>,
 </p>
 
 <p class="email-text">
-  Tu factura <strong>{{invoiceNumber}}</strong> ha sido enviada correctamente.
+  Your invoice <strong>{{invoiceNumber}}</strong> has been sent successfully.
 </p>
 
 <div class="email-card">
   <p style="margin: 0 0 10px 0; font-weight: 600; color: #0f172a;">
-    Detalles de la factura
+    Invoice details
   </p>
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="font-size: 14px;">
     <tr>
-      <td style="padding: 5px 0;"><strong>Número:</strong></td>
+      <td style="padding: 5px 0;"><strong>Number:</strong></td>
       <td style="padding: 5px 0;">{{invoiceNumber}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Cliente:</strong></td>
+      <td style="padding: 5px 0;"><strong>Client:</strong></td>
       <td style="padding: 5px 0;">{{clientName}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Fecha emisión:</strong></td>
+      <td style="padding: 5px 0;"><strong>Issue date:</strong></td>
       <td style="padding: 5px 0;">{{issueDate}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Importe total:</strong></td>
+      <td style="padding: 5px 0;"><strong>Total amount:</strong></td>
       <td style="padding: 5px 0; font-weight: 600;">{{totalAmount}}</td>
     </tr>
     <tr>
-      <td style="padding: 5px 0;"><strong>Estado Verifactu:</strong></td>
+      <td style="padding: 5px 0;"><strong>Verifactu status:</strong></td>
       <td style="padding: 5px 0;">
         <span style="display: inline-block; padding: 3px 8px; background: #dcfce7; color: #166534; border-radius: 4px; font-size: 12px; font-weight: 600;">
-          ✓ Enviada a AEAT
+          Sent to AEAT
         </span>
       </td>
     </tr>
@@ -44,16 +44,16 @@
   <tr>
     <td align="center">
       <a href="{{invoiceUrl}}" class="email-button">
-        Ver factura
+        View invoice
       </a>
     </td>
   </tr>
 </table>
 
 <p class="email-text">
-  La factura ha sido enviada automáticamente al sistema Verifactu de la AEAT para garantizar el cumplimiento fiscal.
+  The invoice has been automatically sent to the AEAT Verifactu system to ensure tax compliance.
 </p>
 
 <p class="email-text">
-  El equipo de Crypto-ERP
+  The Crypto-ERP Team
 </p>

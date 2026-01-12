@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
 import { ApiService } from '@core/services/api.service';
+import { DialogService } from '@core/services/dialog.service';
 
 @Component({
   selector: 'app-profile-settings',
@@ -201,6 +202,8 @@ export class ProfileSettingsComponent implements OnInit {
   passwordSuccess = signal(false);
   passwordError = signal<string | null>(null);
 
+  private dialogService = inject(DialogService);
+
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
@@ -291,8 +294,16 @@ export class ProfileSettingsComponent implements OnInit {
     });
   }
 
-  logoutAllSessions(): void {
-    if (confirm('Close all sessions? You will need to log in again.')) {
+  async logoutAllSessions(): Promise<void> {
+    const confirmed = await this.dialogService.confirm({
+      title: 'Logout All Sessions',
+      message: 'Close all sessions? You will need to log in again.',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      confirmColor: 'warning',
+    });
+
+    if (confirmed) {
       this.auth.logout();
     }
   }

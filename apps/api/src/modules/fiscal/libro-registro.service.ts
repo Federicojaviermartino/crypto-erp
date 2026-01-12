@@ -218,18 +218,18 @@ export class LibroRegistroService {
 
     // Generate CSV header
     const headers = [
-      'Fecha',
-      'Serie',
-      'Número',
-      'NIF Contraparte',
-      'Nombre Contraparte',
-      'Base Imponible',
-      'Tipo IVA (%)',
-      'Cuota IVA',
+      'Date',
+      'Series',
+      'Number',
+      'Counterparty Tax ID',
+      'Counterparty Name',
+      'Tax Base',
+      'VAT Rate (%)',
+      'VAT Amount',
       'Total',
-      'Retención IRPF',
+      'IRPF Withholding',
       'Verifactu ID',
-      'Observaciones',
+      'Notes',
     ];
 
     // Generate CSV rows
@@ -271,16 +271,16 @@ export class LibroRegistroService {
     workbook.creator = data.empresa.nombre;
     workbook.created = new Date();
 
-    // Sheet 1: Facturas Emitidas
-    const sheetEmitidas = workbook.addWorksheet('Facturas Emitidas');
-    this.addSheetData(sheetEmitidas, data.facturasEmitidas, 'Facturas Emitidas', data);
+    // Sheet 1: Issued Invoices
+    const sheetEmitidas = workbook.addWorksheet('Issued Invoices');
+    this.addSheetData(sheetEmitidas, data.facturasEmitidas, 'Issued Invoices', data);
 
-    // Sheet 2: Facturas Recibidas
-    const sheetRecibidas = workbook.addWorksheet('Facturas Recibidas');
-    this.addSheetData(sheetRecibidas, data.facturasRecibidas, 'Facturas Recibidas', data);
+    // Sheet 2: Received Invoices
+    const sheetRecibidas = workbook.addWorksheet('Received Invoices');
+    this.addSheetData(sheetRecibidas, data.facturasRecibidas, 'Received Invoices', data);
 
-    // Sheet 3: Resumen
-    const sheetResumen = workbook.addWorksheet('Resumen');
+    // Sheet 3: Summary
+    const sheetResumen = workbook.addWorksheet('Summary');
     this.addResumenSheet(sheetResumen, data);
 
     // Save to file
@@ -308,7 +308,7 @@ export class LibroRegistroService {
     // Period row
     sheet.mergeCells('A2:L2');
     const periodCell = sheet.getCell('A2');
-    periodCell.value = `Período: ${data.periodo.fechaInicio.toLocaleDateString('es-ES')} - ${data.periodo.fechaFin.toLocaleDateString('es-ES')}`;
+    periodCell.value = `Period: ${data.periodo.fechaInicio.toLocaleDateString('en-US')} - ${data.periodo.fechaFin.toLocaleDateString('en-US')}`;
     periodCell.alignment = { horizontal: 'center' };
 
     // Empty row
@@ -316,18 +316,18 @@ export class LibroRegistroService {
 
     // Headers
     const headerRow = sheet.addRow([
-      'Fecha',
-      'Serie',
-      'Número',
-      'NIF Contraparte',
-      'Nombre Contraparte',
-      'Base Imponible',
-      'Tipo IVA (%)',
-      'Cuota IVA',
+      'Date',
+      'Series',
+      'Number',
+      'Counterparty Tax ID',
+      'Counterparty Name',
+      'Tax Base',
+      'VAT Rate (%)',
+      'VAT Amount',
       'Total',
-      'Retención IRPF',
+      'IRPF Withholding',
       'Verifactu ID',
-      'Observaciones',
+      'Notes',
     ]);
 
     headerRow.font = { bold: true };
@@ -340,7 +340,7 @@ export class LibroRegistroService {
     // Data rows
     entries.forEach((entry) => {
       sheet.addRow([
-        entry.fecha.toLocaleDateString('es-ES'),
+        entry.fecha.toLocaleDateString('en-US'),
         entry.serie,
         entry.numeroFactura,
         entry.nifContraparte,
@@ -356,24 +356,24 @@ export class LibroRegistroService {
     });
 
     // Column widths
-    sheet.getColumn(1).width = 12; // Fecha
-    sheet.getColumn(2).width = 8;  // Serie
-    sheet.getColumn(3).width = 15; // Número
-    sheet.getColumn(4).width = 12; // NIF
-    sheet.getColumn(5).width = 30; // Nombre
-    sheet.getColumn(6).width = 15; // Base
-    sheet.getColumn(7).width = 12; // Tipo IVA
-    sheet.getColumn(8).width = 12; // Cuota IVA
+    sheet.getColumn(1).width = 12; // Date
+    sheet.getColumn(2).width = 8;  // Series
+    sheet.getColumn(3).width = 15; // Number
+    sheet.getColumn(4).width = 12; // Tax ID
+    sheet.getColumn(5).width = 30; // Name
+    sheet.getColumn(6).width = 15; // Tax Base
+    sheet.getColumn(7).width = 12; // VAT Rate
+    sheet.getColumn(8).width = 12; // VAT Amount
     sheet.getColumn(9).width = 12; // Total
     sheet.getColumn(10).width = 15; // IRPF
     sheet.getColumn(11).width = 20; // Verifactu ID
-    sheet.getColumn(12).width = 30; // Observaciones
+    sheet.getColumn(12).width = 30; // Notes
 
     // Number formatting
     for (let i = 5; i <= sheet.rowCount; i++) {
-      sheet.getCell(`F${i}`).numFmt = '#,##0.00 €'; // Base Imponible
-      sheet.getCell(`G${i}`).numFmt = '0.00 "%"';   // Tipo IVA
-      sheet.getCell(`H${i}`).numFmt = '#,##0.00 €'; // Cuota IVA
+      sheet.getCell(`F${i}`).numFmt = '#,##0.00 €'; // Tax Base
+      sheet.getCell(`G${i}`).numFmt = '0.00 "%"';   // VAT Rate
+      sheet.getCell(`H${i}`).numFmt = '#,##0.00 €'; // VAT Amount
       sheet.getCell(`I${i}`).numFmt = '#,##0.00 €'; // Total
       sheet.getCell(`J${i}`).numFmt = '#,##0.00 €'; // IRPF
     }
@@ -386,23 +386,23 @@ export class LibroRegistroService {
     // Title
     sheet.mergeCells('A1:D1');
     const titleCell = sheet.getCell('A1');
-    titleCell.value = `Resumen - ${data.empresa.nombre}`;
+    titleCell.value = `Summary - ${data.empresa.nombre}`;
     titleCell.font = { bold: true, size: 14 };
     titleCell.alignment = { horizontal: 'center' };
 
     // Empty row
     sheet.addRow([]);
 
-    // Facturas Emitidas Summary
-    sheet.addRow(['FACTURAS EMITIDAS', '', '', '']).font = { bold: true };
+    // Issued Invoices Summary
+    sheet.addRow(['ISSUED INVOICES', '', '', '']).font = { bold: true };
     sheet.addRow([
-      'Base Imponible:',
+      'Tax Base:',
       parseFloat(data.totales.emitidas.baseImponible.toFixed(2)),
       '€',
       '',
     ]);
     sheet.addRow([
-      'Cuota IVA:',
+      'VAT Amount:',
       parseFloat(data.totales.emitidas.cuotaIVA.toFixed(2)),
       '€',
       '',
@@ -417,16 +417,16 @@ export class LibroRegistroService {
     // Empty row
     sheet.addRow([]);
 
-    // Facturas Recibidas Summary
-    sheet.addRow(['FACTURAS RECIBIDAS', '', '', '']).font = { bold: true };
+    // Received Invoices Summary
+    sheet.addRow(['RECEIVED INVOICES', '', '', '']).font = { bold: true };
     sheet.addRow([
-      'Base Imponible:',
+      'Tax Base:',
       parseFloat(data.totales.recibidas.baseImponible.toFixed(2)),
       '€',
       '',
     ]);
     sheet.addRow([
-      'Cuota IVA:',
+      'VAT Amount:',
       parseFloat(data.totales.recibidas.cuotaIVA.toFixed(2)),
       '€',
       '',
@@ -448,21 +448,21 @@ export class LibroRegistroService {
     const balanceIVA = data.totales.emitidas.cuotaIVA.minus(data.totales.recibidas.cuotaIVA);
     const balanceTotal = data.totales.emitidas.total.minus(data.totales.recibidas.total);
 
-    sheet.addRow(['BALANCE (Emitidas - Recibidas)', '', '', '']).font = {
+    sheet.addRow(['BALANCE (Issued - Received)', '', '', '']).font = {
       bold: true,
       color: { argb: 'FF0000FF' },
     };
     sheet.addRow([
-      'Base Imponible:',
+      'Tax Base:',
       parseFloat(balanceBase.toFixed(2)),
       '€',
-      balanceBase.isNegative() ? '(A favor AEAT)' : '(A favor empresa)',
+      balanceBase.isNegative() ? '(In favor of AEAT)' : '(In favor of company)',
     ]);
     sheet.addRow([
-      'Cuota IVA:',
+      'VAT Amount:',
       parseFloat(balanceIVA.toFixed(2)),
       '€',
-      balanceIVA.isNegative() ? '(A devolver)' : '(A ingresar)',
+      balanceIVA.isNegative() ? '(To be refunded)' : '(To be paid)',
     ]);
     sheet.addRow([
       'TOTAL:',

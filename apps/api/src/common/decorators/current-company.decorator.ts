@@ -21,25 +21,38 @@ export interface RequestWithCompany extends Request {
  * Decorator to extract current company from request.
  * Must be used after TenantGuard.
  *
+ * By default returns the company ID (string).
+ * Use 'company' to get the full Company object.
+ * Use 'role' to get the user's role in this company.
+ * Use 'context' to get the full CompanyContext.
+ *
  * @example
  * ```typescript
+ * // Get company ID (default)
  * @Get('accounts')
  * @UseGuards(JwtAuthGuard, TenantGuard)
- * getAccounts(@CurrentCompany() ctx: CompanyContext) {
- *   return this.accountsService.findAll(ctx.company.id);
+ * getAccounts(@CurrentCompany() companyId: string) {
+ *   return this.accountsService.findAll(companyId);
  * }
  *
- * // Get only company ID
+ * // Get full company object
  * @Get('accounts')
  * @UseGuards(JwtAuthGuard, TenantGuard)
- * getAccounts(@CurrentCompany('companyId') companyId: string) {
- *   return this.accountsService.findAll(companyId);
+ * getAccounts(@CurrentCompany('company') company: Company) {
+ *   return this.accountsService.findAll(company.id);
+ * }
+ *
+ * // Get full context (company + role)
+ * @Get('accounts')
+ * @UseGuards(JwtAuthGuard, TenantGuard)
+ * getAccounts(@CurrentCompany('context') ctx: CompanyContext) {
+ *   return this.accountsService.findAll(ctx.company.id);
  * }
  * ```
  */
 export const CurrentCompany = createParamDecorator(
   (
-    data: 'company' | 'role' | 'companyId' | undefined,
+    data: 'company' | 'role' | 'companyId' | 'context' | undefined,
     ctx: ExecutionContext,
   ) => {
     const request = ctx.switchToHttp().getRequest<RequestWithCompany>();
@@ -54,10 +67,12 @@ export const CurrentCompany = createParamDecorator(
         return companyContext.company;
       case 'role':
         return companyContext.role;
-      case 'companyId':
-        return companyContext.company.id;
-      default:
+      case 'context':
         return companyContext;
+      case 'companyId':
+      default:
+        // Default to returning just the company ID
+        return companyContext.company.id;
     }
   },
 );

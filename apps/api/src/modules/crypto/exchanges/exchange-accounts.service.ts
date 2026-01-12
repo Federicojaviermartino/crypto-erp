@@ -1,36 +1,88 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@crypto-erp/database';
 import { ExchangeFactory } from './exchange.factory.js';
 import { ExchangeName, EXCHANGE_INFO, ExchangeBalance, ExchangeTrade } from './exchange.interface.js';
 import * as crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'crypto-erp-default-key-32bytes!';
-
 @Injectable()
-export class ExchangeAccountsService {
+export class ExchangeAccountsService implements OnModuleInit {
   private readonly logger = new Logger(ExchangeAccountsService.name);
+  private encryptionKey!: Buffer;
+  private rawEncryptionKey!: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly exchangeFactory: ExchangeFactory,
+    private readonly configService: ConfigService,
   ) {}
 
-  private encrypt(text: string): string {
-    const iv = crypto.randomBytes(16);
-    const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
+  onModuleInit() {
+    // SECURITY: Encryption key MUST be set via environment variable
+    const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
+
+    if (!encryptionKey || encryptionKey.length < 32) {
+      throw new Error(
+        'ENCRYPTION_KEY environment variable must be set with at least 32 characters. ' +
+        'Generate one with: openssl rand -base64 32'
+      );
+    }
+
+    this.rawEncryptionKey = encryptionKey;
+    // Derive a proper 32-byte key using scrypt
+    this.encryptionKey = crypto.scryptSync(encryptionKey, 'crypto-erp-salt-v2', 32);
+    this.logger.log('Encryption key initialized successfully');
   }
 
+  /**
+   * Encrypts sensitive data using AES-256-GCM (authenticated encryption)
+   * Format: iv:authTag:ciphertext (all hex encoded)
+   */
+  private encrypt(text: string): string {
+    const iv = crypto.randomBytes(12); // GCM recommends 12 bytes IV
+    const cipher = crypto.createCipheriv('aes-256-gcm', this.encryptionKey, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    const authTag = cipher.getAuthTag();
+    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+  }
+
+  /**
+   * Decrypts data encrypted with AES-256-GCM
+   * Verifies authenticity via auth tag before returning plaintext
+   */
   private decrypt(text: string): string {
-    const [ivHex, encrypted] = text.split(':');
+    const parts = text.split(':');
+
+    // Support legacy CBC format (2 parts) for migration
+    if (parts.length === 2) {
+      return this.decryptLegacyCBC(text);
+    }
+
+    // GCM format (3 parts): iv:authTag:ciphertext
+    const [ivHex, authTagHex, encrypted] = parts;
     const iv = Buffer.from(ivHex, 'hex');
-    const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    const authTag = Buffer.from(authTagHex, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
+    decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
+    return decrypted;
+  }
+
+  /**
+   * Legacy decryption for data encrypted with old CBC method
+   * @deprecated Will be removed after data migration
+   */
+  private decryptLegacyCBC(text: string): string {
+    const [ivHex, encrypted] = text.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+    // Use old key derivation for legacy data
+    const legacyKey = crypto.scryptSync(this.rawEncryptionKey, 'salt', 32);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', legacyKey, iv);
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    this.logger.warn('Decrypted legacy CBC data - consider re-encrypting with GCM');
     return decrypted;
   }
 

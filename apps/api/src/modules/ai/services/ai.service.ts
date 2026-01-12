@@ -152,7 +152,7 @@ When relevant, cite applicable Spanish regulations (AEAT, BOE, BOICAC).`
         });
 
         const textBlock = response.content.find(block => block.type === 'text') as { type: 'text'; text: string } | undefined;
-        return textBlock?.text || 'No se pudo generar una respuesta.';
+        return textBlock?.text || 'Could not generate a response.';
       } catch (error) {
         this.logger.warn('Anthropic SDK failed, trying provider fallback', error);
       }
@@ -177,7 +177,7 @@ When relevant, cite applicable Spanish regulations (AEAT, BOE, BOICAC).`
       }
     }
 
-    return 'El servicio de IA no está disponible. Por favor, configura al menos un proveedor de IA.';
+    return 'AI service is not available. Please configure at least one AI provider.';
   }
 
   async analyzeTransaction(description: string): Promise<{
@@ -187,7 +187,7 @@ When relevant, cite applicable Spanish regulations (AEAT, BOE, BOICAC).`
     if (!this.client) {
       return {
         suggestedAccounts: { debit: '', credit: '' },
-        explanation: 'Servicio de IA no disponible',
+        explanation: 'AI service is not available',
       };
     }
 
@@ -221,13 +221,13 @@ Responde en formato JSON con esta estructura:
 
       return {
         suggestedAccounts: { debit: '', credit: '' },
-        explanation: 'No se pudo analizar la transacción',
+        explanation: 'Could not analyze the transaction',
       };
     } catch (error) {
       this.logger.error('Error analyzing transaction', error);
       return {
         suggestedAccounts: { debit: '', credit: '' },
-        explanation: 'Error al analizar la transacción',
+        explanation: 'Error analyzing the transaction',
       };
     }
   }
@@ -237,18 +237,18 @@ Responde en formato JSON con esta estructura:
     data: Record<string, unknown>,
   ): Promise<string> {
     if (!this.client) {
-      return 'Servicio de IA no disponible';
+      return 'AI service is not available';
     }
 
     const prompts: Record<string, string> = {
-      summary: `Genera un resumen ejecutivo de la siguiente información financiera en español:\n${JSON.stringify(data, null, 2)}`,
-      recommendations: `Analiza los siguientes datos financieros y proporciona recomendaciones de mejora:\n${JSON.stringify(data, null, 2)}`,
-      'tax-planning': `Basándote en los siguientes datos, sugiere estrategias de planificación fiscal para una empresa española:\n${JSON.stringify(data, null, 2)}`,
+      summary: `Generate an executive summary of the following financial information:\n${JSON.stringify(data, null, 2)}`,
+      recommendations: `Analyze the following financial data and provide improvement recommendations:\n${JSON.stringify(data, null, 2)}`,
+      'tax-planning': `Based on the following data, suggest tax planning strategies for a Spanish company:\n${JSON.stringify(data, null, 2)}`,
     };
 
     const prompt = prompts[reportType];
     if (!prompt) {
-      return 'Tipo de informe no válido';
+      return 'Invalid report type';
     }
 
     try {
@@ -260,10 +260,10 @@ Responde en formato JSON con esta estructura:
       });
 
       const textBlock = response.content.find(block => block.type === 'text') as { type: 'text'; text: string } | undefined;
-      return textBlock?.text || 'No se pudo generar el informe.';
+      return textBlock?.text || 'Could not generate the report.';
     } catch (error) {
       this.logger.error('Error generating report', error);
-      throw new Error('Error al generar el informe');
+      throw new Error('Error generating the report');
     }
   }
 
@@ -271,7 +271,7 @@ Responde en formato JSON con esta estructura:
     transactions: Array<{ type: string; amount: number; gainLoss?: number }>,
   ): Promise<string> {
     if (!this.client) {
-      return 'Servicio de IA no disponible';
+      return 'AI service is not available';
     }
 
     const prompt = `Explica las implicaciones fiscales en España de las siguientes transacciones de criptomonedas:
@@ -293,10 +293,10 @@ Incluye:
       });
 
       const textBlock = response.content.find(block => block.type === 'text') as { type: 'text'; text: string } | undefined;
-      return textBlock?.text || 'No se pudo generar la explicación.';
+      return textBlock?.text || 'Could not generate the explanation.';
     } catch (error) {
       this.logger.error('Error explaining crypto tax', error);
-      throw new Error('Error al explicar la fiscalidad');
+      throw new Error('Error explaining the tax implications');
     }
   }
 

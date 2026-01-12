@@ -521,7 +521,7 @@ export class AiChatComponent implements AfterViewChecked, OnInit, OnDestroy {
 
   // Enhanced features
   attachedFile = signal<File | null>(null);
-  language = signal<'es' | 'en'>('es');
+  language = signal<'es' | 'en'>('en');
   suggestedFollowUps = signal<string[]>([]);
   private readonly STORAGE_KEY = 'ai_chat_history';
 
@@ -727,8 +727,8 @@ export class AiChatComponent implements AfterViewChecked, OnInit, OnDestroy {
   }
 
   private extractSuggestedFollowUps(response: string): void {
-    // Extract suggestions from AI response (format: [Pregunta sugerida: ...])
-    const pattern = /\[Pregunta sugerida: (.*?)\]/g;
+    // Extract suggestions from AI response (format: [Suggested question: ...])
+    const pattern = /\[Suggested question: (.*?)\]/g;
     const matches = Array.from(response.matchAll(pattern));
     if (matches.length > 0) {
       const suggestions = matches.map(m => m[1].trim());

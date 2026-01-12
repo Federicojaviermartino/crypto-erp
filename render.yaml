@@ -19,9 +19,12 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3000
+        value: 5300
       - key: API_PREFIX
         value: api/v1
+      # Frontend URL (for CORS)
+      - key: FRONTEND_URL
+        sync: false
 
       # Database (External - Supabase free tier)
       - key: DATABASE_URL
