@@ -1,5 +1,5 @@
-import { IsEmail, IsString, IsOptional, IsIn } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, IsOptional, IsIn, IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class LoginDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -20,4 +20,9 @@ export class LoginDto {
   @IsString()
   @IsIn(['client', 'admin'])
   role?: string;
+
+  @ApiPropertyOptional({ description: 'Remember user session', default: false })
+  @IsOptional()
+  @IsBoolean()
+  rememberMe?: boolean;
 }

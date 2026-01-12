@@ -64,11 +64,9 @@ export class AuthService {
         });
       }
 
-      // Verify 2FA token (will be injected via TwoFactorService)
-      // For now, we'll add the service in the next step
+      // Verify 2FA token using dynamic import to avoid circular dependency
       const { TwoFactorService } = await import('./services/two-factor.service.js');
-      const twoFactorService = new TwoFactorService(this.prisma, null as any);
-
+      const twoFactorService = new TwoFactorService(this.prisma, this.configService);
       const isValid2FA = await twoFactorService.verifyUserToken(
         fullUser.id,
         dto.twoFactorToken,
@@ -85,7 +83,7 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    return this.generateTokensWithCompanies(fullUser.id);
+    return this.generateTokensWithCompanies(fullUser.id, dto.rememberMe);
   }
 
   async validateUser(
@@ -248,7 +246,7 @@ export class AuthService {
 </EntityDescriptor>`;
   }
 
-  async generateTokensWithCompanies(userId: string): Promise<TokenResponseDto> {
+  async generateTokensWithCompanies(userId: string, rememberMe?: boolean): Promise<TokenResponseDto> {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
       include: {
@@ -268,14 +266,18 @@ export class AuthService {
 
     const payload: JwtPayload = { sub: user.id, email: user.email };
 
+    // Adjust token expiration based on rememberMe
+    const accessExpiresIn = rememberMe ? '7d' : (this.configService.get<string>('jwt.accessExpiresIn') || '15m');
+    const refreshExpiresIn = rememberMe ? '30d' : (this.configService.get<string>('jwt.refreshExpiresIn') || '7d');
+
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.secret'),
-      expiresIn: this.configService.get<string>('jwt.accessExpiresIn') || '15m',
+      expiresIn: accessExpiresIn,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.refreshSecret'),
-      expiresIn: this.configService.get<string>('jwt.refreshExpiresIn') || '7d',
+      expiresIn: refreshExpiresIn,
     });
 
     const companies = user.companyUsers.map((cu) => ({
@@ -286,10 +288,13 @@ export class AuthService {
       isDefault: cu.isDefault,
     }));
 
+    // Calculate expiresIn in seconds
+    const expiresIn = rememberMe ? 7 * 24 * 60 * 60 : 900; // 7 days or 15 minutes
+
     return {
       accessToken,
       refreshToken,
-      expiresIn: 900,
+      expiresIn,
       user: {
         id: user.id,
         email: user.email,
