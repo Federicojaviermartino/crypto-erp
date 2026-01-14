@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, DynamicModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -28,123 +28,130 @@ import { IntegrationsModule } from './modules/integrations/integrations.module.j
 import { WhiteLabelModule } from './modules/white-label/white-label.module.js';
 import { PartnersModule } from './modules/partners/partners.module.js';
 
+// Helper function to conditionally load BullMQ modules
+function getBullModules(): DynamicModule[] {
+    const redisHost = process.env.REDIS_HOST;
+
+  // Only load BullMQ if Redis is configured
+  if (!redisHost) {
+        console.warn('REDIS_HOST not configured - BullMQ job queues disabled');
+        return [];
+  }
+
+  const useTls = process.env.REDIS_TLS === 'true' || redisHost.includes('upstash.io');
+
+  return [
+        BullModule.forRoot({
+                connection: {
+                          host: redisHost,
+                          port: parseInt(process.env.REDIS_PORT || '6379', 10),
+                          password: process.env.REDIS_PASSWORD || undefined,
+                          db: parseInt(process.env.REDIS_DB || '0', 10),
+                          ...(useTls && { tls: {} }),
+                },
+                defaultJobOptions: {
+                          removeOnComplete: 100,
+                          removeOnFail: 500,
+                          attempts: 3,
+                          backoff: {
+                                      type: 'exponential',
+                                      delay: 2000,
+                          },
+                },
+        }),
+        BullModule.registerQueue(
+          { name: 'blockchain-sync' },
+          { name: 'price-update' },
+          { name: 'verifactu-send' },
+          { name: 'journal-entry' },
+              ),
+      ];
+}
+
 @Module({
-  imports: [
-    // Configuration
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-      envFilePath: ['.env.local', '.env'],
-    }),
+    imports: [
+          // Configuration
+      ConfigModule.forRoot({
+              isGlobal: true,
+              load: [configuration],
+              envFilePath: ['.env.local', '.env'],
+      }),
 
-    // Serve Angular frontend (static files)
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'client'),
-      exclude: ['/api/(.*)'],
-      serveStaticOptions: {
-        fallthrough: true,
-        index: 'index.html',
-      },
-    }),
+          // Serve Angular frontend (static files)
+          ServeStaticModule.forRoot({
+                  rootPath: join(__dirname, 'client'),
+                  exclude: ['/api/(.*)'],
+                  serveStaticOptions: {
+                            fallthrough: true,
+                            index: 'index.html',
+                  },
+          }),
 
-    // Rate limiting
-    ThrottlerModule.forRoot([
+          // Rate limiting
+          ThrottlerModule.forRoot([
+            {
+                      name: 'short',
+                      ttl: 1000,
+                      limit: 10,
+            },
+            {
+                      name: 'medium',
+                      ttl: 10000,
+                      limit: 50,
+            },
+            {
+                      name: 'long',
+                      ttl: 60000,
+                      limit: 100,
+            },
+                ]),
+
+          // BullMQ for background job queues (conditional - only if Redis is configured)
+          ...getBullModules(),
+
+          // Database
+          PrismaModule,
+
+          // Cache
+          CacheModule,
+
+          // Common (health checks, etc.)
+          CommonModule,
+
+          // Feature modules
+          AuthModule,
+          UsersModule,
+          CompaniesModule,
+          AccountingModule,
+          InvoicingModule,
+          CryptoModule,
+          AiModule,
+          FiscalModule,
+          AnalyticsModule,
+          PaymentsModule,
+          MonitoringModule,
+          OnboardingModule,
+          OAuthModule,
+          IntegrationsModule,
+          WhiteLabelModule,
+          PartnersModule,
+        ],
+    providers: [
+          // Global exception filter
       {
-        name: 'short',
-        ttl: 1000,
-        limit: 10,
+              provide: APP_FILTER,
+              useClass: GlobalExceptionFilter,
       },
+          // Global rate limiting guard
       {
-        name: 'medium',
-        ttl: 10000,
-        limit: 50,
+              provide: APP_GUARD,
+              useClass: ThrottlerGuard,
       },
+          // Global metrics interceptor
       {
-        name: 'long',
-        ttl: 60000,
-        limit: 100,
+              provide: APP_INTERCEPTOR,
+              useClass: MetricsInterceptor,
       },
-    ]),
-
-    // BullMQ for background job queues
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const redisHost = config.get<string>('REDIS_HOST', 'localhost');
-        const useTls = config.get<string>('REDIS_TLS', 'false') === 'true' ||
-                       redisHost.includes('upstash.io');
-
-        return {
-          connection: {
-            host: redisHost,
-            port: config.get<number>('REDIS_PORT', 6379),
-            password: config.get<string>('REDIS_PASSWORD', undefined),
-            db: config.get<number>('REDIS_DB', 0),
-            ...(useTls && { tls: {} }),
-          },
-        defaultJobOptions: {
-          removeOnComplete: 100,
-          removeOnFail: 500,
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
-          },
-        },
-        };
-      },
-    }),
-    BullModule.registerQueue(
-      { name: 'blockchain-sync' },
-      { name: 'price-update' },
-      { name: 'verifactu-send' },
-      { name: 'journal-entry' },
-    ),
-
-    // Database
-    PrismaModule,
-
-    // Cache
-    CacheModule,
-
-    // Common (health checks, etc.)
-    CommonModule,
-
-    // Feature modules
-    AuthModule,
-    UsersModule,
-    CompaniesModule,
-    AccountingModule,
-    InvoicingModule,
-    CryptoModule,
-    AiModule,
-    FiscalModule,
-    AnalyticsModule,
-    PaymentsModule,
-    MonitoringModule,
-    OnboardingModule,
-    OAuthModule,
-    IntegrationsModule,
-    WhiteLabelModule,
-    PartnersModule,
-  ],
-  providers: [
-    // Global exception filter
-    {
-      provide: APP_FILTER,
-      useClass: GlobalExceptionFilter,
-    },
-    // Global rate limiting guard
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-    // Global metrics interceptor
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: MetricsInterceptor,
-    },
-  ],
+        ],
 })
-export class AppModule {}
+  export class AppModule {}
