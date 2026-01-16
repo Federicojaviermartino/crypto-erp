@@ -1,4 +1,4 @@
-import { Module, Logger } from '@nestjs/common';
+import { Module, Logger, DynamicModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -22,6 +22,65 @@ export const QUEUE_NAMES = {
   EMAIL_SEND: 'email-send',
 } as const;
 
+// Check if Redis is configured
+const redisHost = process.env['REDIS_HOST'];
+const isRedisConfigured = !!redisHost && redisHost !== 'localhost';
+
+// Helper function to get BullMQ modules conditionally
+function getBullModules(): DynamicModule[] {
+  if (!isRedisConfigured) {
+    console.warn('[WorkerModule] REDIS_HOST not configured. Worker will start without job processing capabilities.');
+    return [];
+  }
+
+  const useTls = process.env['REDIS_TLS'] === 'true' || redisHost!.includes('upstash.io');
+
+  return [
+    BullModule.forRoot({
+      connection: {
+        host: redisHost!,
+        port: parseInt(process.env['REDIS_PORT'] || '6379', 10),
+        password: process.env['REDIS_PASSWORD'],
+        db: parseInt(process.env['REDIS_DB'] || '0', 10),
+        ...(useTls && { tls: {} }),
+      },
+      defaultJobOptions: {
+        removeOnComplete: 100,
+        removeOnFail: 500,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 2000,
+        },
+      },
+    }),
+    BullModule.registerQueue(
+      { name: QUEUE_NAMES.BLOCKCHAIN_SYNC },
+      { name: QUEUE_NAMES.PRICE_UPDATE },
+      { name: QUEUE_NAMES.VERIFACTU_SEND },
+      { name: QUEUE_NAMES.JOURNAL_ENTRY },
+      { name: QUEUE_NAMES.AI_CATEGORIZE },
+      { name: QUEUE_NAMES.EMAIL_SEND },
+    ),
+  ];
+}
+
+// Helper function to get processors conditionally
+function getProcessors(): any[] {
+  if (!isRedisConfigured) {
+    return [];
+  }
+
+  return [
+    BlockchainSyncProcessor,
+    PriceUpdateProcessor,
+    VerifactuSendProcessor,
+    JournalEntryProcessor,
+    AiCategorizeProcessor,
+    EmailSendProcessor,
+  ];
+}
+
 @Module({
   imports: [
     // Environment configuration
@@ -33,49 +92,14 @@ export const QUEUE_NAMES = {
     // Schedule module for cron jobs
     ScheduleModule.forRoot(),
 
-    // BullMQ configuration with Redis connection
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-          password: config.get<string>('REDIS_PASSWORD', undefined),
-          db: config.get<number>('REDIS_DB', 0),
-        },
-        defaultJobOptions: {
-          removeOnComplete: 100, // Keep last 100 completed jobs
-          removeOnFail: 500,     // Keep last 500 failed jobs
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
-          },
-        },
-      }),
-    }),
-
-    // Register queues
-    BullModule.registerQueue(
-      { name: QUEUE_NAMES.BLOCKCHAIN_SYNC },
-      { name: QUEUE_NAMES.PRICE_UPDATE },
-      { name: QUEUE_NAMES.VERIFACTU_SEND },
-      { name: QUEUE_NAMES.JOURNAL_ENTRY },
-      { name: QUEUE_NAMES.AI_CATEGORIZE },
-      { name: QUEUE_NAMES.EMAIL_SEND },
-    ),
+    // BullMQ configuration (conditional - only if Redis is configured)
+    ...getBullModules(),
   ],
   providers: [
     PrismaService,
     Logger,
-    // Processors
-    BlockchainSyncProcessor,
-    PriceUpdateProcessor,
-    VerifactuSendProcessor,
-    JournalEntryProcessor,
-    AiCategorizeProcessor,
-    EmailSendProcessor,
+    // Processors (conditional - only if Redis is configured)
+    ...getProcessors(),
   ],
 })
 export class WorkerModule {}
