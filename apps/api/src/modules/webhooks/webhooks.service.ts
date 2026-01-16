@@ -1,7 +1,7 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import { PrismaService } from '@crypto-erp/database';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { CreateWebhookSubscriptionDto } from './dto/create-webhook-subscription.dto';
 import { UpdateWebhookSubscriptionDto } from './dto/update-webhook-subscription.dto';
 import { WebhookEventDto } from './dto/webhook-event.dto';
@@ -13,8 +13,12 @@ export class WebhooksService {
 
   constructor(
     private readonly prisma: PrismaService,
-    @InjectQueue('webhook-delivery') private webhookQueue: Queue,
-  ) {}
+    @Optional() @InjectQueue('webhook-delivery') private webhookQueue: Queue | undefined,
+  ) {
+    if (!this.webhookQueue) {
+      this.logger.warn('Webhook queue not available. Webhooks will be recorded but not delivered.');
+    }
+  }
 
   async createSubscription(companyId: string, dto: CreateWebhookSubscriptionDto) {
     const secret = this.generateSecret();
@@ -146,6 +150,11 @@ export class WebhooksService {
         maxAttempts: subscription.retryCount,
       },
     });
+
+    if (!this.webhookQueue) {
+      this.logger.warn(`Webhook delivery ${delivery.id} created but queue not available`);
+      return;
+    }
 
     await this.webhookQueue.add(
       'send-webhook',

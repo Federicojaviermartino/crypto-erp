@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from '@crypto-erp/database';
 import {
   CryptoAssetsService,
@@ -25,7 +24,6 @@ import { ExchangeAccountsController } from './exchanges/exchange-accounts.contro
   imports: [
     PrismaModule,
     ConfigModule,
-    BullModule.registerQueue({ name: 'ai-categorize' }),
   ],
   controllers: [
     CryptoAssetsController,

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Optional, Inject } from '@nestjs/common';
 import { PrismaService } from '@crypto-erp/database';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -8,7 +8,7 @@ export interface HealthStatus {
   timestamp: Date;
   services: {
     database: 'healthy' | 'unhealthy';
-    redis: 'healthy' | 'unhealthy';
+    redis: 'healthy' | 'unhealthy' | 'not_configured';
   };
   uptime: number;
 }
@@ -24,7 +24,7 @@ export interface RegionalHealthStatus {
       status: 'healthy' | 'unhealthy';
       latency: number;
     }[];
-    redis: 'healthy' | 'unhealthy';
+    redis: 'healthy' | 'unhealthy' | 'not_configured';
   };
   replicaCount: number;
   uptime: number;
@@ -34,22 +34,26 @@ export interface RegionalHealthStatus {
 export class HealthController {
   constructor(
     private prisma: PrismaService,
-    @InjectQueue('email-send') private emailQueue: Queue,
+    @Optional() @Inject('QUEUE_ENABLED') private queueEnabled?: boolean,
+    @Optional() @InjectQueue('email-send') private emailQueue?: Queue,
   ) {}
 
   @Get()
   async check(): Promise<HealthStatus> {
-    const [dbOk, redisOk] = await Promise.all([
+    const [dbOk, redisStatus] = await Promise.all([
       this.checkDatabase(),
       this.checkRedis(),
     ]);
 
+    // Redis is optional - app is healthy if DB is ok and Redis is either healthy or not configured
+    const isHealthy = dbOk && (redisStatus === 'healthy' || redisStatus === 'not_configured');
+
     return {
-      status: dbOk && redisOk ? 'ok' : 'error',
+      status: isHealthy ? 'ok' : 'error',
       timestamp: new Date(),
       services: {
         database: dbOk ? 'healthy' : 'unhealthy',
-        redis: redisOk ? 'healthy' : 'unhealthy',
+        redis: redisStatus,
       },
       uptime: process.uptime(),
     };
@@ -68,15 +72,16 @@ export class HealthController {
   @Get('regional')
   async regionalHealth(): Promise<RegionalHealthStatus> {
     const primaryRegion = process.env['DATABASE_PRIMARY_REGION'] || 'eu';
-    const [primaryOk, replicaStatuses, redisOk] = await Promise.all([
+    const [primaryOk, replicaStatuses, redisStatus] = await Promise.all([
       this.checkDatabase(),
       this.checkReadReplicas(),
       this.checkRedis(),
     ]);
 
     const replicaCount = this.prisma.getReplicaCount();
+    const redisOk = redisStatus === 'healthy' || redisStatus === 'not_configured';
     const allHealthy = primaryOk && redisOk && replicaStatuses.every(r => r.status === 'healthy');
-    const anyUnhealthy = !primaryOk || !redisOk || replicaStatuses.some(r => r.status === 'unhealthy');
+    const anyUnhealthy = !primaryOk || redisStatus === 'unhealthy' || replicaStatuses.some(r => r.status === 'unhealthy');
 
     return {
       status: allHealthy ? 'ok' : anyUnhealthy ? 'error' : 'degraded',
@@ -85,7 +90,7 @@ export class HealthController {
       services: {
         primaryDatabase: primaryOk ? 'healthy' : 'unhealthy',
         readReplicas: replicaStatuses,
-        redis: redisOk ? 'healthy' : 'unhealthy',
+        redis: redisStatus,
       },
       replicaCount,
       uptime: process.uptime(),
@@ -102,13 +107,17 @@ export class HealthController {
     }
   }
 
-  private async checkRedis(): Promise<boolean> {
+  private async checkRedis(): Promise<'healthy' | 'unhealthy' | 'not_configured'> {
+    if (!this.queueEnabled || !this.emailQueue) {
+      return 'not_configured';
+    }
+
     try {
       await this.emailQueue.client.ping();
-      return true;
+      return 'healthy';
     } catch (error) {
       console.error('Redis health check failed:', error);
-      return false;
+      return 'unhealthy';
     }
   }
 

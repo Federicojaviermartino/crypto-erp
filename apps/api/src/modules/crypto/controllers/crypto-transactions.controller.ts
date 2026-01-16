@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Optional,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -40,7 +41,7 @@ export class CryptoTransactionsController {
   constructor(
     private readonly transactionsService: CryptoTransactionsService,
     private readonly costBasisService: CostBasisService,
-    @InjectQueue('ai-categorize') private readonly categorizeQueue: Queue,
+    @Optional() @InjectQueue('ai-categorize') private readonly categorizeQueue?: Queue,
   ) {}
 
   @Get()
@@ -244,6 +245,12 @@ export class CryptoTransactionsController {
       throw new BadRequestException('No transactions found matching criteria');
     }
 
+    if (!this.categorizeQueue) {
+      throw new BadRequestException(
+        'AI categorization is not available. Redis/Queue system is not configured.',
+      );
+    }
+
     // Queue the job
     const jobId = `batch-cat-${Date.now()}-${companyId}`;
     await this.categorizeQueue.add(
@@ -283,6 +290,12 @@ export class CryptoTransactionsController {
   async getBatchStatus(
     @Param('jobId') jobId: string,
   ): Promise<BatchJobStatusResponseDto> {
+    if (!this.categorizeQueue) {
+      throw new BadRequestException(
+        'Job status is not available. Redis/Queue system is not configured.',
+      );
+    }
+
     const job = await this.categorizeQueue.getJob(jobId);
 
     if (!job) {

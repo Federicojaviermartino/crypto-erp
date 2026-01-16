@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
@@ -36,11 +36,15 @@ export class NotificationsService {
   private readonly webUrl: string;
 
   constructor(
-    @InjectQueue('email-send') private emailQueue: Queue,
+    @Optional() @InjectQueue('email-send') private emailQueue: Queue | undefined,
     private configService: ConfigService,
   ) {
     this.defaultFrom = this.configService.get<string>('EMAIL_FROM', 'Crypto-ERP <noreply@crypto-erp.com>');
     this.webUrl = this.configService.get<string>('WEB_URL', 'http://localhost:4200');
+
+    if (!this.emailQueue) {
+      this.logger.warn('Email queue not available. Email notifications will be logged but not sent.');
+    }
   }
 
   /**
@@ -135,6 +139,11 @@ export class NotificationsService {
     // Set default 'from' if not provided
     if (!emailData.from) {
       emailData.from = this.defaultFrom;
+    }
+
+    if (!this.emailQueue) {
+      this.logger.warn(`Email would be sent to ${emailData.to}: ${emailData.subject} (queue not available)`);
+      return;
     }
 
     await this.emailQueue.add('send-email', emailData, {
