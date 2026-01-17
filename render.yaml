@@ -8,13 +8,17 @@ services:
     env: node
     region: frankfurt
     plan: starter
-    buildCommand: npm ci --include=dev && npm run build:prod
+    buildCommand: rm -rf node_modules/.prisma && npm ci --include=dev && PRISMA_ENGINES_MIRROR=https://binaries.prisma.sh npm run db:generate && npm run build:prod
+    preDeployCommand: npm run db:migrate:prod
     startCommand: npm run start:api:prod
     healthCheckPath: /api/v1/health/live
     envVars:
       # Node version
       - key: NODE_VERSION
         value: 20.18.0
+      # Prisma configuration - force library engine
+      - key: PRISMA_CLI_BINARY_TARGETS
+        value: rhel-openssl-3.0.x
       # Environment
       - key: NODE_ENV
         value: production
