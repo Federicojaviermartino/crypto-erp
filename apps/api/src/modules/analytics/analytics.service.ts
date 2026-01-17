@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@crypto-erp/database';
 import { Decimal } from '@prisma/client/runtime/library';
 
-interface PortfolioOverview {
+export interface PortfolioOverview {
   totalCostBasis: number;
   totalPositions: number;
   totalTransactions: number;
@@ -15,7 +15,7 @@ interface PortfolioOverview {
   }>;
 }
 
-interface TransactionStats {
+export interface TransactionStats {
   totalBuys: number;
   totalSells: number;
   buyVolume: number;
@@ -24,7 +24,7 @@ interface TransactionStats {
   avgSellSize: number;
 }
 
-interface TimeSeriesData {
+export interface TimeSeriesData {
   labels: string[];
   datasets: Array<{
     label: string;
@@ -32,7 +32,7 @@ interface TimeSeriesData {
   }>;
 }
 
-interface DashboardMetrics {
+export interface DashboardMetrics {
   // KPIs principales
   totalCostBasis: number;
   monthlyActivity: number;

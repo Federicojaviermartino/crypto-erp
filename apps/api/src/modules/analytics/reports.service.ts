@@ -15,7 +15,7 @@ interface CreateReportDto {
   recipients?: string[];
 }
 
-interface ReportData {
+export interface ReportData {
   id: string;
   name: string;
   description?: string;

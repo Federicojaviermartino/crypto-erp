@@ -48,7 +48,7 @@ interface SIIInvoiceData {
   export: boolean;
 }
 
-interface SIISubmissionResult {
+export interface SIISubmissionResult {
   invoiceId: string;
   success: boolean;
   csv?: string; // Código Seguro Verificación from AEAT

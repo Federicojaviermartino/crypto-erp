@@ -5,7 +5,7 @@ import * as ExcelJS from 'exceljs';
 import { createWriteStream } from 'fs';
 import { Decimal } from '@prisma/client/runtime/library';
 
-interface LibroRegistroEntry {
+export interface LibroRegistroEntry {
   fecha: Date;
   numeroFactura: string;
   serie: string;
@@ -20,7 +20,7 @@ interface LibroRegistroEntry {
   verifactuId?: string;
 }
 
-interface LibroRegistroData {
+export interface LibroRegistroData {
   empresa: {
     nombre: string;
     nif: string;
