@@ -39,7 +39,7 @@ interface VerifactuInvoiceData {
   descripcion: string;
 }
 
-interface VerifactuRecord {
+export interface VerifactuRecord {
   // Huella digital
   huella: string;
   huellaAnterior: string | null;

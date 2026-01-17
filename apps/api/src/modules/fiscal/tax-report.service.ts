@@ -46,7 +46,7 @@ interface CapitalGain {
   estimatedTax: number;
 }
 
-interface TaxReportSummary {
+export interface TaxReportSummary {
   year: number;
   generatedAt: Date;
 

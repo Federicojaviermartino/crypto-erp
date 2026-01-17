@@ -215,7 +215,8 @@ describe('WebhooksService', () => {
       mockPrisma.webhookDelivery.findFirst.mockResolvedValue(null);
       mockPrisma.webhookDelivery.create.mockResolvedValue({ id: 'delivery-123' });
 
-      const result = await service.testWebhook(subscriptionId);
+      const companyId = 'company-123';
+      const result = await service.testWebhook(subscriptionId, companyId);
 
       expect(result).toHaveProperty('message');
       expect(mockQueue.add).toHaveBeenCalled();
@@ -224,7 +225,7 @@ describe('WebhooksService', () => {
     it('should throw NotFoundException if subscription not found', async () => {
       mockPrisma.webhookSubscription.findUnique.mockResolvedValue(null);
 
-      await expect(service.testWebhook('invalid-id')).rejects.toThrow(NotFoundException);
+      await expect(service.testWebhook('invalid-id', 'company-123')).rejects.toThrow(NotFoundException);
     });
   });
 });

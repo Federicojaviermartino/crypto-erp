@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { WebhooksService } from './webhooks.service';
-import { WebhooksController } from './webhooks.controller';
-import { DatabaseModule } from '@crypto-erp/database';
+import { WebhooksService } from './webhooks.service.js';
+import { WebhooksController } from './webhooks.controller.js';
+import { PrismaModule } from '@crypto-erp/database';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [PrismaModule],
   controllers: [WebhooksController],
   providers: [WebhooksService],
   exports: [WebhooksService],

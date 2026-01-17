@@ -24,7 +24,7 @@ interface Modelo721Position {
   porcentajeTitularidad: number;
 }
 
-interface Modelo721Summary {
+export interface Modelo721Summary {
   ejercicio: number;
   fechaGeneracion: Date;
   totalValorEur: Decimal;
@@ -33,7 +33,7 @@ interface Modelo721Summary {
   variacionSignificativa: boolean; // >20,000 EUR vs año anterior
 }
 
-interface Modelo720CryptoItem {
+export interface Modelo720CryptoItem {
   // Subgrupo 8: Monedas virtuales
   claveIdentificacion: string;
   denominacionCripto: string;

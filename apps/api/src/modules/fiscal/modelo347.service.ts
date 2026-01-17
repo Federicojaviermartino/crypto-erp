@@ -19,7 +19,7 @@ interface Modelo347Operation {
   realEstateOperations: Decimal; // Real estate operations
 }
 
-interface Modelo347Data {
+export interface Modelo347Data {
   companyId: string;
   fiscalYear: number;
   declarantNif: string;
