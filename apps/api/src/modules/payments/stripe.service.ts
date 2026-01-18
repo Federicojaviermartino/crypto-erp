@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '@crypto-erp/database';
+import { PrismaService, SubscriptionStatus } from '@crypto-erp/database';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -20,7 +20,6 @@ export class StripeService {
     }
 
     this.stripe = new Stripe(apiKey, {
-      apiVersion: '2024-12-18.acacia',
       typescript: true,
     });
 
@@ -237,17 +236,25 @@ export class StripeService {
       return;
     }
 
-    const status = this.mapStripeStatus(subscription.status);
+    const status = this.mapStripeStatus(subscription.status) as SubscriptionStatus;
+
+    // Access subscription period fields (snake_case in Stripe API)
+    const subData = subscription as unknown as {
+      current_period_start: number;
+      current_period_end: number;
+      cancel_at_period_end: boolean;
+      canceled_at: number | null;
+    };
 
     await this.prisma.subscription.update({
       where: { companyId },
       data: {
         status,
-        currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        canceledAt: subscription.canceled_at
-          ? new Date(subscription.canceled_at * 1000)
+        currentPeriodStart: new Date(subData.current_period_start * 1000),
+        currentPeriodEnd: new Date(subData.current_period_end * 1000),
+        cancelAtPeriodEnd: subData.cancel_at_period_end,
+        canceledAt: subData.canceled_at
+          ? new Date(subData.canceled_at * 1000)
           : null,
       },
     });
@@ -281,7 +288,19 @@ export class StripeService {
    * Handle successful payment
    */
   private async handlePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
-    const subscriptionId = invoice.subscription as string;
+    // Cast invoice to access snake_case properties
+    const invoiceData = invoice as unknown as {
+      subscription: string | null;
+      payment_intent: string | null;
+      amount_paid: number;
+      currency: string;
+      description: string | null;
+      period_start: number;
+      status_transitions: { paid_at: number | null };
+      id: string;
+    };
+
+    const subscriptionId = invoiceData.subscription;
 
     if (!subscriptionId) {
       this.logger.warn('Invoice missing subscription ID');
@@ -302,13 +321,15 @@ export class StripeService {
     await this.prisma.payment.create({
       data: {
         subscriptionId: subscription.id,
-        stripePaymentIntentId: invoice.payment_intent as string,
-        stripeInvoiceId: invoice.id,
-        amount: invoice.amount_paid / 100, // Convert cents to euros
-        currency: invoice.currency.toUpperCase(),
+        stripePaymentIntentId: invoiceData.payment_intent || undefined,
+        stripeInvoiceId: invoiceData.id,
+        amount: invoiceData.amount_paid / 100, // Convert cents to euros
+        currency: invoiceData.currency.toUpperCase(),
         status: 'SUCCEEDED',
-        description: invoice.description || `Payment for ${invoice.period_start}`,
-        paidAt: new Date(invoice.status_transitions.paid_at! * 1000),
+        description: invoiceData.description || `Payment for ${invoiceData.period_start}`,
+        paidAt: invoiceData.status_transitions.paid_at
+          ? new Date(invoiceData.status_transitions.paid_at * 1000)
+          : new Date(),
       },
     });
 
@@ -319,7 +340,19 @@ export class StripeService {
    * Handle failed payment
    */
   private async handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-    const subscriptionId = invoice.subscription as string;
+    // Cast invoice to access snake_case properties
+    const invoiceData = invoice as unknown as {
+      subscription: string | null;
+      payment_intent: string | null;
+      amount_due: number;
+      currency: string;
+      description: string | null;
+      period_start: number;
+      last_finalization_error: { message?: string } | null;
+      id: string;
+    };
+
+    const subscriptionId = invoiceData.subscription;
 
     if (!subscriptionId) {
       this.logger.warn('Invoice missing subscription ID');
@@ -339,13 +372,13 @@ export class StripeService {
     await this.prisma.payment.create({
       data: {
         subscriptionId: subscription.id,
-        stripePaymentIntentId: invoice.payment_intent as string,
-        stripeInvoiceId: invoice.id,
-        amount: invoice.amount_due / 100,
-        currency: invoice.currency.toUpperCase(),
+        stripePaymentIntentId: invoiceData.payment_intent || undefined,
+        stripeInvoiceId: invoiceData.id,
+        amount: invoiceData.amount_due / 100,
+        currency: invoiceData.currency.toUpperCase(),
         status: 'FAILED',
-        description: invoice.description || `Failed payment for ${invoice.period_start}`,
-        failureReason: invoice.last_finalization_error?.message || 'Payment failed',
+        description: invoiceData.description || `Failed payment for ${invoiceData.period_start}`,
+        failureReason: invoiceData.last_finalization_error?.message || 'Payment failed',
       },
     });
 

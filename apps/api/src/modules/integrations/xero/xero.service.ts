@@ -157,9 +157,7 @@ export class XeroService implements IntegrationProvider {
    */
   async syncData(integrationId: string, accessToken: string): Promise<SyncResult> {
     try {
-      const integration = await this.baseService.prisma.integration.findUnique({
-        where: { id: integrationId },
-      });
+      const integration = await this.baseService.getIntegrationById(integrationId);
 
       if (!integration?.metadata?.['tenantId']) {
         throw new Error('Xero tenant ID not found');
@@ -228,9 +226,7 @@ export class XeroService implements IntegrationProvider {
    */
   async pushData(integrationId: string, accessToken: string, data: any): Promise<PushResult> {
     try {
-      const integration = await this.baseService.prisma.integration.findUnique({
-        where: { id: integrationId },
-      });
+      const integration = await this.baseService.getIntegrationById(integrationId);
 
       if (!integration?.metadata?.['tenantId']) {
         throw new Error('Xero tenant ID not found');

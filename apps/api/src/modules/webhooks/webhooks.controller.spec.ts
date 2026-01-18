@@ -13,7 +13,7 @@ describe('WebhooksController', () => {
     updateSubscription: jest.fn(),
     deleteSubscription: jest.fn(),
     testWebhook: jest.fn(),
-    getDeliveries: jest.fn(),
+    getDeliveryHistory: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -120,31 +120,33 @@ describe('WebhooksController', () => {
   describe('test', () => {
     it('should send a test webhook', async () => {
       const id = 'sub-123';
+      const companyId = 'company-123';
       const mockResult = { message: 'Test webhook queued' };
 
       mockWebhooksService.testWebhook.mockResolvedValue(mockResult);
 
-      const result = await controller.test(id);
+      const result = await controller.test(id, companyId);
 
       expect(result).toEqual(mockResult);
-      expect(service.testWebhook).toHaveBeenCalledWith(id);
+      expect(service.testWebhook).toHaveBeenCalledWith(id, companyId);
     });
   });
 
   describe('getDeliveries', () => {
     it('should return delivery history', async () => {
       const id = 'sub-123';
+      const companyId = 'company-123';
       const mockDeliveries = [
         { id: 'del-1', status: 'DELIVERED' },
         { id: 'del-2', status: 'PENDING' },
       ];
 
-      mockWebhooksService.getDeliveries.mockResolvedValue(mockDeliveries);
+      mockWebhooksService.getDeliveryHistory.mockResolvedValue(mockDeliveries);
 
-      const result = await controller.getDeliveries(id);
+      const result = await controller.getDeliveries(id, companyId);
 
       expect(result).toEqual(mockDeliveries);
-      expect(service.getDeliveries).toHaveBeenCalledWith(id);
+      expect(service.getDeliveryHistory).toHaveBeenCalledWith(id, companyId, undefined);
     });
   });
 });

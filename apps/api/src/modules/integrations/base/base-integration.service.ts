@@ -26,9 +26,9 @@ export class BaseIntegrationService {
     metadata?: Record<string, any>;
   }) {
     // Encrypt tokens
-    const encryptedAccessToken = this.cryptoService.encrypt(data.accessToken);
+    const encryptedAccessToken = await this.cryptoService.encrypt(data.accessToken);
     const encryptedRefreshToken = data.refreshToken
-      ? this.cryptoService.encrypt(data.refreshToken)
+      ? await this.cryptoService.encrypt(data.refreshToken)
       : null;
 
     // Calculate expiration
@@ -81,13 +81,13 @@ export class BaseIntegrationService {
   /**
    * Get decrypted access token
    */
-  getDecryptedAccessToken(integration: { accessToken: string | null }): string | null {
+  async getDecryptedAccessToken(integration: { accessToken: string | null }): Promise<string | null> {
     if (!integration.accessToken) {
       return null;
     }
 
     try {
-      return this.cryptoService.decrypt(integration.accessToken);
+      return await this.cryptoService.decrypt(integration.accessToken);
     } catch (error) {
       console.error('Failed to decrypt access token:', error);
       return null;
@@ -97,17 +97,38 @@ export class BaseIntegrationService {
   /**
    * Get decrypted refresh token
    */
-  getDecryptedRefreshToken(integration: { refreshToken: string | null }): string | null {
+  async getDecryptedRefreshToken(integration: { refreshToken: string | null }): Promise<string | null> {
     if (!integration.refreshToken) {
       return null;
     }
 
     try {
-      return this.cryptoService.decrypt(integration.refreshToken);
+      return await this.cryptoService.decrypt(integration.refreshToken);
     } catch (error) {
       console.error('Failed to decrypt refresh token:', error);
       return null;
     }
+  }
+
+  /**
+   * Find integration by ID and company (public method for controllers)
+   */
+  async findIntegrationById(integrationId: string, companyId: string) {
+    return this.prisma.integration.findFirst({
+      where: {
+        id: integrationId,
+        companyId,
+      },
+    });
+  }
+
+  /**
+   * Get integration by ID only (for internal service use)
+   */
+  async getIntegrationById(integrationId: string) {
+    return this.prisma.integration.findUnique({
+      where: { id: integrationId },
+    });
   }
 
   /**

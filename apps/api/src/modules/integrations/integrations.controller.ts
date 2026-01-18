@@ -267,19 +267,14 @@ export class IntegrationsController {
     const companyId = this.getCompanyId(headers);
 
     // Get integration
-    const integration = await this.baseService.prisma.integration.findFirst({
-      where: {
-        id: integrationId,
-        companyId,
-      },
-    });
+    const integration = await this.baseService.findIntegrationById(integrationId, companyId);
 
     if (!integration) {
       throw new BadRequestException('Integration not found');
     }
 
     // Get decrypted access token
-    const accessToken = this.baseService.getDecryptedAccessToken(integration);
+    const accessToken = await this.baseService.getDecryptedAccessToken(integration);
     if (!accessToken) {
       throw new BadRequestException('Integration has no valid access token');
     }

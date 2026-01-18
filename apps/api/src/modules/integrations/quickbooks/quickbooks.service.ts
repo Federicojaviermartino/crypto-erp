@@ -155,9 +155,7 @@ export class QuickBooksService implements IntegrationProvider {
    */
   async syncData(integrationId: string, accessToken: string): Promise<SyncResult> {
     try {
-      const integration = await this.baseService.prisma.integration.findUnique({
-        where: { id: integrationId },
-      });
+      const integration = await this.baseService.getIntegrationById(integrationId);
 
       if (!integration?.metadata?.['realmId']) {
         throw new Error('QuickBooks realm ID not found');
@@ -226,9 +224,7 @@ export class QuickBooksService implements IntegrationProvider {
    */
   async pushData(integrationId: string, accessToken: string, data: any): Promise<PushResult> {
     try {
-      const integration = await this.baseService.prisma.integration.findUnique({
-        where: { id: integrationId },
-      });
+      const integration = await this.baseService.getIntegrationById(integrationId);
 
       if (!integration?.metadata?.['realmId']) {
         throw new Error('QuickBooks realm ID not found');
