@@ -98,7 +98,7 @@ export class BitcoinParser {
       } else {
         // No involvement with this address
         return {
-          type: 'OTHER',
+          type: CryptoTxType.UNKNOWN,
           feeAsset: 'BTC',
           confidence: 0.5,
           reasoning: 'Transaction does not involve this address',
@@ -107,7 +107,7 @@ export class BitcoinParser {
     } catch (error) {
       this.logger.error(`Failed to parse Bitcoin transaction: ${error.message}`);
       return {
-        type: 'OTHER',
+        type: CryptoTxType.UNKNOWN,
         feeAsset: 'BTC',
         confidence: 0.1,
         reasoning: `Parse error: ${error.message}`,
@@ -161,7 +161,7 @@ export class BitcoinParser {
     if (Math.abs(netChange) < 0.00001) {
       // Pure consolidation (UTXO optimization)
       return {
-        type: 'OTHER',
+        type: CryptoTxType.UNKNOWN,
         subtype: 'consolidation',
         assetIn: 'BTC',
         amountIn: this.satoshisToBtc(outputAmount),
@@ -170,7 +170,7 @@ export class BitcoinParser {
         feeAsset: 'BTC',
         feeAmount: this.satoshisToBtc(fee),
         confidence: 0.95,
-        reasoning: `UTXO consolidation: ${tx.vin.length} inputs → ${tx.vout.length} outputs`,
+        reasoning: 'UTXO consolidation transaction',
       };
     } else if (netChange > 0) {
       // Partial send with change back

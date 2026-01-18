@@ -76,7 +76,7 @@ export class LibroRegistroService {
     const issuedInvoices = await this.prisma.invoice.findMany({
       where: {
         companyId,
-        direction: InvoiceDirection.SALE,
+        direction: InvoiceDirection.ISSUED,
         issueDate: {
           gte: startDate,
           lte: endDate,
@@ -87,7 +87,7 @@ export class LibroRegistroService {
       },
       include: {
         contact: true,
-        items: true,
+        lines: true,
       },
       orderBy: [{ issueDate: 'asc' }, { number: 'asc' }],
     });
@@ -96,7 +96,7 @@ export class LibroRegistroService {
     const receivedInvoices = await this.prisma.invoice.findMany({
       where: {
         companyId,
-        direction: InvoiceDirection.PURCHASE,
+        direction: InvoiceDirection.RECEIVED,
         issueDate: {
           gte: startDate,
           lte: endDate,
@@ -107,7 +107,7 @@ export class LibroRegistroService {
       },
       include: {
         contact: true,
-        items: true,
+        lines: true,
       },
       orderBy: [{ issueDate: 'asc' }, { number: 'asc' }],
     });
@@ -141,37 +141,37 @@ export class LibroRegistroService {
   /**
    * Transform Invoice to LibroRegistroEntry
    */
-  private invoiceToLibroEntry(invoice: Invoice & { items: any[]; contact?: any }): LibroRegistroEntry {
+  private invoiceToLibroEntry(invoice: Invoice & { lines: any[]; contact?: any }): LibroRegistroEntry {
     // Calculate totals
     let baseImponible = new Decimal(0);
     let cuotaIVA = new Decimal(0);
 
-    invoice.items.forEach((item) => {
-      const itemBase = new Decimal(item.quantity).times(item.unitPrice);
-      const itemTax = itemBase.times(item.taxRate).dividedBy(100);
+    invoice.lines.forEach((line) => {
+      const lineBase = new Decimal(line.quantity).times(line.unitPrice);
+      const lineTax = lineBase.times(line.taxRate || 0).dividedBy(100);
 
-      baseImponible = baseImponible.plus(itemBase);
-      cuotaIVA = cuotaIVA.plus(itemTax);
+      baseImponible = baseImponible.plus(lineBase);
+      cuotaIVA = cuotaIVA.plus(lineTax);
     });
 
     const total = baseImponible.plus(cuotaIVA);
 
-    // Extract tax rate (assume first item's tax rate for simplicity)
-    const tipoImpositivo = invoice.items.length > 0 ? invoice.items[0].taxRate : 21;
+    // Extract tax rate (assume first line's tax rate for simplicity)
+    const tipoImpositivo = invoice.lines.length > 0 ? (invoice.lines[0].taxRate || 21) : 21;
 
     return {
       fecha: invoice.issueDate,
-      numeroFactura: invoice.number,
-      serie: invoice.series || 'A',
+      numeroFactura: String(invoice.number),
+      serie: 'A', // Default series since field doesn't exist in schema
       nifContraparte: invoice.counterpartyTaxId || 'N/A',
       nombreContraparte: invoice.counterpartyName || invoice.contact?.name || 'N/A',
       baseImponible,
       tipoImpositivo,
       cuotaIVA,
       total,
-      retencionIRPF: invoice.withholdingAmount ? new Decimal(invoice.withholdingAmount) : undefined,
+      retencionIRPF: undefined, // Field doesn't exist in current schema
       observaciones: invoice.notes || undefined,
-      verifactuId: invoice.verifactuId || undefined,
+      verifactuId: undefined, // Field doesn't exist on Invoice model
     };
   }
 

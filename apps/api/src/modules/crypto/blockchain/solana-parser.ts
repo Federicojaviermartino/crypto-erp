@@ -75,7 +75,8 @@ export class SolanaParser {
       // Check for failed transactions
       if (tx.err) {
         return {
-          type: 'FAILED',
+          type: CryptoTxType.UNKNOWN,
+          subtype: 'failed',
           feeAsset: 'SOL',
           confidence: 1.0,
           reasoning: 'Transaction failed on-chain',
@@ -107,7 +108,7 @@ export class SolanaParser {
 
       // Default: unknown transaction
       return {
-        type: 'OTHER',
+        type: CryptoTxType.UNKNOWN,
         feeAsset: 'SOL',
         confidence: 0.3,
         reasoning: 'Unknown Solana transaction type',
@@ -115,7 +116,7 @@ export class SolanaParser {
     } catch (error) {
       this.logger.error(`Failed to parse Solana transaction: ${error.message}`);
       return {
-        type: 'OTHER',
+        type: CryptoTxType.UNKNOWN,
         feeAsset: 'SOL',
         confidence: 0.1,
         reasoning: `Parse error: ${error.message}`,
@@ -257,7 +258,7 @@ export class SolanaParser {
 
     if (balanceChanges.length === 0) {
       return {
-        type: 'OTHER',
+        type: CryptoTxType.UNKNOWN,
         feeAsset: 'SOL',
         confidence: 0.4,
         reasoning: 'Token program called but no balance changes detected',
@@ -299,7 +300,7 @@ export class SolanaParser {
 
     if (balanceChanges.length === 0) {
       return {
-        type: 'OTHER',
+        type: CryptoTxType.UNKNOWN,
         feeAsset: 'SOL',
         confidence: 0.5,
         reasoning: 'System program transaction',

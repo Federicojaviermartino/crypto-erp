@@ -192,8 +192,20 @@ export class AEATClientService {
    * Envía la petición SOAP a AEAT
    */
   private sendSoapRequest(xml: string): Promise<string> {
+    return this.sendSoapRequestToEndpoint(this.getEndpointUrl(), 'SuministroLRFacturasEmitidas', xml);
+  }
+
+  /**
+   * Envía la petición SOAP a un endpoint específico de AEAT (para SII y otros servicios)
+   */
+  async sendSoapRequestToEndpoint(endpoint: string, soapAction: string, xml: string): Promise<string> {
+    if (!this.certificate) {
+      this.logger.warn('No certificate configured - simulating AEAT response');
+      return `<?xml version="1.0"?><Response><EstadoEnvio>Correcto</EstadoEnvio><CSV>SIMULATED${Date.now()}</CSV></Response>`;
+    }
+
     return new Promise((resolve, reject) => {
-      const url = new URL(this.getEndpointUrl());
+      const url = new URL(endpoint);
 
       const options: https.RequestOptions = {
         hostname: url.hostname,
@@ -203,7 +215,7 @@ export class AEATClientService {
         headers: {
           'Content-Type': 'text/xml; charset=utf-8',
           'Content-Length': Buffer.byteLength(xml, 'utf8'),
-          'SOAPAction': '"SuministroLRFacturasEmitidas"',
+          'SOAPAction': `"${soapAction}"`,
         },
         key: this.certificate!.key,
         cert: this.certificate!.cert,

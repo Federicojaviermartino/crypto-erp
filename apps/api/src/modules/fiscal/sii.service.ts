@@ -90,7 +90,7 @@ export class SIIService {
       where: {
         id: { in: invoiceIds },
         companyId,
-        direction: 'SALE', // Only issued invoices
+        direction: InvoiceDirection.ISSUED, // Only issued invoices
         status: { in: ['SENT', 'PAID', 'OVERDUE'] }, // Only final invoices
       },
       include: {
@@ -112,7 +112,7 @@ export class SIIService {
     const results: SIISubmissionResult[] = [];
 
     try {
-      const response = await this.aeatClient.sendSoapRequest(
+      const response = await this.aeatClient.sendSoapRequestToEndpoint(
         endpoint,
         'SuministroLRFacturasEmitidas',
         xml,
@@ -179,7 +179,7 @@ export class SIIService {
       where: {
         id: { in: invoiceIds },
         companyId,
-        direction: 'PURCHASE', // Only received invoices
+        direction: InvoiceDirection.RECEIVED, // Only received invoices
         status: { in: ['SENT', 'PAID', 'OVERDUE'] },
       },
       include: {
@@ -201,7 +201,7 @@ export class SIIService {
     const results: SIISubmissionResult[] = [];
 
     try {
-      const response = await this.aeatClient.sendSoapRequest(
+      const response = await this.aeatClient.sendSoapRequestToEndpoint(
         endpoint,
         'SuministroLRFacturasRecibidas',
         xml,

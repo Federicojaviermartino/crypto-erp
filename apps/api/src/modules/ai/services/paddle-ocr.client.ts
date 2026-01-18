@@ -82,7 +82,7 @@ export class PaddleOcrClient {
       this.lastHealthCheck = now;
 
       if (this.isAvailable) {
-        const data = await response.json();
+        const data = await response.json() as { status: string; version: string };
         this.logger.log(`PaddleOCR health check: ${data.status} (v${data.version})`);
       }
 
@@ -148,7 +148,7 @@ export class PaddleOcrClient {
         };
       }
 
-      const result: PaddleOcrResponse = await response.json();
+      const result = await response.json() as PaddleOcrResponse;
 
       if (result.success) {
         this.logger.log(
@@ -185,8 +185,8 @@ export class PaddleOcrClient {
         return ['es', 'en']; // Fallback
       }
 
-      const data = await response.json();
-      return data.languages.map((lang: any) => lang.code);
+      const data = await response.json() as { languages: Array<{ code: string }> };
+      return data.languages.map((lang) => lang.code);
     } catch (error) {
       this.logger.warn('Failed to fetch supported languages', error);
       return ['es', 'en'];

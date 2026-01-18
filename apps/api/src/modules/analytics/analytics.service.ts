@@ -668,12 +668,12 @@ export class AnalyticsService {
       },
     });
 
-    // Churned users (cancelled subscriptions)
+    // Churned users (canceled subscriptions)
     const churnedUsers = await this.prisma.subscription.count({
       where: {
         companyId,
-        status: 'CANCELLED',
-        cancelledAt: {
+        status: 'CANCELED',
+        canceledAt: {
           gte: startDate,
           lte: endDate,
         },
