@@ -14,7 +14,7 @@ import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TaxPredictionService } from './tax-prediction.service.js';
 import { PredictTaxImpactDto, TaxPredictionResponseDto } from './dto/predict-tax.dto.js';
-import { Modelo347Service } from './modelo347.service.js';
+import { Modelo347Service, Modelo347Data } from './modelo347.service.js';
 import { SIIService } from './sii.service.js';
 import { LibroRegistroService } from './libro-registro.service.js';
 import { GenerateModelo347Dto } from './dto/generate-modelo347.dto.js';
@@ -90,7 +90,7 @@ export class FiscalController {
   async calculateModelo347(
     @GetCompany() companyId: string,
     @Query() dto: GenerateModelo347Dto,
-  ) {
+  ): Promise<Modelo347Data> {
     return this.modelo347.calculateModelo347(companyId, dto.fiscalYear);
   }
 

@@ -8,7 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { VerifactuService } from './verifactu.service.js';
+import { VerifactuService, VerifactuRecord } from './verifactu.service.js';
 
 @Controller('invoicing/verifactu')
 export class VerifactuController {
@@ -26,7 +26,7 @@ export class VerifactuController {
   async generateRecord(
     @Headers() headers: Record<string, string>,
     @Param('invoiceId') invoiceId: string,
-  ) {
+  ): Promise<VerifactuRecord> {
     const companyId = this.getCompanyId(headers);
     return this.verifactuService.generateVerifactuRecord(companyId, invoiceId);
   }

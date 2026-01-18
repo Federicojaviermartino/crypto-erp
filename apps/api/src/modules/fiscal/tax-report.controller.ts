@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { TaxReportService } from './tax-report.service.js';
+import { TaxReportService, TaxReportSummary } from './tax-report.service.js';
 
 @Controller('fiscal/tax-report')
 export class TaxReportController {
@@ -25,7 +25,7 @@ export class TaxReportController {
   async getTaxReport(
     @Headers() headers: Record<string, string>,
     @Param('year') yearStr: string,
-  ) {
+  ): Promise<TaxReportSummary> {
     const companyId = this.getCompanyId(headers);
     const year = parseInt(yearStr, 10);
 

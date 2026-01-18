@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { Modelo721Service } from './modelo721.service.js';
+import { Modelo721Service, Modelo721Summary, Modelo720CryptoItem } from './modelo721.service.js';
 
 @Controller('fiscal/modelo721')
 export class Modelo721Controller {
@@ -25,7 +25,7 @@ export class Modelo721Controller {
   async getModelo721(
     @Headers() headers: Record<string, string>,
     @Param('year') yearStr: string,
-  ) {
+  ): Promise<Modelo721Summary> {
     const companyId = this.getCompanyId(headers);
     const year = parseInt(yearStr, 10);
 
@@ -95,7 +95,7 @@ export class Modelo721Controller {
   async getModelo720Crypto(
     @Headers() headers: Record<string, string>,
     @Param('year') yearStr: string,
-  ) {
+  ): Promise<Modelo720CryptoItem[]> {
     const companyId = this.getCompanyId(headers);
     const year = parseInt(yearStr, 10);
 
